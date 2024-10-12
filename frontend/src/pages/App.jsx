@@ -1,5 +1,4 @@
-import { Button, CssBaseline } from "@mui/material";
-import { Outlet } from "react-router-dom";
+import { CssBaseline } from "@mui/material";
 import Layout from "../components/Layout";
 
 function App() {
@@ -7,7 +6,6 @@ function App() {
     <>
       <CssBaseline />
       <Layout />
-      <Outlet />
     </>
   );
 }

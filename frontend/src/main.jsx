@@ -3,11 +3,12 @@ import { createRoot } from "react-dom/client";
 import App from "./pages/App";
 import Chat from "./pages/Chat";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Layout from "./components/Layout";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <Layout />,
     children: [
       {
         path: "chat",
