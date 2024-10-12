@@ -16,7 +16,7 @@ export default function Layout() {
   const handleDrawerClose = () => setOpen(false);
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", height: "100vh" }}>
       <CssBaseline />
       <AppBar open={open} isSmallScreen={isSmallScreen} handleDrawerOpen={handleDrawerOpen} />
       <DrawerMenu open={open} isSmallScreen={isSmallScreen} handleDrawerClose={handleDrawerClose} />

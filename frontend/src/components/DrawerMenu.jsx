@@ -14,6 +14,7 @@ import MailIcon from "@mui/icons-material/Mail";
 import { styled, useTheme } from "@mui/material/styles";
 
 const drawerWidth = 240;
+const smallScreenDrawerWidth = 230;
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -28,10 +29,10 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   return (
     <Drawer
       sx={{
-        width: isSmallScreen ? "auto" : drawerWidth,
+        width: isSmallScreen ? smallScreenDrawerWidth : drawerWidth,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: isSmallScreen ? "auto" : drawerWidth,
+          width: isSmallScreen ? smallScreenDrawerWidth : drawerWidth,
           boxSizing: "border-box",
           backgroundColor: "#2d2d2d",
           color: "#fff",

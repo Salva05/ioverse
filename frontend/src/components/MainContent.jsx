@@ -6,6 +6,9 @@ const Main = styled("main", {
 })(({ theme, open, isSmallScreen }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
+  height: "100vh",
+  display: "flex",
+  flexDirection: "column",
   transition: theme.transitions.create("margin", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -19,7 +22,7 @@ const Main = styled("main", {
         duration: theme.transitions.duration.enteringScreen,
       }),
     }),
-  paddingTop: theme.spacing(8), // To not overlap AppBar with MainContent
+    paddingTop: theme.spacing(8),
 }));
 
 export default function MainContent({ open, isSmallScreen, children }) {
