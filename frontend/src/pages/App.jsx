@@ -1,10 +1,12 @@
-import { Button } from "@mui/material";
+import { Button, CssBaseline } from "@mui/material";
 import { Outlet } from "react-router-dom";
+import Layout from "../components/Layout";
 
 function App() {
   return (
     <>
-      <Button variant="contained">Contained</Button>
+      <CssBaseline />
+      <Layout />
       <Outlet />
     </>
   );
