@@ -4,8 +4,8 @@ from rest_framework import authentication, permissions
 
 class Chatbot(APIView):
     """
-    Hanldes incoming POST requests, routing it's body 
-    into chatbot_modules and returns a message representing the reponse
+    Hanldes incoming POST requests (user messages), routing it's body 
+    into chatbot_modules and returns a message representing the AI's reponse
     
     * Requires token authentication.
     """
