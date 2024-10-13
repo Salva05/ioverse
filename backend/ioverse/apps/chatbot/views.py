@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +9,8 @@ from rest_framework.parsers import JSONParser, FormParser
 
 from .serializers import MessageSerializer
 from .models import Conversation
+from .models import Message
+from chatbot_modules.core.chatbot import Chatbot
 
 import logging
 
@@ -34,12 +37,12 @@ class MessageCreate(APIView):
         user = request.user
         data = request.data.copy() # Make a mutable copy of the request data
         
-        # Establislh if is first message of the conversation
+        # Establish if it's first message of the conversation
         # checking if request.data.conversation_id is present
         conversation_id = data.get('conversation_id', None)
         if conversation_id:
             try:
-                # Fetch the conversation
+                # Ensure the conversation_id exists, if it has been passed in the request
                 conversation = Conversation.objects.get(id=conversation_id, user=user)
                 logger.debug(f"Found existing conversation: {conversation.id} for user: {user.username}")
             except Conversation.DoesNotExist:
@@ -48,24 +51,13 @@ class MessageCreate(APIView):
                     {"conversation_id": ["Invalid conversation ID."]},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
-            # Check if last message was from user or AI
-            last_message = conversation.messages.last()
-            if last_message and last_message.sender == 'user':
-                sender = 'ai'
-            else:
-                sender = 'user'
-        else:
-            # No conversation_id provided; this is the first message in a new conversation
-            sender = 'user'
         
         # Prepare data for the serializer
-        # The 'sender' is determined by the backend and should not be provided by the client
         serializer_data = {
             "conversation_id": conversation_id,  # Serializer will handle 'None' cases 
         }
         
-        if 'message_body' in data:
+        if 'message_body' in data:  # Handle cases where msg is empty, passing it to serializer
             serializer_data['message_body'] = data['message_body']
     
         serializer = MessageSerializer(
@@ -76,12 +68,39 @@ class MessageCreate(APIView):
         if serializer.is_valid(): # Perform validation
             try:
                 with transaction.atomic():
-                    message = serializer.save(sender=sender)    # pass the sender
-                logger.info(f"Message {message.id} created in conversation {message.conversation.id} by {sender}")
-                return Response(
-                    MessageSerializer(message).data,
-                    status=status.HTTP_201_CREATED
-                )
+                    # Save the user message
+                    user_message = serializer.save()
+                    
+                # Access the shared components from AppConfig
+                chatbot_app_config = apps.get_app_config('chatbot')
+                ai_service = chatbot_app_config.ai_service
+                chat_logic = chatbot_app_config.chat_logic
+                
+                # Reconstruct chat history from conversation messages
+                conversation = user_message.conversation
+                history = self.build_chat_history(conversation)
+                
+                # Create a new Chatbot instance per conversation
+                chatbot = Chatbot(ai_service, chat_logic, history=history)
+                
+                # Get the AI's response
+                ai_response_text = chatbot.get_response(user_message.message_body)
+                
+                with transaction.atomic():
+                    # Save the AI's response as a new message
+                    ai_message = Message.objects.create(
+                        conversation=conversation,
+                        sender='ai',
+                        message_body=ai_response_text
+                        )
+                    
+                # Return both messages
+                response_data = {
+                    'user_message': MessageSerializer(user_message).data,
+                    'ai_message': MessageSerializer(ai_message).data
+                }
+                logger.debug(f"Message {user_message.id} created in conversation {user_message.conversation.id}")
+                return Response(response_data, status=status.HTTP_201_CREATED)
             except ValidationError as e:
                 logger.error(f"Validation error during message creation: {e.detail}")
                 return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
@@ -94,3 +113,19 @@ class MessageCreate(APIView):
         else:
             logger.error(f"Serializer validation error: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def build_chat_history(self, conversation):
+        # Reconstruct the chat history from the conversation messages
+        chatbot_app_config = apps.get_app_config('chatbot')
+        chat_logic = chatbot_app_config.chat_logic
+
+        # Start with the default system message
+        history = chat_logic.prepare_initial_history()
+
+        # Append existing messages in the conversation to the history
+        messages = conversation.messages.order_by('timestamp')
+        for message in messages:
+            role = 'user' if message.sender == 'user' else 'assistant'
+            content = message.message_body
+            history.append({'role': role, 'content': content})
+        return history

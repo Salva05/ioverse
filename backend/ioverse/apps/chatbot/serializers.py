@@ -87,18 +87,14 @@ class MessageSerializer(serializers.ModelSerializer):
         
         return data
         
-    def create(self, validated_data, **kwargs):
+    def create(self, validated_data):
         """
         Handles the creation of a Message instance:
         - Associates the message with an existing conversation or creates a new one.
         - Sets the sender as 'user'.
         """
         user = self.context['request'].user
-        sender = kwargs.get('sender', 'user')  # Default to 'user' if not provided
         conversation_id = validated_data.pop('conversation_id', None)
-
-        # Remove 'sender' from validated_data if it's present to prevent duplication
-        validated_data.pop('sender', None)
         
         with transaction.atomic():
             if conversation_id:
@@ -110,13 +106,13 @@ class MessageSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Invalid conversation ID.")
             else:
                 # Create a new conversation for the user
-                conversation = Conversation.objects.create(user=user, title='New Conversation') # Mock title yet
+                conversation = Conversation.objects.create(user=user, title='New Conversation') # Mock title for now
                 logger.debug(f"Created new conversation: {conversation.id} for user: {user.username}")
 
             # Create the message
             message = Message.objects.create(
                 conversation=conversation,
-                sender=sender,
+                sender='user',
                 **validated_data
             )
             logger.debug(f"Created message: {message.id} for conversation: {conversation.id}")

@@ -121,6 +121,56 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} {message}',
+            'style': '{',
+        },
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'fmt': '%(asctime)s %(name)s %(levelname)s %(message)s',
+        },
+        'chat': {
+            'format': '%(asctime)s - %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'chatbot_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'chatbot_project.log',
+            'formatter': 'json',
+        },
+        'chat_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'chat.log',
+            'formatter': 'chat',
+        },
+    },
+    'loggers': {
+        'chatbot_project': {
+            'handlers': ['chatbot_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'chat_log': {
+            'handlers': ['chat_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

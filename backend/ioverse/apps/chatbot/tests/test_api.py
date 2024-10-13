@@ -32,11 +32,18 @@ class MessageCreateViewTests(APITestCase):
         # Verify that a new conversation was created
         self.assertEqual(Conversation.objects.filter(user=self.user).count(), 2)
         
-        # Verify the message details
-        message = Message.objects.get(id=response.data['id'])
-        self.assertEqual(message.message_body, data['message_body'])
-        self.assertEqual(message.sender, 'user')
-        self.assertEqual(message.conversation.user, self.user)
+        # Verify the user message details
+        user_message_id = response.data['user_message']['id']
+        user_message = Message.objects.get(id=user_message_id)
+        self.assertEqual(user_message.message_body, data['message_body'])
+        self.assertEqual(user_message.sender, 'user')
+        self.assertEqual(user_message.conversation.user, self.user)
+        
+        # Verify the AI message details
+        ai_message_id = response.data['ai_message']['id']
+        ai_message = Message.objects.get(id=ai_message_id)
+        self.assertEqual(ai_message.sender, 'ai')
+        self.assertEqual(ai_message.conversation, user_message.conversation)
         
     def test_create_message_existing_conversation(self):
         """
@@ -49,11 +56,18 @@ class MessageCreateViewTests(APITestCase):
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
-        # Verify the message details
-        message = Message.objects.get(id=response.data['id'])
-        self.assertEqual(message.message_body, data['message_body'])
-        self.assertEqual(message.sender, 'user')
-        self.assertEqual(message.conversation, self.conversation)
+        # Verify the user message details
+        user_message_id = response.data['user_message']['id']
+        user_message = Message.objects.get(id=user_message_id)
+        self.assertEqual(user_message.message_body, data['message_body'])
+        self.assertEqual(user_message.sender, 'user')
+        self.assertEqual(user_message.conversation, self.conversation)
+        
+        # Verify the AI message details
+        ai_message_id = response.data['ai_message']['id']
+        ai_message = Message.objects.get(id=ai_message_id)
+        self.assertEqual(ai_message.sender, 'ai')
+        self.assertEqual(ai_message.conversation, self.conversation)
         
     def test_create_message_invalid_conversation_id(self):
         """
@@ -129,7 +143,7 @@ class MessageCreateViewTests(APITestCase):
         }
         response_user = self.client.post(self.url, data_user, format='json')
         self.assertEqual(response_user.status_code, status.HTTP_201_CREATED)
-        message_user = Message.objects.get(id=response_user.data['id'])
+        message_user = Message.objects.get(id=response_user.data['user_message']['id'])
         self.assertEqual(message_user.sender, 'user')
         
         # Mock AI sending a response by directly creating a message with sender='ai'
@@ -154,7 +168,7 @@ class MessageCreateViewTests(APITestCase):
         }
         response_user_2 = self.client.post(self.url, data_user_2, format='json')
         self.assertEqual(response_user_2.status_code, status.HTTP_201_CREATED)
-        message_user_2 = Message.objects.get(id=response_user_2.data['id'])
+        message_user_2 = Message.objects.get(id=response_user_2.data['user_message']['id'])
         self.assertEqual(message_user_2.sender, 'user')
         
     def test_sender_assignment_user_after_ai(self):
@@ -175,7 +189,7 @@ class MessageCreateViewTests(APITestCase):
         }
         response_user = self.client.post(self.url, data_user, format='json')
         self.assertEqual(response_user.status_code, status.HTTP_201_CREATED)
-        message_user = Message.objects.get(id=response_user.data['id'])
+        message_user = Message.objects.get(id=response_user.data['user_message']['id'])
         self.assertEqual(message_user.sender, 'user')
         
     def test_create_message_without_message_body(self):

@@ -1,6 +1,6 @@
 import openai
 from typing import List, Dict
-from services.abstract_ai_service import AbstractAIService
+from .abstract_ai_service import AbstractAIService
 import logging
 
 logger = logging.getLogger("chatbot_project")
@@ -15,4 +15,4 @@ class OpenAIService(AbstractAIService):
             return response.choices[0].message.content
         except openai.OpenAIError as e:
             logger.error(f"OpenAI API error: {e}")
-            raise RuntimeError(f"OpenAI API error: {e}")
+            raise  # Handler will take care of this exception in the re-tries
