@@ -11,7 +11,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class Chatbot(APIView):
+class MessageCreate(APIView):
     """
     Hanldes incoming POST requests (user messages), routing it's body 
     into chatbot_modules and returns a message representing the AI's reponse
@@ -48,7 +48,7 @@ class Chatbot(APIView):
             # Check if last message was from user or AI
             last_message = conversation.messages.last()
             if last_message and last_message.sender == 'user':
-                sender = 'AI'
+                sender = 'ai'
             else:
                 sender = 'user'
         else:
@@ -60,7 +60,7 @@ class Chatbot(APIView):
         serializer_data = {
             "conversation_id": conversation_id,
             "message_body": data.get("message_body", "")    
-        }
+        }   # sender will be passed at creation time, since it's not coming from client no validation needed
         
         serializer = MessageSerializer(
             data=serializer_data,
@@ -70,7 +70,7 @@ class Chatbot(APIView):
         if serializer.is_valid(): # Perform validation
             try:
                 with transaction.atomic():
-                    message = serializer.save(sender=sender)
+                    message = serializer.save(sender=sender)    # pass the sender
                 logger.info(f"Message {message.id} created in conversation {message.conversation.id} by {sender}")
                 return Response(
                     MessageSerializer(message).data,
