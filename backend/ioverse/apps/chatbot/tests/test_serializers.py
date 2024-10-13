@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from rest_framework.test import APIRequestFactory
-from .models import Conversation, Message
-from .serializers import MessageSerializer, ReadOnlyConversationSerializer
+from ..models import Conversation, Message
+from ..serializers import MessageSerializer, ReadOnlyConversationSerializer
 
 class SerializerTestCase(TestCase):
     @classmethod    # class-level data set up

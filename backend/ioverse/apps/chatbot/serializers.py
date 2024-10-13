@@ -12,9 +12,20 @@ import bleach
 logger = logging.getLogger(__name__)
 
 class MessageSerializer(serializers.ModelSerializer):
-    conversation_id = serializers.IntegerField(required=False)  # e.g. first message of the conversation
-    sender = serializers.CharField(read_only=True)  # 'user' or 'AI'
-
+    conversation_id = serializers.IntegerField(required=False, allow_null=True)  # e.g. first message of the conversation
+    sender = serializers.CharField(read_only=True)  # 'user' or 'ai'
+    message_body = serializers.CharField(
+        required=True,
+        allow_blank=False,
+        allow_null=False,
+        error_messages={
+            'required': 'Message content is required.',
+            'blank': 'Message content cannot be empty.',
+            'null': 'Message content cannot be null.',
+            'max_length': 'Message content exceeds the maximum allowed length.',
+        }
+    )
+        
     class Meta:
         model = Message
         fields = ['id', 'conversation_id', 'message_body', 'sender', 'timestamp']
@@ -24,6 +35,8 @@ class MessageSerializer(serializers.ModelSerializer):
         """
         Ensures the conversation exists and belongs to the authenticated user.
         """
+        if value is None:
+            return value  # No conversation ID provided;
         user = self.context['request'].user
         if not Conversation.objects.filter(id=value, user=user).exists():
             logger.error(f"Invalid conversation ID: {value} for user: {user.username}")
@@ -46,6 +59,7 @@ class MessageSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Message content cannot be empty.")
         
         if len(cleaned_content) > 1000:
+            logging.warning(f"Message prevented from submission: exceeded maximum allowed length")
             raise serializers.ValidationError("Message content exceeds the maximum allowed length.")
         
         return cleaned_content
@@ -83,6 +97,9 @@ class MessageSerializer(serializers.ModelSerializer):
         sender = kwargs.get('sender', 'user')  # Default to 'user' if not provided
         conversation_id = validated_data.pop('conversation_id', None)
 
+        # Remove 'sender' from validated_data if it's present to prevent duplication
+        validated_data.pop('sender', None)
+        
         with transaction.atomic():
             if conversation_id:
                 try:

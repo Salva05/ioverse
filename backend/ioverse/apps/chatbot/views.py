@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework import authentication, permissions, status
+from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import JSONParser, FormParser
 
 from .serializers import MessageSerializer
 from .models import Conversation
@@ -22,6 +24,8 @@ class MessageCreate(APIView):
     """
     
     throttle_classes = [UserRateThrottle]   # DRF rate limiting for API requests
+    permission_classes = [permissions.IsAuthenticated]  # Sets permission requirements for accessing the view
+    parser_classes = [JSONParser, FormParser]   # Enables the parsing of JSON
     
     # authentication_classes = [authentication.TokenAuthentication]
     # permission_classes = [permissions.IsAdminUser]
@@ -58,10 +62,12 @@ class MessageCreate(APIView):
         # Prepare data for the serializer
         # The 'sender' is determined by the backend and should not be provided by the client
         serializer_data = {
-            "conversation_id": conversation_id,
-            "message_body": data.get("message_body", "")    
-        }   # sender will be passed at creation time, since it's not coming from client no validation needed
+            "conversation_id": conversation_id,  # Serializer will handle 'None' cases 
+        }
         
+        if 'message_body' in data:
+            serializer_data['message_body'] = data['message_body']
+    
         serializer = MessageSerializer(
             data=serializer_data,
             context={'request': request}
@@ -76,7 +82,7 @@ class MessageCreate(APIView):
                     MessageSerializer(message).data,
                     status=status.HTTP_201_CREATED
                 )
-            except serializer.ValidationError as e:
+            except ValidationError as e:
                 logger.error(f"Validation error during message creation: {e.detail}")
                 return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
