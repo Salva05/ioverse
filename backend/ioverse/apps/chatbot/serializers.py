@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class MessageSerializer(serializers.ModelSerializer):
     conversation_id = serializers.IntegerField(required=False)  # e.g. first message of the conversation
-    sender = serializers.CharField(source='get_sender_display', read_only=True)
+    sender = serializers.CharField(read_only=True)  # 'user' or 'AI'
 
     class Meta:
         model = Message
@@ -21,6 +21,9 @@ class MessageSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'sender', 'timestamp']
 
     def validate_conversation_id(self, value):
+        """
+        Ensures the conversation exists and belongs to the authenticated user.
+        """
         user = self.context['request'].user
         if not Conversation.objects.filter(id=value, user=user).exists():
             logger.error(f"Invalid conversation ID: {value} for user: {user.username}")
@@ -70,13 +73,14 @@ class MessageSerializer(serializers.ModelSerializer):
         
         return data
         
-    def create(self, validated_data):
+    def create(self, validated_data, **kwargs):
         """
         Handles the creation of a Message instance:
         - Associates the message with an existing conversation or creates a new one.
         - Sets the sender as 'user'.
         """
         user = self.context['request'].user
+        sender = kwargs.get('sender', 'user')  # Default to 'user' if not provided
         conversation_id = validated_data.pop('conversation_id', None)
 
         with transaction.atomic():
@@ -95,7 +99,7 @@ class MessageSerializer(serializers.ModelSerializer):
             # Create the message
             message = Message.objects.create(
                 conversation=conversation,
-                sender='user', # Mock data yet
+                sender=sender,
                 **validated_data
             )
             logger.debug(f"Created message: {message.id} for conversation: {conversation.id}")

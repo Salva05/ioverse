@@ -35,7 +35,7 @@ class SerializerTestCase(TestCase):
         self.assertEqual(serialized['id'], message.id)
         self.assertEqual(serialized['conversation_id'], self.conversation1.id)
         self.assertEqual(serialized['message_body'], 'Hello AI!')
-        self.assertEqual(serialized['sender'], 'User')
+        self.assertEqual(serialized['sender'], 'user')
         self.assertIsNotNone(serialized['timestamp'])
     
     def test_message_creation_new_conversation(self):
