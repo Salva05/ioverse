@@ -11,7 +11,9 @@ import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
+import ChatIcon from "@mui/icons-material/Chat";
 import { styled, useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -24,8 +26,25 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
+const pages = [
+  {
+    id: 1,
+    display: "Chat",
+    path: "chat",
+    icon: <ChatIcon sx={{ color: "#fff" }} />
+  },
+  {
+    id: 2,
+    display: "Mailing",
+    path: "chat",
+    icon: <MailIcon sx={{ color: "#fff" }} />
+  },
+];
+
 export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const theme = useTheme();
+  const navigate = useNavigate();
+
   return (
     <Drawer
       sx={{
@@ -54,17 +73,13 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       </DrawerHeader>
       <Divider sx={{ backgroundColor: "#444" }} />
       <List>
-        {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
+        {pages.map((page, index) => (
+          <ListItem key={page.id} disablePadding>
+            <ListItemButton onClick={() => navigate(page.path)}>
               <ListItemIcon>
-                {index % 2 === 0 ? (
-                  <InboxIcon sx={{ color: "#fff" }} />
-                ) : (
-                  <MailIcon sx={{ color: "#fff" }} />
-                )}
+                {page.icon}
               </ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemText primary={page.display} />
             </ListItemButton>
           </ListItem>
         ))}
