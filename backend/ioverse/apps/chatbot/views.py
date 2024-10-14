@@ -1,8 +1,11 @@
+from rest_framework.decorators import action
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
-from .models import Message
-from .serializers import MessageSerializer
+from rest_framework.permissions import AllowAny
+
+from .models import Message, Conversation
+from .serializers import MessageSerializer, ReadOnlyConversationSerializer
 from .services.chat_service import ChatService
 import logging
 
@@ -12,7 +15,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     
     queryset = Message.objects.all()    # For efficency will apply constraints later on..
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [UserRateThrottle]   # Apply rate limiting 
     
     # Override create method to use ChatService
@@ -51,3 +54,15 @@ class MessageViewSet(viewsets.ModelViewSet):
         else:
             logger.error(f"Serializer validation error: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ConversationViewSet(viewsets.ModelViewSet):
+    
+    queryset = Conversation.objects.all()
+    serializer_class = ReadOnlyConversationSerializer
+    permission_classes = [AllowAny]
+    
+    # Custom queryset to filter by owner
+"""     def get_queryset(self):
+        user = self.request.user
+        return Conversation.objects.filter(user = user) """
+    
