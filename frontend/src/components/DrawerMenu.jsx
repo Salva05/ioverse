@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -13,7 +13,9 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import ChatIcon from "@mui/icons-material/Chat";
 import { styled, useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Conversation } from "@chatscope/chat-ui-kit-react";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -31,19 +33,43 @@ const pages = [
     id: 1,
     display: "Chat",
     path: "chat",
-    icon: <ChatIcon sx={{ color: "#fff" }} />
+    icon: <ChatIcon sx={{ color: "#fff" }} />,
   },
   {
     id: 2,
     display: "Mailing",
-    path: "chat",
-    icon: <MailIcon sx={{ color: "#fff" }} />
+    path: "/",
+    icon: <MailIcon sx={{ color: "#fff" }} />,
   },
 ];
 
 export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const theme = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [conversations, setConversations] = useState(null);
+
+  const fetchConversations = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/chatbot/conversations"
+      );
+
+      // Update conversations
+      setConversations(response.data);
+    } catch (error) {
+      console.log("Error fetching conversations:", error);
+    }
+  };
+
+  // Trigger fetchConversations when the page is refreshed or when the component mounts and URL is /chat
+  useEffect(() => {
+    if (location.pathname === "/chat") {
+      fetchConversations();
+    } else {
+      setConversations(null)
+    }
+  }, [location.pathname]); // This runs every time the URL changes or on mount
 
   return (
     <Drawer
@@ -75,10 +101,15 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       <List>
         {pages.map((page, index) => (
           <ListItem key={page.id} disablePadding>
-            <ListItemButton onClick={() => navigate(page.path)}>
-              <ListItemIcon>
-                {page.icon}
-              </ListItemIcon>
+            <ListItemButton
+              onClick={() => {
+                if (page.path === "chat") {
+                  fetchConversations();
+                }
+                navigate(page.path);
+              }}
+            >
+              <ListItemIcon>{page.icon}</ListItemIcon>
               <ListItemText primary={page.display} />
             </ListItemButton>
           </ListItem>
@@ -86,20 +117,14 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       </List>
       <Divider sx={{ backgroundColor: "#444" }} />
       <List>
-        {["All mail", "Trash", "Spam"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? (
-                  <InboxIcon sx={{ color: "#fff" }} />
-                ) : (
-                  <MailIcon sx={{ color: "#fff" }} />
-                )}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {conversations &&
+          conversations.results.map((conversation, index) => (
+            <ListItem key={index} disablePadding>
+              <ListItemButton>
+                <ListItemText primary={conversation.title} />
+              </ListItemButton>
+            </ListItem>
+          ))}
       </List>
     </Drawer>
   );
