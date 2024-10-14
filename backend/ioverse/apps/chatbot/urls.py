@@ -1,6 +1,7 @@
-from django.urls import path
-from .views import MessageCreate
+from rest_framework import routers
+from .views import MessageViewSet
 
-urlpatterns = [
-    path('chat/', MessageCreate.as_view(), name='message-create'),
-]
+router = routers.DefaultRouter()
+router.register(r'messages', MessageViewSet, basename='message')
+
+urlpatterns = router.urls
