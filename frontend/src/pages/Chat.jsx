@@ -13,31 +13,39 @@ import { mapMessages } from "../utils/mapMessages";
 import chatService from "../services/chatService";
 
 const Chat = () => {
-  const { activeConversation, addMessageToActiveConversation } =
+  const { activeConversation, activateConversation } =
     useContext(ConversationContext);
   const [typing, setTyping] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
 
   useEffect(() => {
     if (activeConversation && activeConversation.messages) {
-      const mappedMessages = mapMessages(activeConversation.messages);
-      setLocalMessages(mappedMessages);
+      updateLocalState();
     } else {
       setLocalMessages([]);
     }
   }, [activeConversation]);
 
-  const handleSend = async (messageText) => {
-    const newMessage = {
-      id: Date.now(),
-      conversation_id: activeConversation.id,
-      message_body: messageText,
-      sender: "user",
-      timestamp: new Date().toISOString(),
-    };
+  const updateLocalState = () => {
+    const mappedMessages = mapMessages(activeConversation.messages);
+    setLocalMessages(mappedMessages);
+  };
 
-    // Update context with the new message
-    addMessageToActiveConversation(newMessage);
+  const handleSend = async (messageText) => {
+    // Manually upadate the local state
+    // To trigger an immediate visual feedback wihout waiting backend response
+    setLocalMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        message: messageText,
+        sentTime: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        sender: "You",
+        direction: "outgoing",
+      },
+    ]);
 
     // Show typing indicator
     setTyping(true);
@@ -50,16 +58,11 @@ const Chat = () => {
     // Process the message and get AI response
     const ai_message = await processMessageToBackend(backend_message);
 
-    const newAiMessage = {
-      id: Date.now() + 1,
-      conversation_id: activeConversation.id,
-      message_body: ai_message,
-      sender: "ai",
-      timestamp: new Date().toISOString(),
-    };
+    // Update context's conversation
+    activateConversation(activeConversation.id);
 
-    // Update context with AI's message
-    addMessageToActiveConversation(newAiMessage);
+    // update local messages based on the active updated context
+    updateLocalState();
 
     // Hide typing indicator
     setTyping(false);
@@ -68,6 +71,7 @@ const Chat = () => {
   async function processMessageToBackend(message) {
     try {
       const response = await chatService.sendMessage(message);
+      console.log(response.ai_message);
       return response.ai_message;
     } catch (error) {
       console.error("Error sending message:", error);

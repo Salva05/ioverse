@@ -6,6 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -22,6 +23,8 @@ const StyledAppBar = styled(MuiAppBar, {
 }));
 
 export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
+  const navigate = useNavigate();
+
   return (
     <StyledAppBar position="fixed" open={open && !isSmallScreen}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -37,7 +40,7 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
         <Typography variant="h6" noWrap component="div">
           Dark Menu
         </Typography>
-        <Button color="inherit">Login</Button>
+        <Button color="inherit" onClick={() => navigate('login')}>Login</Button>
       </Toolbar>
     </StyledAppBar>
   );

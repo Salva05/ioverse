@@ -8,6 +8,12 @@ const chatService = {
     return response.data;
   },
 
+  // GET: Fetch a single conversation
+  getConversation: async (id) => {
+    const response = await axiosInstance.get(`/chatbot/conversations/${id}`);
+    return response.data;
+  },
+
   // POST: Send a Message
   sendMessage: async (messageData) => {
     const response = await axiosInstance.post("/chatbot/messages/", messageData); // Requires trailing slash for POSTs

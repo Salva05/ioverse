@@ -90,8 +90,8 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
     }
   }, [conversationsData, activateConversation, activeConversation]);
 
-  const handleConversationClick = (conversation) => {
-    activateConversation(conversation);
+  const handleConversationClick = (id) => {
+    activateConversation(id);
   };
 
   return (
@@ -157,7 +157,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                 <ListItem key={conversation.id} disablePadding>
                   <ListItemButton
                     selected={activeConversation?.id === conversation.id}
-                    onClick={() => handleConversationClick(conversation)}
+                    onClick={() => handleConversationClick(conversation.id)}
                     sx={{
                       "&.Mui-selected": {
                         backgroundColor: theme.palette.action.selected,

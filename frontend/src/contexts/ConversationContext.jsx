@@ -1,23 +1,14 @@
 import React, { createContext, useState } from "react";
+import chatService from "../services/chatService";
 
 export const ConversationContext = createContext();
 
 export const ConversationProvider = ({ children }) => {
   const [activeConversation, setActiveConversation] = useState(null);
 
-  const activateConversation = (conversation) => {
-    setActiveConversation(conversation);
-  };
-
-  const addMessageToActiveConversation = (newMessage) => {
-    if (!activeConversation) return;
-
-    const updatedConversation = {
-      ...activeConversation,
-      messages: [...activeConversation.messages, newMessage],
-    };
-
-    setActiveConversation(updatedConversation);
+  const activateConversation = async (id) => {
+    const response = await chatService.getConversation(id);
+    setActiveConversation(response);
   };
 
   return (
@@ -25,7 +16,6 @@ export const ConversationProvider = ({ children }) => {
       value={{
         activeConversation,
         activateConversation,
-        addMessageToActiveConversation,
       }}
     >
       {children}

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConversationProvider } from "./contexts/ConversationContext";
 import theme from "./themes/theme";
 import { ThemeProvider } from "@mui/material";
+import Login from "./pages/Login";
 
 // Manages chaching, fetching and synchronization of server side data
 const queryClient = new QueryClient();
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
       {
         path: "chat",
         element: <Chat />,
+      },
+      {
+        path: "login",
+        element: <Login />,
       },
     ],
   },
