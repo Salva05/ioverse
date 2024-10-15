@@ -15,7 +15,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     
     queryset = Message.objects.all()    # For efficency will apply constraints later on..
     serializer_class = MessageSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [UserRateThrottle]   # Apply rate limiting 
     
     # Override create method to use ChatService
@@ -59,10 +59,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     
     queryset = Conversation.objects.all()
     serializer_class = ReadOnlyConversationSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     
     # Custom queryset to filter by owner
-"""     def get_queryset(self):
+    def get_queryset(self):
         user = self.request.user
-        return Conversation.objects.filter(user = user) """
+        return Conversation.objects.filter(user = user)
     
