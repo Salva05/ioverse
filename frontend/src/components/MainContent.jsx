@@ -22,7 +22,7 @@ const Main = styled("main", {
         duration: theme.transitions.duration.enteringScreen,
       }),
     }),
-    paddingTop: theme.spacing(8),
+  paddingTop: theme.spacing(8),
 }));
 
 export default function MainContent({ open, isSmallScreen, children }) {

@@ -9,14 +9,15 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import ChatIcon from "@mui/icons-material/Chat";
 import { styled, useTheme } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import axiosInstance from "../api/axiosInstance";
-import config from "../config";
+import chatService from "../services/chatService";
+import { useQuery } from "@tanstack/react-query";
+
+import { toast } from "react-toastify";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -48,25 +49,24 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const [conversations, setConversations] = useState(null);
 
-  const fetchConversations = async () => {
-    try {
-      const response = await axiosInstance.get("/chatbot/conversations");
-      setConversations(response.data);
-    } catch (error) {
-      console.log("Error fetching conversations:", error);
-    }
-  };
+  const {
+    data: conversationsData,
+    error,
+    isError,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: chatService.getConversations,
+    enabled: location.pathname === "/chat",
+  });
 
-  // Trigger fetchConversations when the page is refreshed or when the component mounts and URL is /chat
   useEffect(() => {
-    if (location.pathname === "/chat") {
-      fetchConversations();
-    } else {
-      setConversations(null);
+    if (isError) {
+      toast.error("Error loading conversations: " + error);
     }
-  }, [location.pathname]); // This runs every time the URL changes or on mount
+  }, [isError]);
 
   return (
     <Drawer
@@ -101,7 +101,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
             <ListItemButton
               onClick={() => {
                 if (page.path === "chat") {
-                  fetchConversations();
+                  refetch();
                 }
                 navigate(page.path);
               }}
@@ -113,16 +113,28 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
         ))}
       </List>
       <Divider sx={{ backgroundColor: "#444" }} />
-      <List>
-        {conversations &&
-          conversations.results.map((conversation, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton>
-                <ListItemText primary={conversation.title} />
-              </ListItemButton>
+      {location.pathname === "/chat" && (
+        <List>
+          {/* Display Conversations */}
+          {isLoading ? (
+            <ListItem>
+              <ListItemText primary="Loading..." />
             </ListItem>
-          ))}
-      </List>
+          ) : conversationsData && conversationsData.results.length > 0 ? (
+            conversationsData.results.map((conversation) => (
+              <ListItem key={conversation.id} disablePadding>
+                <ListItemButton>
+                  <ListItemText primary={conversation.title} />
+                </ListItemButton>
+              </ListItem>
+            ))
+          ) : (
+            <ListItem>
+              <ListItemText primary="No conversations found." />
+            </ListItem>
+          )}
+        </List>
+      )}
     </Drawer>
   );
 }
