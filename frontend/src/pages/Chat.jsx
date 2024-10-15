@@ -1,47 +1,77 @@
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   MainContainer,
   ChatContainer,
   MessageList,
   Message,
   MessageInput,
-  TypingIndicator
+  TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
+import { ConversationContext } from "../contexts/ConversationContext";
+import { mapMessages } from "../utils/mapMessages";
+import chatService from "../services/chatService";
 
 const Chat = () => {
+  const { activeConversation, addMessageToActiveConversation } =
+    useContext(ConversationContext);
   const [typing, setTyping] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      message: "How can I help you?",
-      sentTime: "just now",
-      sender: "Chatbot",
-      direction: "incoming"
-    },
-  ]);
+  const [localMessages, setLocalMessages] = useState([]);
 
-  const handleSend = async (message) => {
-    const newMessage = {
-      message: message,
-      sentTime: "one minte ago",
-      sender: "user",
-      direction: "outgoing"
+  useEffect(() => {
+    if (activeConversation && activeConversation.messages) {
+      const mappedMessages = mapMessages(activeConversation.messages);
+      setLocalMessages(mappedMessages);
+    } else {
+      setLocalMessages([]);
     }
+  }, [activeConversation]);
 
-    const newMessages = [...messages, newMessage]; // all the old messages + the new message
+  const handleSend = async (messageText) => {
+    const newMessage = {
+      id: Date.now(),
+      conversation_id: activeConversation.id,
+      message_body: messageText,
+      sender: "user",
+      timestamp: new Date().toISOString(),
+    };
 
-    // update out messages state
-    setMessages(newMessages);
+    // Update context with the new message
+    addMessageToActiveConversation(newMessage);
 
-    // set typing indicator
+    // Show typing indicator
     setTyping(true);
 
-    // process message to backend
-    await processMessageToBackend(newMessages);
-  }
+    const backend_message = {
+      conversation_id: activeConversation ? activeConversation.id : null,
+      message_body: messageText,
+    };
 
-  async function processMessageToBackend(chatMessages) {
+    // Process the message and get AI response
+    const ai_message = await processMessageToBackend(backend_message);
 
+    const newAiMessage = {
+      id: Date.now() + 1,
+      conversation_id: activeConversation.id,
+      message_body: ai_message,
+      sender: "ai",
+      timestamp: new Date().toISOString(),
+    };
+
+    // Update context with AI's message
+    addMessageToActiveConversation(newAiMessage);
+
+    // Hide typing indicator
+    setTyping(false);
+  };
+
+  async function processMessageToBackend(message) {
+    try {
+      const response = await chatService.sendMessage(message);
+      return response.ai_message;
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   }
 
   return (
@@ -56,12 +86,15 @@ const Chat = () => {
       <MainContainer style={{ flex: 1 }}>
         <ChatContainer>
           <MessageList
-            typingIndicator={typing ? <TypingIndicator content="Reasoning"/> : null}>
-            {messages.map((message, id) => (
+            typingIndicator={
+              typing ? <TypingIndicator content="Reasoning" /> : null
+            }
+          >
+            {localMessages.map((message, id) => (
               <Message key={id} model={message} />
             ))}
           </MessageList>
-          <MessageInput placeholder="Type message here" onSend={handleSend}/>
+          <MessageInput placeholder="Type message here" onSend={handleSend} />
         </ChatContainer>
       </MainContainer>
     </div>

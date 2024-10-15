@@ -10,7 +10,7 @@ const chatService = {
 
   // POST: Send a Message
   sendMessage: async (messageData) => {
-    const response = await axiosInstance.post("/chatbot/send", messageData);
+    const response = await axiosInstance.post("/chatbot/messages/", messageData); // Requires trailing slash for POSTs
     return response.data;
   },
 };

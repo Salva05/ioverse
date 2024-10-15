@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
   },
 });
 
-/* // Interceptors fro request and response for authorization
+/* // Interceptors for request and response for authorization
 axiosInstance.interceptors.request.use(
   (config) => {
     // Authorization token into header
