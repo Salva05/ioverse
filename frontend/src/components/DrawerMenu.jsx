@@ -14,8 +14,9 @@ import MailIcon from "@mui/icons-material/Mail";
 import ChatIcon from "@mui/icons-material/Chat";
 import { styled, useTheme } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { Conversation } from "@chatscope/chat-ui-kit-react";
+
+import axiosInstance from "../api/axiosInstance";
+import config from "../config";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -51,11 +52,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
 
   const fetchConversations = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/chatbot/conversations"
-      );
-
-      // Update conversations
+      const response = await axiosInstance.get("/chatbot/conversations");
       setConversations(response.data);
     } catch (error) {
       console.log("Error fetching conversations:", error);
@@ -67,7 +64,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
     if (location.pathname === "/chat") {
       fetchConversations();
     } else {
-      setConversations(null)
+      setConversations(null);
     }
   }, [location.pathname]); // This runs every time the URL changes or on mount
 
