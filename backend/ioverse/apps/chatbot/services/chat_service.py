@@ -3,6 +3,7 @@ from django.apps import apps
 from ..models import Conversation, Message
 from chatbot_modules.core.chatbot import Chatbot
 import logging
+import openai
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class ChatService:
         """
         with transaction.atomic():
             # Retrieve or create conversation
-            conversation = self.get_or_create_conversation(user, conversation_id)
+            conversation = self.get_or_create_conversation(user, conversation_id, message_body)
 
             # Save user message
             user_message = Message.objects.create(
@@ -51,12 +52,13 @@ class ChatService:
 
         return user_message, ai_message
 
-    def get_or_create_conversation(self, user, conversation_id):
+    def get_or_create_conversation(self, user, conversation_id, first_message):
         if conversation_id:
             conversation = Conversation.objects.get(id=conversation_id, user=user)
             logger.debug(f"Found existing conversation: {conversation.id} for user: {user.username}")
         else:
-            conversation = Conversation.objects.create(user=user, title='New Conversation')
+            title = self.generate_conversation_title(first_message)
+            conversation = Conversation.objects.create(user=user, title=title)
             logger.debug(f"Created new conversation: {conversation.id} for user: {user.username}")
         return conversation
 
@@ -69,3 +71,47 @@ class ChatService:
             content = message.message_body
             history.append({'role': role, 'content': content})
         return history
+
+    def generate_conversation_title(self, first_message: str) -> str:
+        """
+        Generates a title for the conversation based on the first message
+
+        Args:
+            first_message (str): The user's first message in the conversation.
+
+        Returns:
+            str: A generated title for the conversation.
+        """
+        system_prompt = (
+            "You are an assistant specialized in generating concise, relevant, and descriptive titles for conversations. "
+            "Your task is to analyze the user's initial message and create a suitable title that accurately reflects the topic and intent of the conversation.\n\n"
+            "**Guidelines:**\n"
+            "1. **Conciseness:** The title should be no longer than 5 words.\n"
+            "2. **Relevance:** Ensure the title directly relates to the main topic of the user's message.\n"
+            "3. **Clarity:** Use clear and straightforward language without jargon.\n"
+            "4. **Capitalization:** Capitalize the first letter of each major word.\n"
+            "5. **Avoid Redundancy:** Do not include phrases like 'Conversation about' or 'Discussion on.'\n\n"
+            "**Format:**\n"
+            "- The title should be presented as a single line of text without any additional commentary or punctuation at the end.\n\n"
+            "**Example:**\n\n"
+            "- **User Message:** \"I'm planning to launch an online store for handmade jewelry. Can you suggest some effective marketing strategies?\"\n\n"
+            "- **Generated Title:** \"Marketing Strategies\""
+        )
+        user_prompt = f"User Message: \"{first_message}\"\n\nTitle:"
+        
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=20,        
+                temperature=0.5,      # Balanced creativity and accuracy
+                n=1,
+            )
+            title = response.choices[0].message.content.strip()
+            return title
+        except Exception as e:
+            logger.error(f"Title generation failed: {e}")
+            return "Untitled Conversation"

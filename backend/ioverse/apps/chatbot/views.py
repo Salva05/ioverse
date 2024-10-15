@@ -15,7 +15,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     
     queryset = Message.objects.all()    # For efficency will apply constraints later on..
     serializer_class = MessageSerializer
-    #permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [UserRateThrottle]   # Apply rate limiting 
     
     # Override create method to use ChatService

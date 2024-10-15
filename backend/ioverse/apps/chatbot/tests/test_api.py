@@ -11,7 +11,7 @@ class MessageCreateViewTests(APITestCase):
         self.user = User.objects.create_user(username='testuser', password='testpass')
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-        self.url = reverse('message-list')
+        self.url = reverse('messages-list')
         self.conversation = Conversation.objects.create(user=self.user, title='Existing Conversation')
 
     @patch('apps.chatbot.services.chat_service.Chatbot.get_response')
