@@ -6,6 +6,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
+import LinearProgress from '@mui/material/LinearProgress';
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
@@ -64,9 +65,11 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
 
   useEffect(() => {
     if (isError) {
-      toast.error("Error loading conversations: " + error);
+      toast.error(
+        "Error loading conversations: " + (error?.message || "Unknown error")
+      );
     }
-  }, [isError]);
+  }, [isError, error]);
 
   return (
     <Drawer
@@ -118,9 +121,12 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
           {/* Display Conversations */}
           {isLoading ? (
             <ListItem>
-              <ListItemText primary="Loading..." />
+              <ListItemText>
+                <LinearProgress color="secondary" />
+              </ListItemText>
             </ListItem>
-          ) : conversationsData && conversationsData.results.length > 0 ? (
+          ) : (
+            conversationsData &&
             conversationsData.results.map((conversation) => (
               <ListItem key={conversation.id} disablePadding>
                 <ListItemButton>
@@ -128,10 +134,6 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                 </ListItemButton>
               </ListItem>
             ))
-          ) : (
-            <ListItem>
-              <ListItemText primary="No conversations found." />
-            </ListItem>
           )}
         </List>
       )}
