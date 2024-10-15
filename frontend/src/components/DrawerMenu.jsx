@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -6,7 +6,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import LinearProgress from '@mui/material/LinearProgress';
+import LinearProgress from "@mui/material/LinearProgress";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
@@ -14,6 +14,7 @@ import MailIcon from "@mui/icons-material/Mail";
 import ChatIcon from "@mui/icons-material/Chat";
 import { styled, useTheme } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ConversationContext } from "../contexts/ConversationContext";
 
 import chatService from "../services/chatService";
 import { useQuery } from "@tanstack/react-query";
@@ -50,6 +51,8 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { activeConversation, activateConversation } =
+    useContext(ConversationContext);
 
   const {
     data: conversationsData,
@@ -70,6 +73,26 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       );
     }
   }, [isError, error]);
+
+  // Set the latest conversation as active on initial load
+  useEffect(() => {
+    if (
+      conversationsData &&
+      conversationsData.results.length > 0 &&
+      !activeConversation
+    ) {
+      // Sort conversations by 'created_at' in descending order
+      const sortedConversations = [...conversationsData.results].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+      const latestConversation = sortedConversations[0];
+      activateConversation(latestConversation);
+    }
+  }, [conversationsData, activateConversation, activeConversation]);
+
+  const handleConversationClick = (conversation) => {
+    activateConversation(conversation);
+  };
 
   return (
     <Drawer
@@ -127,13 +150,27 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
             </ListItem>
           ) : (
             conversationsData &&
-            conversationsData.results.map((conversation) => (
-              <ListItem key={conversation.id} disablePadding>
-                <ListItemButton>
-                  <ListItemText primary={conversation.title} />
-                </ListItemButton>
-              </ListItem>
-            ))
+            conversationsData.results
+              // Backend should also sort
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .map((conversation) => (
+                <ListItem key={conversation.id} disablePadding>
+                  <ListItemButton
+                    selected={activeConversation?.id === conversation.id}
+                    onClick={() => handleConversationClick(conversation)}
+                    sx={{
+                      "&.Mui-selected": {
+                        backgroundColor: theme.palette.action.selected,
+                        "&:hover": {
+                          backgroundColor: theme.palette.action.hover,
+                        },
+                      },
+                    }}
+                  >
+                    <ListItemText primary={conversation.title} />
+                  </ListItemButton>
+                </ListItem>
+              ))
           )}
         </List>
       )}
