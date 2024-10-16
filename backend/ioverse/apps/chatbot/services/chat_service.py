@@ -50,6 +50,9 @@ class ChatService:
                 message_body=ai_response_text
             )
 
+            # Update the conversation
+            conversation.save(update_fields=["updated_at"])
+            
         return user_message, ai_message
 
     def get_or_create_conversation(self, user, conversation_id, first_message):
