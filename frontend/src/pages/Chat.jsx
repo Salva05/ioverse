@@ -31,21 +31,26 @@ const Chat = () => {
     setLocalMessages(mappedMessages);
   };
 
-  const handleSend = async (messageText) => {
-    // Manually upadate the local state
-    // To trigger an immediate visual feedback wihout waiting backend response
+  const addLocalMessage = (message, isAi) => {
     setLocalMessages((prevMessages) => [
       ...prevMessages,
       {
-        message: messageText,
+        message: message,
         sentTime: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        sender: "You",
-        direction: "outgoing",
+        sender: isAi ? "Chatbot" : "You",
+        direction: isAi ? "incoming" : "outgoing",
       },
     ]);
+  };
+
+  const handleSend = async (messageText) => {
+    // Manually upadate the local state
+    // To get immediate visual feedback wihout waiting backend response
+    // This will also prevent re-render of all messages
+    addLocalMessage(messageText, false);
 
     // Show typing indicator
     setTyping(true);
@@ -58,11 +63,7 @@ const Chat = () => {
     // Process the message and get AI response
     const ai_message = await processMessageToBackend(backend_message);
 
-    // Update context's conversation
-    activateConversation(activeConversation.id);
-
-    // update local messages based on the active updated context
-    updateLocalState();
+    addLocalMessage(ai_message.message_body, true);
 
     // Hide typing indicator
     setTyping(false);
@@ -94,7 +95,11 @@ const Chat = () => {
             }
           >
             {localMessages.map((message, id) => (
-              <Message key={id} model={message} />
+              <Message
+                key={id}
+                model={message}
+                style={{ paddingTop: 10, paddingBottom: 10 }}
+              />
             ))}
           </MessageList>
           <MessageInput placeholder="Type message here" onSend={handleSend} />
