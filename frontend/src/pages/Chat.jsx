@@ -12,6 +12,7 @@ import { ConversationContext } from "../contexts/ConversationContext";
 import { mapMessages } from "../utils/mapMessages";
 import chatService from "../services/chatService";
 import { DrawerContext } from "../contexts/DrawerContext";
+import ChatDial from "../components/ChatDial";
 
 const Chat = () => {
   const { activeConversation, activateConversation } =
@@ -79,33 +80,36 @@ const Chat = () => {
   }
 
   return (
-    <div
-      style={{
-        width: "100%",
-        display: "flex",
-        justifyContent: "center",
-        flexGrow:1,
-      }}
-    >
-      <MainContainer style={{ flex: 1, maxWidth: "700px", }}>
-        <ChatContainer>
-          <MessageList
-            typingIndicator={
-              typing ? <TypingIndicator content="Reasoning" /> : null
-            }
-          >
-            {localMessages.map((message, id) => (
-              <Message
-                key={id}
-                model={message}
-                style={{ paddingTop: 10, paddingBottom: 10 }}
-              />
-            ))}
-          </MessageList>
-          <MessageInput placeholder="Type message here" onSend={handleSend} />
-        </ChatContainer>
-      </MainContainer>
-    </div>
+    <>
+      <ChatDial />
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          flexGrow: 1,
+        }}
+      >
+        <MainContainer style={{ flex: 1, maxWidth: "700px" }}>
+          <ChatContainer>
+            <MessageList
+              typingIndicator={
+                typing ? <TypingIndicator content="Reasoning" /> : null
+              }
+            >
+              {localMessages.map((message, id) => (
+                <Message
+                  key={id}
+                  model={message}
+                  style={{ paddingTop: 10, paddingBottom: 10 }}
+                />
+              ))}
+            </MessageList>
+            <MessageInput placeholder="Type message here" onSend={handleSend} />
+          </ChatContainer>
+        </MainContainer>
+      </div>
+    </>
   );
 };
 

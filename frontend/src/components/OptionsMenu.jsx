@@ -1,18 +1,27 @@
-import * as React from "react";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import React, { useState } from "react";
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Button,
+  Box,
+  Tooltip,
+} from "@mui/material";
+import {
+  MoreVert,
+  Delete as DeleteIcon,
+  Inventory as InventoryIcon,
+} from "@mui/icons-material";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
-import DeleteIcon from "@mui/icons-material/Delete";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import { IconButton, Box, Tooltip } from "@mui/material";
-import { MoreVert } from "@mui/icons-material";
-import { useQueryClient } from "@tanstack/react-query";
 import chatService from "../services/chatService";
-import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function OptionsMenu({ conversationId }) {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const handleClick = (event) => {
     event.stopPropagation();
@@ -33,98 +42,139 @@ export default function OptionsMenu({ conversationId }) {
     popupState.close();
   };
 
-  const handleDelete = async (id, popupState, event) => {
+  const handleDeleteClick = (event) => {
+    event.stopPropagation();
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-        event.stopPropagation();
-        const response = await chatService.deleteConversation(id);
-        console.log("Deleted conversation with ID: " + id + "\n\n" + response);
-        popupState.close();
-        queryClient.invalidateQueries(["conversations"]); // Trigger the TanQuery refetch()
+      await chatService.deleteConversation(conversationId);
+      queryClient.invalidateQueries(["conversations"]);
     } catch (error) {
-      console.error("Failed to delete conversation: ", error);
+      console.error("Failed to delete conversation:", error);
+    } finally {
+      setConfirmOpen(false);
     }
   };
 
   return (
-    <PopupState variant="popover" popupId="demo-popup-menu">
-      {(popupState) => (
-        <React.Fragment>
-          <Tooltip title="Options">
-            <IconButton
-              variant="contained"
-              onClick={(e) => {
-                handleClick(e);
-                bindTrigger(popupState).onClick(e);
+    <>
+      <PopupState variant="popover" popupId="demo-popup-menu">
+        {(popupState) => (
+          <React.Fragment>
+            <Tooltip title="Options">
+              <IconButton
+                variant="contained"
+                onClick={(e) => {
+                  handleClick(e);
+                  bindTrigger(popupState).onClick(e);
+                }}
+                onMouseDown={handleMouseDown}
+              >
+                <MoreVert fontSize="small" sx={{ color: "#a6a6a6" }} />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              {...bindMenu(popupState)}
+              sx={{
+                "& .MuiPaper-root": {
+                  backgroundColor: "#404040",
+                  borderRadius: "15px",
+                  border: "0.4px solid rgba(255, 255, 255, 0.19)",
+                },
               }}
-              onMouseDown={handleMouseDown}
+              onClose={handleClose(popupState)}
             >
-              <MoreVert fontSize="small" sx={{ color: "#a6a6a6" }} />
-            </IconButton>
-          </Tooltip>
-          <Menu
-            {...bindMenu(popupState)}
-            sx={{
-              "& .MuiPaper-root": {
-                backgroundColor: "#404040",
-                borderRadius: "15px",
-                border: "0.4px solid rgba(255, 255, 255, 0.19)",
-              },
+              <MenuItem
+                onClick={handleMenuItemClick(popupState)}
+                sx={{
+                  padding: "4px 16px",
+                  "&:hover": { backgroundColor: "transparent" },
+                }}
+              >
+                <Box
+                  sx={{
+                    padding: "4px 8px",
+                    borderRadius: "8px",
+                    minWidth: "100px",
+                    "&:hover": {
+                      backgroundColor: "#555555",
+                    },
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <InventoryIcon fontSize="small" sx={{ marginRight: 1 }} />
+                  Archive
+                </Box>
+              </MenuItem>
+              <MenuItem
+                onClick={(e) => {
+                  popupState.close();
+                  handleDeleteClick(e);
+                }}
+                sx={{
+                  color: "red",
+                  padding: "4px 16px",
+                  "&:hover": { backgroundColor: "transparent" },
+                }}
+              >
+                <Box
+                  sx={{
+                    padding: "4px 8px",
+                    borderRadius: "8px",
+                    minWidth: "100px",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 0, 0, 0.15)",
+                    },
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <DeleteIcon fontSize="small" sx={{ marginRight: 1 }} />
+                  Delete
+                </Box>
+              </MenuItem>
+            </Menu>
+          </React.Fragment>
+        )}
+      </PopupState>
+      <Dialog
+        open={confirmOpen}
+        onClose={(e) => {
+          e.stopPropagation();
+          handleConfirmClose(e);
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DialogTitle>Are you sure you want to delete?</DialogTitle>
+        <DialogActions>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleConfirmClose(e);
             }}
-            onClose={handleClose(popupState)}
+            color="primary"
           >
-            <MenuItem
-              onClick={handleMenuItemClick(popupState)}
-              sx={{
-                padding: "4px 16px",
-                "&:hover": { backgroundColor: "transparent" },
-              }}
-            >
-              <Box
-                sx={{
-                  padding: "4px 8px",
-                  borderRadius: "8px",
-                  minWidth: "100px",
-                  "&:hover": {
-                    backgroundColor: "#555555",
-                  },
-                  color: "white",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <InventoryIcon fontSize="small" sx={{ marginRight: 1 }} />
-                Archive
-              </Box>
-            </MenuItem>
-            <MenuItem
-              onClick={(event) =>
-                handleDelete(conversationId, popupState, event)
-              }
-              sx={{
-                color: "red",
-                padding: "4px 16px",
-                "&:hover": { backgroundColor: "transparent" },
-              }}
-            >
-              <Box
-                sx={{
-                  padding: "4px 8px",
-                  borderRadius: "8px",
-                  minWidth: "100px",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 0, 0, 0.15)",
-                  },
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <DeleteIcon fontSize="small" sx={{ marginRight: 1 }} />
-                Delete
-              </Box>
-            </MenuItem>
-          </Menu>
-        </React.Fragment>
-      )}
-    </PopupState>
+            Cancel
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleConfirmDelete(e);
+            }}
+            color="error"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }

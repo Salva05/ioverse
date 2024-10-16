@@ -5,8 +5,13 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { styled, useTheme } from "@mui/material/styles";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useMediaQuery } from "@mui/material";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import ChatOptionsMenu from "./ChatOptionsMenu";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -24,23 +29,50 @@ const StyledAppBar = styled(MuiAppBar, {
 
 export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const them = useTheme();
+
+  // Use media query to detect when screen width is below 1109px
+  const isNarrowScreen = useMediaQuery("(max-width:1109px)");
+
+  // Check if the current page is '/chat'
+  const isChatPage = location.pathname === "/chat";
+
+  // Conditionally render the IconButton to access chat options
+  const shouldShowChatOptions = isNarrowScreen && isChatPage;
 
   return (
     <StyledAppBar position="fixed" open={open && !isSmallScreen}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          onClick={handleDrawerOpen}
-          edge="start"
-          sx={{ mr: 2, display: open && !isSmallScreen ? "none" : "block" }}
-        >
-          <MenuIcon />
-        </IconButton>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+          >
+            <MenuIcon />
+          </IconButton>
+          {shouldShowChatOptions && (
+            <>
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                flexItem
+                sx={{ backgroundColor: "white" }}
+              />
+              <IconButton color="inherit">
+                <ChatOptionsMenu />
+              </IconButton>
+            </>
+          )}
+        </Box>
         <Typography variant="h6" noWrap component="div">
           Dark Menu
         </Typography>
-        <Button color="inherit" onClick={() => navigate('login')}>Login</Button>
+        <Button color="inherit" onClick={() => navigate("login")}>
+          Login
+        </Button>
       </Toolbar>
     </StyledAppBar>
   );
