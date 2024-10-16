@@ -13,6 +13,7 @@ import { mapMessages } from "../utils/mapMessages";
 import chatService from "../services/chatService";
 import { DrawerContext } from "../contexts/DrawerContext";
 import ChatDial from "../components/ChatDial";
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 
 const Chat = () => {
   const { activeConversation, activateConversation } =
@@ -20,6 +21,8 @@ const Chat = () => {
   const { open, isSmallScreen } = useContext(DrawerContext);
   const [typing, setTyping] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
+  const queryClient = useQueryClient();
+
 
   useEffect(() => {
     if (activeConversation && activeConversation.messages) {
@@ -63,6 +66,10 @@ const Chat = () => {
 
     // Process the message and get AI response
     const ai_message = await processMessageToBackend(backend_message);
+
+    // If is the first message of a new conversation, trigger a refetch() in DrawerMenu
+    // To update the menu real time
+    if (!activeConversation) queryClient.invalidateQueries(['conversations']);
 
     addLocalMessage(ai_message.message_body, true);
 

@@ -3,23 +3,19 @@ import { useTheme } from "@mui/material/styles";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SaveIcon from "@mui/icons-material/Save";
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import ShareIcon from '@mui/icons-material/Share';
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import ShareIcon from "@mui/icons-material/Share";
 import { useMediaQuery, SpeedDial } from "@mui/material";
 import { DrawerContext } from "../contexts/DrawerContext";
-
-const actions = [
-  { icon: <AddOutlinedIcon />, name: "New" },
-  { icon: <ShareIcon />, name: "Share" },
-  { icon: <SaveIcon />, name: "Save" },
-];
+import { ConversationContext } from "../contexts/ConversationContext";
 
 export default function ChatDial() {
+  const { activateConversation, setActiveConversation } = useContext(ConversationContext);
   const theme = useTheme();
   const { open: drawerOpen, isSmallScreen } = useContext(DrawerContext);
 
   // Use media query to detect when screen width is below 900px
-  const isNarrowScreen = useMediaQuery('(max-width:1109px)');
+  const isNarrowScreen = useMediaQuery("(max-width:1109px)");
 
   if (isNarrowScreen) return null;
 
@@ -36,18 +32,36 @@ export default function ChatDial() {
   const transitionDuration = theme.transitions.duration.enteringScreen; // Match with drawer
   const transitionEasing = theme.transitions.easing.sharp; // Match with drawer
 
+  const actions = [
+    {
+      icon: <AddOutlinedIcon />,
+      name: "New",
+      handleAction: () => {setActiveConversation(null)},
+    },
+    {
+      icon: <ShareIcon />,
+      name: "Share",
+      handleAction: () => {},
+    },
+    {
+      icon: <SaveIcon />,
+      name: "Save",
+      handleAction: () => {},
+    },
+  ];
+
   return (
     <SpeedDial
       ariaLabel="SpeedDial playground example"
       icon={<SpeedDialIcon />}
       direction="down"
       sx={{
-        position: 'fixed',
+        position: "fixed",
         top: theme.spacing(10),
         left: `${leftPosition}px`,
         zIndex: 99,
         transform: `translateX(${transformX}px)`,
-        transition: theme.transitions.create('transform', {
+        transition: theme.transitions.create("transform", {
           easing: transitionEasing,
           duration: transitionDuration,
         }),
@@ -58,6 +72,7 @@ export default function ChatDial() {
           key={action.name}
           icon={action.icon}
           tooltipTitle={action.name}
+          onClick={action.handleAction}
         />
       ))}
     </SpeedDial>

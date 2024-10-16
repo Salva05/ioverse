@@ -6,50 +6,35 @@ import { IconButton, Box, Tooltip } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import SaveIcon from "@mui/icons-material/Save";
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import ShareIcon from '@mui/icons-material/Share';
-import SettingsSharpIcon from '@mui/icons-material/SettingsSharp';
-
-const options = [
-  {
-    name: "New",
-    icon: <AddCircleIcon fontSize="small" sx={{ marginRight: 1 }} />,
-    handleClick: () => {},
-  },
-  {
-    name: "Share",
-    icon: <ShareIcon fontSize="small" sx={{ marginRight: 1 }} />,
-    handleClick: () => {},
-  },
-  {
-    name: "Save",
-    icon: <SaveIcon fontSize="small" sx={{ marginRight: 1 }} />,
-    handleClick: () => {},
-  },
-];
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import ShareIcon from "@mui/icons-material/Share";
+import SettingsSharpIcon from "@mui/icons-material/SettingsSharp";
+import { ConversationContext } from "../contexts/ConversationContext";
 
 export default function ChatOptionsMenu({ conversationId }) {
+  const { setActiveConversation } = React.useContext(ConversationContext);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const handleClick = (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-  };
-
-  const handleMouseDown = (event) => {
-    event.stopPropagation();
-  };
-
-  const handleClose = (popupState) => (event) => {
-    event.stopPropagation();
-    popupState.close();
-  };
-
-  const handleMenuItemClick = (popupState) => (event) => {
-    event.stopPropagation();
-    popupState.close();
-  };
+  const options = [
+    {
+      name: "New",
+      icon: <AddCircleIcon fontSize="small" sx={{ marginRight: 1 }} />,
+      handleClick: () => {
+        setActiveConversation(null);
+      },
+    },
+    {
+      name: "Share",
+      icon: <ShareIcon fontSize="small" sx={{ marginRight: 1 }} />,
+      handleClick: () => {},
+    },
+    {
+      name: "Save",
+      icon: <SaveIcon fontSize="small" sx={{ marginRight: 1 }} />,
+      handleClick: () => {},
+    },
+  ];
 
   return (
     <PopupState variant="popover" popupId="demo-popup-menu">
@@ -57,12 +42,8 @@ export default function ChatOptionsMenu({ conversationId }) {
         <React.Fragment>
           <Tooltip title="Options">
             <IconButton
-              variant="contained"
-              onClick={(e) => {
-                handleClick(e);
-                bindTrigger(popupState).onClick(e);
-              }}
-              onMouseDown={handleMouseDown}
+              onClick={bindTrigger(popupState).onClick}
+              onMouseDown={(e) => e.stopPropagation()}
             >
               <SettingsSharpIcon sx={{ color: "#fff" }} />
             </IconButton>
@@ -76,12 +57,16 @@ export default function ChatOptionsMenu({ conversationId }) {
                 border: "0.4px solid rgba(255, 255, 255, 0.19)",
               },
             }}
-            onClose={handleClose(popupState)}
+            onClose={popupState.close}
           >
             {options.map((option, id) => (
               <MenuItem
-              key={id}
-                onClick={option.handleClick}
+                key={id}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  option.handleClick();
+                  popupState.close();
+                }}
                 sx={{
                   padding: "4px 16px",
                   "&:hover": { backgroundColor: "transparent" },

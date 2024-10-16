@@ -16,6 +16,7 @@ export const ConversationProvider = ({ children }) => {
       value={{
         activeConversation,
         activateConversation,
+        setActiveConversation,
       }}
     >
       {children}

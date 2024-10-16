@@ -18,7 +18,7 @@ import { ConversationContext } from "../contexts/ConversationContext";
 import OptionsMenu from "./OptionsMenu";
 import chatService from "../services/chatService";
 import { useQuery } from "@tanstack/react-query";
-
+import Fade from "@mui/material/Fade";
 import { toast } from "react-toastify";
 
 const drawerWidth = 240;
@@ -81,12 +81,12 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       conversationsData.results.length > 0 &&
       !activeConversation
     ) {
-      const latestConversation = sortedConversations()
+      const latestConversation = sortedConversations();
       activateConversation(latestConversation.id);
     }
-  }, [conversationsData, activateConversation, activeConversation]);
+  }, [conversationsData]);
 
-  // Update the active conversation when a conversation get deleted 
+  // Update the active conversation when a conversation get deleted
   useEffect(() => {
     if (conversationsData && conversationsData.results.length > 0) {
       const latestConversation = sortedConversations();
@@ -100,7 +100,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
     return sortedConversations[0];
-  }
+  };
 
   const handleConversationClick = (id) => {
     activateConversation(id);
@@ -166,23 +166,25 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
               // Backend should also sort
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               .map((conversation) => (
-                <ListItem key={conversation.id} disablePadding>
-                  <ListItemButton
-                    selected={activeConversation?.id === conversation.id}
-                    onClick={() => handleConversationClick(conversation.id)}
-                    sx={{
-                      "&.Mui-selected": {
-                        backgroundColor: theme.palette.action.selected,
-                        "&:hover": {
-                          backgroundColor: theme.palette.action.hover,
+                <Fade in={true} timeout={1500} key={conversation.id}>
+                  <ListItem key={conversation.id} disablePadding>
+                    <ListItemButton
+                      selected={activeConversation?.id === conversation.id}
+                      onClick={() => handleConversationClick(conversation.id)}
+                      sx={{
+                        "&.Mui-selected": {
+                          backgroundColor: theme.palette.action.selected,
+                          "&:hover": {
+                            backgroundColor: theme.palette.action.hover,
+                          },
                         },
-                      },
-                    }}
-                  >
-                    <ListItemText primary={conversation.title} />
-                    <OptionsMenu conversationId={conversation.id}/>
-                  </ListItemButton>
-                </ListItem>
+                      }}
+                    >
+                      <ListItemText primary={conversation.title} />
+                      <OptionsMenu conversationId={conversation.id} />
+                    </ListItemButton>
+                  </ListItem>
+                </Fade>
               ))
           )}
         </List>
