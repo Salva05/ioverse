@@ -11,10 +11,12 @@ import {
 import { ConversationContext } from "../contexts/ConversationContext";
 import { mapMessages } from "../utils/mapMessages";
 import chatService from "../services/chatService";
+import { DrawerContext } from "../contexts/DrawerContext";
 
 const Chat = () => {
   const { activeConversation, activateConversation } =
     useContext(ConversationContext);
+  const { open, isSmallScreen } = useContext(DrawerContext);
   const [typing, setTyping] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
 
@@ -47,9 +49,7 @@ const Chat = () => {
   };
 
   const handleSend = async (messageText) => {
-    // Manually upadate the local state
-    // To get immediate visual feedback wihout waiting backend response
-    // This will also prevent re-render of all messages
+    // Manually update the local state
     addLocalMessage(messageText, false);
 
     // Show typing indicator
@@ -81,13 +81,13 @@ const Chat = () => {
   return (
     <div
       style={{
-        position: "relative",
-        height: "100%",
         width: "100%",
         display: "flex",
+        justifyContent: "center",
+        flexGrow:1,
       }}
     >
-      <MainContainer style={{ flex: 1 }}>
+      <MainContainer style={{ flex: 1, maxWidth: "700px", }}>
         <ChatContainer>
           <MessageList
             typingIndicator={

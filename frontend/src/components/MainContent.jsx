@@ -7,6 +7,7 @@ const Main = styled("main", {
   flexGrow: 1,
   padding: theme.spacing(3),
   height: "100vh",
+  overflow: "auto",
   display: "flex",
   flexDirection: "column",
   transition: theme.transitions.create("margin", {
@@ -27,7 +28,7 @@ const Main = styled("main", {
 
 export default function MainContent({ open, isSmallScreen, children }) {
   return (
-    <Main open={open} isSmallScreen={isSmallScreen}>
+    <Main open={open} isSmallScreen={isSmallScreen} >
       {children}
     </Main>
   );

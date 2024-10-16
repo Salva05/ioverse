@@ -15,7 +15,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import { styled, useTheme } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ConversationContext } from "../contexts/ConversationContext";
-
+import OptionsMenu from "./OptionsMenu";
 import chatService from "../services/chatService";
 import { useQuery } from "@tanstack/react-query";
 
@@ -81,14 +81,26 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       conversationsData.results.length > 0 &&
       !activeConversation
     ) {
-      // Sort conversations by 'created_at' in descending order
-      const sortedConversations = [...conversationsData.results].sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
-      );
-      const latestConversation = sortedConversations[0];
+      const latestConversation = sortedConversations()
       activateConversation(latestConversation.id);
     }
   }, [conversationsData, activateConversation, activeConversation]);
+
+  // Update the active conversation when a conversation get deleted 
+  useEffect(() => {
+    if (conversationsData && conversationsData.results.length > 0) {
+      const latestConversation = sortedConversations();
+      activateConversation(latestConversation.id);
+    }
+  }, [conversationsData]);
+
+  const sortedConversations = () => {
+    // Sort conversations by 'created_at' in descending order
+    const sortedConversations = [...conversationsData.results].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+    return sortedConversations[0];
+  }
 
   const handleConversationClick = (id) => {
     activateConversation(id);
@@ -168,6 +180,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                     }}
                   >
                     <ListItemText primary={conversation.title} />
+                    <OptionsMenu conversationId={conversation.id}/>
                   </ListItemButton>
                 </ListItem>
               ))
