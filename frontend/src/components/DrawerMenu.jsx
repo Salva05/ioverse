@@ -86,7 +86,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
       const latestConversation = sortedConversations[0];
-      activateConversation(latestConversation);
+      activateConversation(latestConversation.id);
     }
   }, [conversationsData, activateConversation, activeConversation]);
 

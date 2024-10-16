@@ -1,6 +1,6 @@
 import axiosInstance from "../api/axiosInstance";
 
-// Service object for chat-related API calls
+// Service for chat-related API calls
 const chatService = {
   // GET: Fetch Conversations
   getConversations: async () => {

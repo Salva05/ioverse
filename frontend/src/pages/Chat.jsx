@@ -71,7 +71,6 @@ const Chat = () => {
   async function processMessageToBackend(message) {
     try {
       const response = await chatService.sendMessage(message);
-      console.log(response.ai_message);
       return response.ai_message;
     } catch (error) {
       console.error("Error sending message:", error);
