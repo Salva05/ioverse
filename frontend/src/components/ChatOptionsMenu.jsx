@@ -1,19 +1,23 @@
 import * as React from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { IconButton, Box, Tooltip } from "@mui/material";
+import { IconButton, Box, Tooltip, Fade } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import SaveIcon from "@mui/icons-material/Save";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ShareIcon from "@mui/icons-material/Share";
 import SettingsSharpIcon from "@mui/icons-material/SettingsSharp";
 import { ConversationContext } from "../contexts/ConversationContext";
+import ShareLinkDialog from "./ShareLinkDialog";
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Fade {...props} ref={ref} timeout={800} />;
+});
 
 export default function ChatOptionsMenu({ conversationId }) {
   const { setActiveConversation } = React.useContext(ConversationContext);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const options = [
     {
@@ -26,7 +30,9 @@ export default function ChatOptionsMenu({ conversationId }) {
     {
       name: "Share",
       icon: <ShareIcon fontSize="small" sx={{ marginRight: 1 }} />,
-      handleClick: () => {},
+      handleClick: () => {
+        handleOpenShareDialog();
+      },
     },
     {
       name: "Save",
@@ -34,6 +40,18 @@ export default function ChatOptionsMenu({ conversationId }) {
       handleClick: () => {},
     },
   ];
+
+  // Share logic
+  const handleOpenShareDialog = () => {
+    setDialogOpen(true);
+  };
+  const handleCloseShareDialog = () => {
+    setDialogOpen(false);
+  };
+  const handleConfirmShareDialog = (duration) => {
+    console.log(`Sharing link duration set to: ${duration} hours`);
+    setDialogOpen(false);
+  };
 
   // Manage menu state
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -104,6 +122,12 @@ export default function ChatOptionsMenu({ conversationId }) {
           </MenuItem>
         ))}
       </Menu>
+      <ShareLinkDialog
+        open={dialogOpen}
+        onClose={handleCloseShareDialog}
+        onConfirm={handleConfirmShareDialog}
+        TransitionComponent={Transition}
+      />
     </>
   );
 }
