@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
@@ -10,33 +10,37 @@ import { DrawerContext } from "../contexts/DrawerContext";
 import { ConversationContext } from "../contexts/ConversationContext";
 
 export default function ChatDial() {
-  const { activateConversation, setActiveConversation } = useContext(ConversationContext);
+  const { activateConversation, setActiveConversation } =
+    useContext(ConversationContext);
   const theme = useTheme();
   const { open: drawerOpen, isSmallScreen } = useContext(DrawerContext);
 
-  // Use media query to detect when screen width is below 900px
+  // Use media query to detect when screen width is below 1109px
   const isNarrowScreen = useMediaQuery("(max-width:1109px)");
 
   if (isNarrowScreen) return null;
 
-  const drawerWidth = 240; // Ensure this matches your DrawerMenu
+  const [dialOpen, setDialOpen] = useState(false);
+
+  const handleOpen = () => setDialOpen(true);
+  const handleClose = () => setDialOpen(false);
+
+  const drawerWidth = 240;
   const spacing = parseInt(theme.spacing(2), 10);
 
-  // Base left position remains constant
   const leftPosition = spacing;
-
-  // Calculate transformX based on drawer state
   const transformX = drawerOpen ? drawerWidth : 0;
 
-  // Use consistent transition duration and easing
-  const transitionDuration = theme.transitions.duration.enteringScreen; // Match with drawer
-  const transitionEasing = theme.transitions.easing.sharp; // Match with drawer
+  const transitionDuration = theme.transitions.duration.enteringScreen;
+  const transitionEasing = theme.transitions.easing.sharp;
 
   const actions = [
     {
       icon: <AddOutlinedIcon />,
       name: "New",
-      handleAction: () => {setActiveConversation(null)},
+      handleAction: () => {
+        setActiveConversation(null);
+      },
     },
     {
       icon: <ShareIcon />,
@@ -55,6 +59,24 @@ export default function ChatDial() {
       ariaLabel="SpeedDial playground example"
       icon={<SpeedDialIcon />}
       direction="down"
+      FabProps={{
+        sx: (theme) => ({
+          backgroundColor: dialOpen ? "#fff" : "#2d2d2d",
+          color: dialOpen ? "black" : "white",
+          transition: `${theme.transitions.create(['background-color', 'color'], {
+            duration: theme.transitions.duration.shortest,
+            easing: theme.transitions.easing.easeInOut,
+          })}`,
+          "&:hover": {
+            backgroundColor: dialOpen ? "#fff" : "#2d2d2d",
+            color: "black",
+          },
+        }),
+        size: "medium",
+      }}
+      onClose={handleClose}
+      onOpen={handleOpen}
+      open={dialOpen} // Controls the open state
       sx={{
         position: "fixed",
         top: theme.spacing(10),

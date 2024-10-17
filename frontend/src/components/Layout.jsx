@@ -17,7 +17,15 @@ export default function Layout() {
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => setOpen(true);
-  const handleDrawerClose = () => setOpen(false);
+  const handleDrawerClose = () => {
+    setOpen(false)
+    // Shift focus to the menu button
+    const menuButton = document.getElementById('menu-button');
+    if (menuButton) {
+      menuButton.focus();
+    }
+  };
+  
   return (
     <DrawerContext.Provider value={{ open, isSmallScreen }}>
       <Box sx={{ display: "flex", }}>

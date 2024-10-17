@@ -20,6 +20,7 @@ import chatService from "../services/chatService";
 import { useQuery } from "@tanstack/react-query";
 import Fade from "@mui/material/Fade";
 import { toast } from "react-toastify";
+import SearchBar from "./SearchBar";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -53,6 +54,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const location = useLocation();
   const { activeConversation, activateConversation } =
     useContext(ConversationContext);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     data: conversationsData,
@@ -65,6 +67,13 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
     queryFn: chatService.getConversations,
     enabled: location.pathname === "/chat",
   });
+
+  // Filter conversations based on the search query
+  const filteredConversations = conversationsData
+    ? conversationsData.results.filter((conversation) =>
+        conversation.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   useEffect(() => {
     if (isError) {
@@ -153,6 +162,11 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       <Divider sx={{ backgroundColor: "#444" }} />
       {location.pathname === "/chat" && (
         <List>
+          <Fade in={true} timeout={1500}>
+            <ListItem>
+              <SearchBar onSearchChange={setSearchQuery} value={searchQuery} />
+            </ListItem>
+          </Fade>
           {/* Display Conversations */}
           {isLoading ? (
             <ListItem>
@@ -161,8 +175,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
               </ListItemText>
             </ListItem>
           ) : (
-            conversationsData &&
-            conversationsData.results
+            filteredConversations
               // Backend should also sort
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               .map((conversation) => (
@@ -180,7 +193,18 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                         },
                       }}
                     >
-                      <ListItemText primary={conversation.title} />
+                      <ListItemText
+                        primary={conversation.title}
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          flexGrow: 1,
+                          maskImage:
+                            "linear-gradient(to right, black 85%, transparent)",
+                          WebkitMaskImage:
+                            "linear-gradient(to right, black 85%, transparent)", // For Safari
+                        }}
+                      />
                       <OptionsMenu conversationId={conversation.id} />
                     </ListItemButton>
                   </ListItem>

@@ -55,6 +55,11 @@ export default function OptionsMenu({ conversationId }) {
     try {
       await chatService.deleteConversation(conversationId);
       queryClient.invalidateQueries(["conversations"]);
+      // Shift focus to prevent accessibility issues
+      const mainContent = document.getElementById("menu-button");
+      if (mainContent) {
+        mainContent.focus();
+      }
     } catch (error) {
       console.error("Failed to delete conversation:", error);
     } finally {

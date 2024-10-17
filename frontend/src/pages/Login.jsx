@@ -1,10 +1,11 @@
 // Login.jsx
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import login from "../authService";
+import { AuthContext } from '../contexts/AuthContext';
 
 const Login = () => {
+  const { authenticate } = useContext(AuthContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,7 +16,7 @@ const Login = () => {
     setError('');
 
     try {
-     login(username, password)
+      authenticate(username, password)
       navigate('/chat');
     } catch (err) {
       setError('Invalid credentials. Please try again.');

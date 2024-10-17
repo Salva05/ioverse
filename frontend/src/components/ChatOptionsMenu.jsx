@@ -1,7 +1,6 @@
 import * as React from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { IconButton, Box, Tooltip } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -36,63 +35,75 @@ export default function ChatOptionsMenu({ conversationId }) {
     },
   ];
 
+  // Manage menu state
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleMenuOpen = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = (event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setAnchorEl(null);
+  };
+
   return (
-    <PopupState variant="popover" popupId="demo-popup-menu">
-      {(popupState) => (
-        <React.Fragment>
-          <Tooltip title="Options">
-            <IconButton
-              onClick={bindTrigger(popupState).onClick}
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <SettingsSharpIcon sx={{ color: "#fff" }} />
-            </IconButton>
-          </Tooltip>
-          <Menu
-            {...bindMenu(popupState)}
-            sx={{
-              "& .MuiPaper-root": {
-                backgroundColor: "#404040",
-                borderRadius: "15px",
-                border: "0.4px solid rgba(255, 255, 255, 0.19)",
-              },
+    <>
+      <Tooltip title="Options">
+        <IconButton
+          onClick={handleMenuOpen}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <SettingsSharpIcon sx={{ color: "#fff" }} />
+        </IconButton>
+      </Tooltip>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        sx={{
+          "& .MuiPaper-root": {
+            backgroundColor: "#404040",
+            borderRadius: "15px",
+            border: "0.4px solid rgba(255, 255, 255, 0.19)",
+          },
+        }}
+      >
+        {options.map((option, id) => (
+          <MenuItem
+            key={id}
+            onClick={(event) => {
+              event.stopPropagation();
+              option.handleClick();
+              handleMenuClose(event);
             }}
-            onClose={popupState.close}
+            sx={{
+              padding: "4px 16px",
+              "&:hover": { backgroundColor: "transparent" },
+            }}
           >
-            {options.map((option, id) => (
-              <MenuItem
-                key={id}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  option.handleClick();
-                  popupState.close();
-                }}
-                sx={{
-                  padding: "4px 16px",
-                  "&:hover": { backgroundColor: "transparent" },
-                }}
-              >
-                <Box
-                  sx={{
-                    padding: "4px 8px",
-                    borderRadius: "8px",
-                    minWidth: "100px",
-                    "&:hover": {
-                      backgroundColor: "#555555",
-                    },
-                    color: "white",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  {option.icon}
-                  {option.name}
-                </Box>
-              </MenuItem>
-            ))}
-          </Menu>
-        </React.Fragment>
-      )}
-    </PopupState>
+            <Box
+              sx={{
+                padding: "4px 8px",
+                borderRadius: "8px",
+                minWidth: "100px",
+                "&:hover": {
+                  backgroundColor: "#555555",
+                },
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {option.icon}
+              {option.name}
+            </Box>
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
   );
 }
