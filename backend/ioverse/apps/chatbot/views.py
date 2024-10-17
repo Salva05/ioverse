@@ -3,7 +3,10 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
 
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ReadOnlyConversationSerializer
 from .services.chat_service import ChatService
@@ -63,6 +66,55 @@ class ConversationViewSet(viewsets.ModelViewSet):
     
     # Custom queryset to filter by owner
     def get_queryset(self):
-        user = self.request.user
-        return Conversation.objects.filter(user = user)
+        return Conversation.objects.filter(user = self.request.user)
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def share(self, request, pk=None):
+        """
+        Custom action to share a conversation.
+        Sets `is_shared` to True and returns the shareable URL.
+        """
+        conversation = self.get_object()
+        
+        if not conversation.is_shared:
+            # Share the conversation
+            conversation.share()
+
+        # Build the absolute URL for sharing
+        share_url = request.build_absolute_url(
+            reverse('shared-conversation-detail', args=[conversation.share_token])
+        )
+        return response({'share_url': share_url}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unshare(self, request, pk=None):
+        """
+        Custom action to unshare a conversation.
+        Sets 'is_shared' to False
+        """
+        conversation = self.get_object()
+        
+        if conversation.is_shared:
+            conversation.unshare()
+            return Response({'detail': 'Conversation unshared successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Conversation is not shared.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class SharedConversationView(APIView):
+    permission_classes = [permissions.AllowAny] # Public access
+    
+    def get(self, request, share_token, format=None):
+        """
+        Retrieve a shared conversation using the 'share_token'
+        Only returns the covnversation if 'is_shared=True'
+        """
+        conversation = get_object_or_404(Conversation, share_token=share_token, is_shared=True)
+        
+        # Check for expiration
+        if conversation.expires_at and timezone.now() > conversation.expires_at:
+            conversation.unshare()
+            return Response({'detail': 'This shared link has expired'}, status=status.HTTP_200_OK)
+
+        serializer = ReadOnlyConversationSerializer(conversation)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     

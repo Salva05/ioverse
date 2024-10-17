@@ -1,3 +1,5 @@
+import uuid
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -24,6 +26,30 @@ class Conversation(models.Model):
         verbose_name="Updated At",
         help_text="The date and time when the conversation was last updated."
     )
+    is_shared = models.BooleanField(default=False)
+    shared_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    share_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    
+    def share(self, duration_days=None):
+        """
+        Method to share the conversation.
+        Optionally set an expiration duration.
+        """
+        self.is_shared = True
+        self.shared_at = timezone.now()
+        if duration_days:
+            self.expires_at = timezone.now() + timezone.timedelta(days=duration_days)
+        self.save()
+        
+    def unshare(self):
+        """
+        Method to unshare the conversation.
+        """
+        self.is_shared = False
+        self.shared_at = None
+        self.expires_at = None
+        self.save()
     
     def __str__(self):
         return f"Conversation {self.id} with {self.user.username}"
