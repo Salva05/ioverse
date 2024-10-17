@@ -17,10 +17,10 @@ export default function ChatDial() {
 
   // Use media query to detect when screen width is below 1109px
   const isNarrowScreen = useMediaQuery("(max-width:1109px)");
+  const [dialOpen, setDialOpen] = useState(false);
 
   if (isNarrowScreen) return null;
 
-  const [dialOpen, setDialOpen] = useState(false);
 
   const handleOpen = () => setDialOpen(true);
   const handleClose = () => setDialOpen(false);

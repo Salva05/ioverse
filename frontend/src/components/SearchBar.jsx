@@ -14,9 +14,10 @@ const Search = styled("div")(({ theme }) => ({
   marginLeft: 0,
   width: "100%",
   [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(1),
+    marginLeft: theme.spacing(0),
     width: "auto",
   },
+  marginBottom: 5
 }));
 
 const SearchIconWrapper = styled("div")(({ theme }) => ({
@@ -35,8 +36,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("background-color"), // Adjusted transition
-    width: "100%", // Set width to 100%
+    transition: theme.transitions.create("background-color"),
+    width: "100%", 
   },
 }));
 
