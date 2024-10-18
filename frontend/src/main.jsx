@@ -26,6 +26,10 @@ const router = createBrowserRouter([
         path: "login",
         element: <Login />,
       },
+      {
+        path: "/shared-conversation/:share_token",
+        element: <div><h1>FUNZIONAA</h1></div>
+      }
     ],
   },
 ]);
