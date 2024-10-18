@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ReadOnlyConversationSerializer
@@ -75,16 +76,27 @@ class ConversationViewSet(viewsets.ModelViewSet):
         Sets `is_shared` to True and returns the shareable URL.
         """
         conversation = self.get_object()
+        hours = request.data.get('hours')
+        if not hours:
+            return Response({'error': 'Hours duration is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            hours = int(hours)
+            if hours < 1 or hours > 72:
+                raise ValueError
+        except ValueError:
+            return Response({'error': "Hours must be an integer between 1 and 72"}, status=status.HTTP_400_BAD_REQUEST)
         
         if not conversation.is_shared:
             # Share the conversation
-            conversation.share()
+            conversation.share(duration_hours=hours)
 
-        # Build the absolute URL for sharing
-        share_url = request.build_absolute_url(
-            reverse('shared-conversation-detail', args=[conversation.share_token])
-        )
-        return response({'share_url': share_url}, status=status.HTTP_200_OK)
+        # Build the frontend share URL
+        host = request.get_host()
+        scheme = 'https' if request.is_secure() else 'http'
+        share_url = f"{scheme}://{host}/shared-conversation/{conversation.share_token}/"
+        
+        return Response({'share_url': share_url}, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unshare(self, request, pk=None):

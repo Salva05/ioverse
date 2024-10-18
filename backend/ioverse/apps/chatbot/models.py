@@ -31,15 +31,15 @@ class Conversation(models.Model):
     expires_at = models.DateTimeField(null=True, blank=True)
     share_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
-    def share(self, duration_days=None):
+    def share(self, duration_hours=None):
         """
         Method to share the conversation.
         Optionally set an expiration duration.
         """
         self.is_shared = True
         self.shared_at = timezone.now()
-        if duration_days:
-            self.expires_at = timezone.now() + timezone.timedelta(days=duration_days)
+        if duration_hours:
+            self.expires_at = timezone.now() + timezone.timedelta(hours=duration_hours)
         self.save()
         
     def unshare(self):
