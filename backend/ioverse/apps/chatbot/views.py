@@ -7,9 +7,10 @@ from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.conf import settings
 from django.utils import timezone
 from .models import Message, Conversation
-from .serializers import MessageSerializer, ReadOnlyConversationSerializer
+from .serializers import MessageSerializer, ReadOnlyConversationSerializer, SharedConversationSerializer
 from .services.chat_service import ChatService
 import logging
 
@@ -92,9 +93,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             conversation.share(duration_hours=hours)
 
         # Build the frontend share URL
-        host = request.get_host()
-        scheme = 'https' if request.is_secure() else 'http'
-        share_url = f"{scheme}://{host}/shared-conversation/{conversation.share_token}/"
+        share_url = f"{settings.FRONTEND_URL}/shared-conversation/{conversation.share_token}/"
         
         return Response({'share_url': share_url}, status=status.HTTP_200_OK)
     
@@ -127,6 +126,6 @@ class SharedConversationView(APIView):
             conversation.unshare()
             return Response({'detail': 'This shared link has expired'}, status=status.HTTP_200_OK)
 
-        serializer = ReadOnlyConversationSerializer(conversation)
+        serializer = SharedConversationSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_200_OK)
     

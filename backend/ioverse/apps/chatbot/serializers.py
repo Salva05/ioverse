@@ -62,3 +62,10 @@ class ReadOnlyConversationSerializer(serializers.ModelSerializer):
         model = Conversation
         fields = ['id', 'title', 'user_username', 'created_at', 'updated_at', 'messages', 'share_token', 'is_shared', 'shared_at', 'expires_at']
         read_only_fields = fields
+
+class SharedConversationSerializer(serializers.ModelSerializer):
+    messages = MessageSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Conversation
+        fields = ['title', 'messages']
