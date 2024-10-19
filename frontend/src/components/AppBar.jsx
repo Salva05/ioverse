@@ -73,7 +73,6 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
           Dark Menu
         </Typography>
         {isAuthenticated ? (
-          // Wrap LogoutButton in a Box with fixed width
           <Box
             sx={{ width: "125px", display: "flex", justifyContent: "flex-end" }}
           >
