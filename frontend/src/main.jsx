@@ -7,9 +7,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConversationProvider } from "./contexts/ConversationContext";
 import theme from "./themes/theme";
 import { ThemeProvider } from "@mui/material";
-import SignIn from "./pages/SignIn";
+import Login from "./pages/Login";
 import { AuthProvider } from "./contexts/AuthContext";
 import SharedConversation from "./pages/SharedConversation";
+import ProtectedRoute from "./pages/ProtectedRoute";
 
 // Manages chaching, fetching and synchronization of server side data
 const queryClient = new QueryClient();
@@ -21,16 +22,20 @@ const router = createBrowserRouter([
     children: [
       {
         path: "chat",
-        element: <Chat />,
+        element: (
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "login",
-        element: <SignIn />,
+        element: <Login />,
       },
       {
         path: "/shared-conversation/:share_token",
-        element: <SharedConversation/>
-      }
+        element: <SharedConversation />,
+      },
     ],
   },
 ]);

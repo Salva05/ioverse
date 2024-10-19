@@ -21,6 +21,9 @@ import { useQuery } from "@tanstack/react-query";
 import Fade from "@mui/material/Fade";
 import { toast } from "react-toastify";
 import SearchBar from "./SearchBar";
+import { AuthContext } from "../contexts/AuthContext";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import { Tooltip } from "@mui/material";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -55,7 +58,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const { activeConversation, activateConversation } =
     useContext(ConversationContext);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const { isAuthenticated } = useContext(AuthContext);
   const {
     data: conversationsData,
     error,
@@ -65,7 +68,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   } = useQuery({
     queryKey: ["conversations"],
     queryFn: chatService.getConversations,
-    enabled: location.pathname === "/chat",
+    enabled: isAuthenticated && location.pathname === "/chat",
   });
 
   // Filter conversations based on the search query
@@ -148,13 +151,22 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
             <ListItemButton
               onClick={() => {
                 if (page.path === "chat") {
-                  refetch();
+                  if (isAuthenticated) {
+                    refetch();
+                  }
                 }
                 navigate(page.path);
               }}
             >
               <ListItemIcon>{page.icon}</ListItemIcon>
               <ListItemText primary={page.display} />
+              {!isAuthenticated && page.path === "chat" && (
+                <Tooltip title="Login required">
+                  <IconButton>
+                    <VpnKeyIcon fontSize="small" sx={{ color: 'rgba(227, 227, 227, 0.79)'}} />
+                  </IconButton>
+                </Tooltip>
+              )}
             </ListItemButton>
           </ListItem>
         ))}

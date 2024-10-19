@@ -13,7 +13,7 @@ import { mapMessages } from "../utils/mapMessages";
 import chatService from "../services/chatService";
 import { DrawerContext } from "../contexts/DrawerContext";
 import ChatDial from "../components/ChatDial";
-import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 
 const Chat = () => {
   const { activeConversation, activateConversation } =
@@ -22,7 +22,6 @@ const Chat = () => {
   const [typing, setTyping] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
   const queryClient = useQueryClient();
-
 
   useEffect(() => {
     if (activeConversation && activeConversation.messages) {
@@ -69,7 +68,7 @@ const Chat = () => {
 
     // If is the first message of a new conversation, trigger a refetch() in DrawerMenu
     // To update the menu real time
-    if (!activeConversation) queryClient.invalidateQueries(['conversations']);
+    if (!activeConversation) queryClient.invalidateQueries(["conversations"]);
 
     addLocalMessage(ai_message.message_body, true);
 
@@ -92,12 +91,13 @@ const Chat = () => {
       <div
         style={{
           width: "100%",
+          height: "92vh",
           display: "flex",
           justifyContent: "center",
           flexGrow: 1,
         }}
       >
-        <MainContainer style={{ flex: 1, maxWidth: "700px" }}>
+        <MainContainer style={{ flex: 1, maxWidth: "800px", }}>
           <ChatContainer>
             <MessageList
               typingIndicator={
@@ -112,7 +112,18 @@ const Chat = () => {
                 />
               ))}
             </MessageList>
-            <MessageInput placeholder="Type message here" onSend={handleSend} />
+            <div
+            as={MessageInput}
+              style={{
+                position: "sticky",
+                bottom: 0,
+              }}
+            >
+              <MessageInput
+                placeholder="Type message here"
+                onSend={handleSend}
+              />
+            </div>
           </ChatContainer>
         </MainContainer>
       </div>

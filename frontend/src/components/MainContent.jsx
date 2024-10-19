@@ -6,8 +6,6 @@ const Main = styled("main", {
 })(({ theme, open, isSmallScreen }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
-  height: "100vh",
-  overflow: "auto",
   display: "flex",
   flexDirection: "column",
   transition: theme.transitions.create("margin", {

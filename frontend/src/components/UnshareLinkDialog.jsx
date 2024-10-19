@@ -16,6 +16,7 @@ import {
 import { styled } from "@mui/system";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { ConversationContext } from "../contexts/ConversationContext";
+import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
@@ -78,7 +79,7 @@ export default function ShareDetailsDialog({
   const { activeConversation } = useContext(ConversationContext);
 
   // Generate the shared link
-  const baseDomain = window.location.origin;  // Detects the current domain
+  const baseDomain = window.location.origin; // Detects the current domain
   const sharedLink = `${baseDomain}/shared-conversation/${activeConversation?.share_token}`;
 
   // State to show copy success message
@@ -150,7 +151,7 @@ export default function ShareDetailsDialog({
             />
             <Tooltip title={copySuccess ? "Copied!" : "Copy to clipboard"}>
               <StyledOutlinedIconButton onClick={handleCopy} sx={{ ml: 1 }}>
-                <ContentCopyIcon />
+                {copySuccess ? <ContentCopyTwoToneIcon /> : <ContentCopyIcon />}
               </StyledOutlinedIconButton>
             </Tooltip>
           </Box>
