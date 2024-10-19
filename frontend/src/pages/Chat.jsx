@@ -91,7 +91,8 @@ const Chat = () => {
       <div
         style={{
           width: "100%",
-          height: "92vh",
+          marginTop: '10px',
+          height: "100%",
           display: "flex",
           justifyContent: "center",
           flexGrow: 1,

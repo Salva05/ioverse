@@ -8,6 +8,7 @@ const Main = styled("main", {
   padding: theme.spacing(3),
   display: "flex",
   flexDirection: "column",
+  height: '100vh',
   transition: theme.transitions.create("margin", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
