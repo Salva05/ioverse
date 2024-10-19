@@ -23,7 +23,7 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
 
 const StyledButton = styled(Button)(({ theme }) => ({
   color: "#ffffff",
-  backgroundColor: theme.palette.error.main, // Red for unshare
+  backgroundColor: theme.palette.error.main,
   "&:hover": {
     backgroundColor: theme.palette.error.dark,
   },
@@ -53,7 +53,6 @@ export default function UnshareLinkDialog({
       maxWidth="xs"
       fullWidth
     >
-      {/* Backdrop with Spinner */}
       <Backdrop
         open={isUnsharing}
         sx={{ position: "absolute", zIndex: 1301, color: "#fff" }}

@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
@@ -36,8 +36,6 @@ export default function ChatDial() {
   const isNarrowScreen = useMediaQuery("(max-width:1109px)");
   const [dialOpen, setDialOpen] = useState(false);
 
-  if (isNarrowScreen) return null;
-
   // Share logic
   const handleOpenShareDialog = () => setDialogOpen(true);
   const handleCloseShareDialog = () => setDialogOpen(false);
@@ -48,7 +46,7 @@ export default function ChatDial() {
     setIsSharing(true);
     try {
       const data = await shareConversation(activeConversation.id, duration);
-      activateConversation(activeConversation.id) // This causes the rerender and update of the icon
+      activateConversation(activeConversation.id); // This causes the rerender and update of the icon
       console.log(`Sharing link duration set to: ${duration} hours`);
       console.log("Share URL:", data.share_url);
     } catch (error) {
@@ -61,6 +59,41 @@ export default function ChatDial() {
   };
 
   // Unshare logic
+
+  useEffect(() => {
+    const checkExpiration = async () => {
+      if (dialOpen && calculateRemainingHours() <= 0 && isShared) {
+        // Prevent multiple unshare calls
+        if (isUnsharingRef.current) return;
+
+        isUnsharingRef.current = true;
+        setIsUnsharing(true);
+
+        try {
+          await unshareConversation(activeConversation.id);
+          console.log(
+            `Conversation with ID ${activeConversation.id} unshared successfully`
+          );
+
+          // Update the active conversation state
+          setActiveConversation({
+            ...activeConversation,
+            is_shared: false,
+            shared_at: null,
+            expires_at: null,
+          });
+        } catch (error) {
+          console.error("Error unsharing conversation:", error);
+        } finally {
+          isUnsharingRef.current = false;
+          setIsUnsharing(false);
+        }
+      }
+    };
+
+    checkExpiration();
+  }, [dialOpen]);
+
   const handleOpenUnshareDialog = () => setUnshareDialogOpen(true);
   const handleCloseUnshareDialog = () => setUnshareDialogOpen(false);
 
@@ -70,11 +103,10 @@ export default function ChatDial() {
     setIsUnsharing(true);
     try {
       await unshareConversation(activeConversation.id);
-      activateConversation(activeConversation.id)
+      activateConversation(activeConversation.id);
       console.log(
         `Conversation with ID ${activeConversation.id} unshared successfully`
       );
-      
     } catch (error) {
       console.error("Error unsharing conversation:", error);
     } finally {
@@ -86,13 +118,13 @@ export default function ChatDial() {
 
   const calculateRemainingHours = () => {
     if (!activeConversation?.expires_at) return 0;
-  
+
     const expiresAt = new Date(activeConversation.expires_at);
     const now = new Date();
     // Calculate the difference in milliseconds
     const remainingMs = expiresAt - now;
     // Convert milliseconds to hours
-    const remainingHours = remainingMs / (1000 * 60 * 60);  
+    const remainingHours = remainingMs / (1000 * 60 * 60);
     return remainingHours > 0 ? Math.ceil(remainingHours) : 0;
   };
 
@@ -117,7 +149,7 @@ export default function ChatDial() {
     },
     isShared
       ? {
-          icon: <CancelScheduleSendIcon />, // Use appropriate Unshare icon
+          icon: <CancelScheduleSendIcon />,
           name: "Unshare",
           handleAction: () => {
             handleOpenUnshareDialog();
@@ -137,6 +169,8 @@ export default function ChatDial() {
     },
   ];
 
+  if (isNarrowScreen) return null;
+  
   return (
     <>
       <SpeedDial
@@ -185,8 +219,6 @@ export default function ChatDial() {
           />
         ))}
       </SpeedDial>
-
-      {/* Share Dialog */}
       {!isShared && activeConversation && (
         <ShareLinkDialog
           open={dialogOpen}
@@ -196,8 +228,6 @@ export default function ChatDial() {
           isSharing={isSharing}
         />
       )}
-
-      {/* Unshare Dialog */}
       {isShared && activeConversation && (
         <UnshareLinkDialog
           open={unshareDialogOpen}

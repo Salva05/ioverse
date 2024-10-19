@@ -94,7 +94,6 @@ export default function ShareLinkDialog({
         </Box>
 
         <Box sx={{ px: 2, py: 1 }}>
-          {/* Slider for setting duration */}
           <Slider
             value={typeof duration === "number" ? duration : 0}
             onChange={handleSliderChange}
@@ -115,8 +114,6 @@ export default function ShareLinkDialog({
               },
             }}
           />
-
-          {/* TextField for setting the duration */}
           <TextField
             label="Duration (hours)"
             type="number"
