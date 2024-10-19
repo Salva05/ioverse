@@ -11,7 +11,7 @@ import { ConversationContext } from "../contexts/ConversationContext";
 import ShareLinkDialog from "./ShareLinkDialog";
 import shareConversation from "../utils/shareConversation";
 import unshareConversation from "../utils/unshareConversation";
-import CancelScheduleSendIcon from "@mui/icons-material/CancelScheduleSend";
+import ScheduleSendIcon from '@mui/icons-material/ScheduleSend';
 import UnshareLinkDialog from "./UnshareLinkDialog";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -49,12 +49,15 @@ export default function ChatDial() {
       activateConversation(activeConversation.id); // This causes the rerender and update of the icon
       console.log(`Sharing link duration set to: ${duration} hours`);
       console.log("Share URL:", data.share_url);
+      
+      // Automatically open the Share Details dialog after sharing
+      setDialogOpen(false);
+      setUnshareDialogOpen(true);
     } catch (error) {
       console.error("Error sharing conversation:", error);
     } finally {
       isSharingRef.current = false;
       setIsSharing(false);
-      setDialogOpen(false);
     }
   };
 
@@ -63,7 +66,6 @@ export default function ChatDial() {
   useEffect(() => {
     const checkExpiration = async () => {
       if (dialOpen && calculateRemainingHours() <= 0 && isShared) {
-        // Prevent multiple unshare calls
         if (isUnsharingRef.current) return;
 
         isUnsharingRef.current = true;
@@ -149,8 +151,8 @@ export default function ChatDial() {
     },
     isShared
       ? {
-          icon: <CancelScheduleSendIcon />,
-          name: "Unshare",
+          icon: <ScheduleSendIcon />,
+          name: "Sharing",
           handleAction: () => {
             handleOpenUnshareDialog();
           },
@@ -170,7 +172,7 @@ export default function ChatDial() {
   ];
 
   if (isNarrowScreen) return null;
-  
+
   return (
     <>
       <SpeedDial

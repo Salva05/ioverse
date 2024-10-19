@@ -14,6 +14,12 @@ const chatService = {
     return response.data;
   },
 
+  // GET Shared conversation
+  getSharedConversation: async (share_token) => {
+    const response = await axiosInstance.get(`/chatbot/shared/${share_token}`);
+    return response.data;
+  },
+
   // DELETE
   deleteConversation: async (id) => {
     const response = await axiosInstance.delete(`/chatbot/conversations/${id}/`);

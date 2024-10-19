@@ -1,11 +1,10 @@
 import React, { useContext, useRef, useState } from "react";
 import { Menu, MenuItem, IconButton, Box, Tooltip, Fade } from "@mui/material";
-import { styled } from "@mui/system";
 import { useQueryClient } from "@tanstack/react-query";
 import SaveIcon from "@mui/icons-material/Save";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ShareIcon from "@mui/icons-material/Share";
-import CancelScheduleSendIcon from "@mui/icons-material/CancelScheduleSend";
+import ScheduleSendIcon from '@mui/icons-material/ScheduleSend';
 import SettingsSharpIcon from "@mui/icons-material/SettingsSharp";
 import { ConversationContext } from "../contexts/ConversationContext";
 import ShareLinkDialog from "./ShareLinkDialog";
@@ -43,10 +42,13 @@ export default function ChatOptionsMenu({ conversationId }) {
     setIsSharing(true);
     try {
       const data = await shareConversation(activeConversation.id, duration);
-      activateConversation(activeConversation.id) // This causes the rerender and update of the icon
+      activateConversation(activeConversation.id) // This causes the re-render and update of the icon
       console.log(`Sharing link duration set to: ${duration} hours`);
       console.log("Share URL:", data.share_url);
-      // Optionally notify success
+      
+      // Automatically open the Share Details dialog after sharing
+      setShareDialogOpen(false);
+      setUnshareDialogOpen(true);
     } catch (error) {
       console.error("Error sharing conversation:", error);
     } finally {
@@ -113,9 +115,9 @@ export default function ChatOptionsMenu({ conversationId }) {
     },
     isShared
       ? {
-          name: "Unshare",
+          name: "Sharing",
           icon: (
-            <CancelScheduleSendIcon fontSize="small" sx={{ marginRight: 1 }} />
+            <ScheduleSendIcon fontSize="small" sx={{ marginRight: 1 }} />
           ),
           handleClick: () => {
             handleOpenUnshareDialog();
@@ -134,7 +136,7 @@ export default function ChatOptionsMenu({ conversationId }) {
       name: "Save",
       icon: <SaveIcon fontSize="small" sx={{ marginRight: 1 }} />,
       handleClick: () => {
-        // Implement save functionality
+        // Yet to be implemented
         handleMenuClose();
       },
     },
@@ -154,7 +156,6 @@ export default function ChatOptionsMenu({ conversationId }) {
         anchorEl={anchorEl}
         open={open}
         onClose={handleMenuClose}
-        TransitionComponent={Transition}
         sx={{
           "& .MuiPaper-root": {
             backgroundColor: "#404040",
@@ -194,8 +195,6 @@ export default function ChatOptionsMenu({ conversationId }) {
           </MenuItem>
         ))}
       </Menu>
-
-      {/* Share Dialog */}
       {!isShared && activeConversation && (
         <ShareLinkDialog
           open={shareDialogOpen}
@@ -205,8 +204,6 @@ export default function ChatOptionsMenu({ conversationId }) {
           isSharing={isSharing}
         />
       )}
-
-      {/* Unshare Dialog */}
       {isShared && activeConversation && (
         <UnshareLinkDialog
           open={unshareDialogOpen}

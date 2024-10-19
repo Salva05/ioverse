@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,8 +9,13 @@ import {
   Backdrop,
   CircularProgress,
   Box,
+  TextField,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { ConversationContext } from "../contexts/ConversationContext";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
@@ -37,7 +42,32 @@ const StyledCancelButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export default function UnshareLinkDialog({
+const StyledLinkField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    color: "#ffffff",
+    borderRadius: theme.shape.borderRadius,
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#ffffff",
+  },
+  "& .MuiInputBase-input": {
+    color: "#ffffff",
+  },
+}));
+
+const StyledOutlinedIconButton = styled(IconButton)(({ theme }) => ({
+  borderColor: "#ffffff",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderRadius: theme.shape.borderRadius,
+  height: "100%",
+  color: "#ffffff",
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
+
+export default function ShareDetailsDialog({
   open,
   onClose,
   onConfirm,
@@ -45,6 +75,23 @@ export default function UnshareLinkDialog({
   isUnsharing,
   remainingHours,
 }) {
+  const { activeConversation } = useContext(ConversationContext);
+
+  // Generate the shared link
+  const baseDomain = window.location.origin;  // Detects the current domain
+  const sharedLink = `${baseDomain}/shared-conversation/${activeConversation?.share_token}`;
+
+  // State to show copy success message
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  // Function to copy link to clipboard
+  const handleCopy = () => {
+    navigator.clipboard.writeText(sharedLink).then(() => {
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
+    });
+  };
+
   return (
     <StyledDialog
       open={open}
@@ -63,17 +110,50 @@ export default function UnshareLinkDialog({
       <DialogTitle
         sx={{ textAlign: "center", fontWeight: "bold", color: "#ffffff" }}
       >
-        Unshare Conversation
+        Sharing Details
       </DialogTitle>
       <DialogContent>
         <Box sx={{ textAlign: "center", mb: 2 }}>
           <Typography variant="body1" gutterBottom sx={{ color: "#e0e0e0" }}>
-            This conversation is currently shared for another {remainingHours}{" "}
-            hour(s).
+            This conversation will be available for the next{" "}
+            <Typography
+              component="span"
+              variant="body1"
+              sx={{
+                fontWeight: "bold",
+                color: "yellow",
+                fontSize: "1.2rem",
+              }}
+            >
+              {remainingHours} hour(s)
+            </Typography>
+            .
           </Typography>
-          <Typography variant="body2" sx={{ color: "#e0e0e0" }}>
-            Are you sure you want to unshare it now?
+          <Typography variant="body2" sx={{ color: "#e0e0e0", mb: 2 }}>
+            You can view and share this link:
           </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <StyledLinkField
+              value={sharedLink}
+              fullWidth
+              InputProps={{
+                readOnly: true,
+              }}
+              variant="outlined"
+              size="small"
+            />
+            <Tooltip title={copySuccess ? "Copied!" : "Copy to clipboard"}>
+              <StyledOutlinedIconButton onClick={handleCopy} sx={{ ml: 1 }}>
+                <ContentCopyIcon />
+              </StyledOutlinedIconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </DialogContent>
       <DialogActions
@@ -84,14 +164,14 @@ export default function UnshareLinkDialog({
           variant="outlined"
           disabled={isUnsharing}
         >
-          Cancel
+          Close
         </StyledCancelButton>
         <StyledButton
           onClick={onConfirm}
           variant="contained"
           disabled={isUnsharing}
         >
-          {isUnsharing ? "Unsharing..." : "Confirm"}
+          Stop Sharing
         </StyledButton>
       </DialogActions>
     </StyledDialog>

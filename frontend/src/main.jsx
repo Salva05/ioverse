@@ -9,6 +9,7 @@ import theme from "./themes/theme";
 import { ThemeProvider } from "@mui/material";
 import Login from "./pages/Login";
 import { AuthProvider } from "./contexts/AuthContext";
+import SharedConversation from "./pages/SharedConversation";
 
 // Manages chaching, fetching and synchronization of server side data
 const queryClient = new QueryClient();
@@ -28,7 +29,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/shared-conversation/:share_token",
-        element: <div><h1>FUNZIONAA</h1></div>
+        element: <SharedConversation/>
       }
     ],
   },

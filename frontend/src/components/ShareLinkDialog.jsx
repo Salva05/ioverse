@@ -154,7 +154,7 @@ export default function ShareLinkDialog({
           Cancel
         </StyledCancelButton>
         <StyledButton onClick={() => onConfirm(duration)} variant="contained">
-          Confirm
+          Share
         </StyledButton>
       </DialogActions>
     </StyledDialog>
