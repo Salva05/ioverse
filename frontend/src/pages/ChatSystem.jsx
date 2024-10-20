@@ -55,9 +55,17 @@ const MessageItem = ({ sender, message }) => {
           maxWidth: "560px",
           width: "auto",
           wordBreak: "break-word",
+          overflowWrap: "break-word",
         }}
       >
-        <ListItemText>
+        <ListItemText
+          sx={{
+            "& code": {
+              whiteSpace: "pre-wrap", // Ensure code blocks wrap correctly
+              wordBreak: "break-word", // Ensure long code doesn't overflow
+            },
+          }}
+        >
           <ReactMarkdown
             rehypePlugins={[rehypeSanitize]}
             remarkPlugins={[remarkGfm]}

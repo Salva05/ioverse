@@ -14,7 +14,7 @@ import { DrawerContext } from "../contexts/DrawerContext";
 export default function Layout() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const [open, setOpen] = React.useState(!isSmallScreen); // Initialize based on screen size
+  const [open, setOpen] = React.useState(false); // Initialize based on screen size
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => {
@@ -24,10 +24,6 @@ export default function Layout() {
       menuButton.focus();
     }
   };
-
-  React.useEffect(() => {
-    setOpen(!isSmallScreen);
-  }, [isSmallScreen]);
 
   return (
     <DrawerContext.Provider value={{ open, isSmallScreen }}>
