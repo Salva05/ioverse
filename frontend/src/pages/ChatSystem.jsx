@@ -23,6 +23,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { mapMessages } from "../utils/mapMessages";
 import chatService from "../services/chatService";
 import ChatDial from "../components/ChatDial";
+import TypingEffect from "../components/TypingEffect";
 
 const drawerWidth = 240;
 
@@ -237,6 +238,11 @@ export default function ChatSystem() {
             zIndex: 1000,
           }}
         >
+          {typing && (
+            <Box sx={{ position: "absolute", top: "-30px", left: "10px" }}>
+              <TypingEffect />
+            </Box>
+          )}
           <TextField
             fullWidth
             multiline
