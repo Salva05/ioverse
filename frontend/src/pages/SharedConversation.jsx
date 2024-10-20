@@ -92,7 +92,7 @@ export default function SharedConversation() {
         </Toolbar>
       </StyledAppBar>
 
-      <Container maxWidth="md" sx={{ marginTop: "50px", padding: "16px" }}>
+      <Container maxWidth="md" sx={{ marginTop: "20px", padding: "16px" }}>
         {error ? (
           <Box sx={{ textAlign: "center", marginTop: "20px" }}>
             <Alert

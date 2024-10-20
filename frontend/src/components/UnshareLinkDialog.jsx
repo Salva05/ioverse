@@ -17,6 +17,7 @@ import { styled } from "@mui/system";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { ConversationContext } from "../contexts/ConversationContext";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
@@ -85,14 +86,6 @@ export default function ShareDetailsDialog({
   // State to show copy success message
   const [copySuccess, setCopySuccess] = useState(false);
 
-  // Function to copy link to clipboard
-  const handleCopy = () => {
-    navigator.clipboard.writeText(sharedLink).then(() => {
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
-    });
-  };
-
   return (
     <StyledDialog
       open={open}
@@ -149,11 +142,23 @@ export default function ShareDetailsDialog({
               variant="outlined"
               size="small"
             />
-            <Tooltip title={copySuccess ? "Copied!" : "Copy to clipboard"}>
-              <StyledOutlinedIconButton onClick={handleCopy} sx={{ ml: 1 }}>
-                {copySuccess ? <ContentCopyTwoToneIcon /> : <ContentCopyIcon />}
-              </StyledOutlinedIconButton>
-            </Tooltip>
+            <CopyToClipboard
+              text={sharedLink}
+              onCopy={() => {
+                setCopySuccess(true);
+                setTimeout(() => setCopySuccess(false), 2000);
+              }}
+            >
+              <Tooltip title={copySuccess ? "Copied!" : "Copy to clipboard"}>
+                <StyledOutlinedIconButton sx={{ ml: 1 }}>
+                  {copySuccess ? (
+                    <ContentCopyTwoToneIcon />
+                  ) : (
+                    <ContentCopyIcon />
+                  )}
+                </StyledOutlinedIconButton>
+              </Tooltip>
+            </CopyToClipboard>
           </Box>
         </Box>
       </DialogContent>
