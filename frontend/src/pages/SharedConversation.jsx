@@ -8,6 +8,9 @@ import Paper from "@mui/material/Paper";
 import { List, ListItem, ListItemText, Container, Alert } from "@mui/material";
 import chatService from "../services/chatService";
 import { useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
+import he from "he";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -30,21 +33,27 @@ const MessageItem = ({ sender, message }) => {
       sx={{
         justifyContent: isUser ? "flex-end" : "flex-start",
         display: "flex",
-        paddingX: { xs: "5px", sm: "10px" },
+        paddingX: { xs: "0px", sm: "10px" },
+        width: { sx: "100%", sm: "auto" },
       }}
     >
       <Paper
         elevation={3}
         sx={{
+          marginY: "10px",
           padding: "10px 15px",
           backgroundColor: isUser ? "#1976d2" : "#f5f5f5",
           color: isUser ? "white" : "black",
           borderRadius: isUser ? "15px 0 15px 15px" : "0 15px 15px 15px",
-          maxWidth: "70%",
-          width: "fit-content",
+          maxWidth: { xs: "100%", sm: "70%" }, // Full width on xs
+          width: { xs: "100%", sm: "fit-content" },
         }}
       >
-        <ListItemText primary={message} />
+        <ListItemText>
+          <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+            {he.decode(message).replace(/<br\s*\/?>/gi, "\n")}
+          </ReactMarkdown>
+        </ListItemText>
       </Paper>
     </ListItem>
   );
