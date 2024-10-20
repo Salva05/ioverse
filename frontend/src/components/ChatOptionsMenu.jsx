@@ -11,6 +11,7 @@ import ShareLinkDialog from "./ShareLinkDialog";
 import UnshareLinkDialog from "./UnshareLinkDialog";
 import shareConversation from "../utils/shareConversation";
 import unshareConversation from "../utils/unshareConversation";
+import handleDownload from "../services/handleDownload";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={800} />;
@@ -138,6 +139,7 @@ export default function ChatOptionsMenu({ conversationId }) {
       handleClick: () => {
         // Yet to be implemented
         handleMenuClose();
+        handleDownload(activeConversation.id);
       },
     },
   ];

@@ -14,6 +14,10 @@ import chatService from "../services/chatService";
 import { DrawerContext } from "../contexts/DrawerContext";
 import ChatDial from "../components/ChatDial";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
+import he from "he";
 
 const Chat = () => {
   const { activeConversation, activateConversation } =
@@ -91,14 +95,14 @@ const Chat = () => {
       <div
         style={{
           width: "100%",
-          marginTop: '10px',
+          marginTop: "10px",
           height: "100%",
           display: "flex",
           justifyContent: "center",
           flexGrow: 1,
         }}
       >
-        <MainContainer style={{ flex: 1, maxWidth: "800px", }}>
+        <MainContainer style={{ flex: 1, maxWidth: "800px" }}>
           <ChatContainer>
             <MessageList
               typingIndicator={
@@ -110,11 +114,22 @@ const Chat = () => {
                   key={id}
                   model={message}
                   style={{ paddingTop: 10, paddingBottom: 10 }}
-                />
+                  direction={message.direction}
+                >
+                  {/* Custom Message Content */}
+                  <Message.TextContent>
+                    <ReactMarkdown
+                      rehypePlugins={[rehypeSanitize]}
+                      remarkPlugins={[remarkGfm]}
+                    >
+                      {he.decode(message.message).replace(/<br\s*\/?>/gi, "\n")}
+                    </ReactMarkdown>
+                  </Message.TextContent>
+                </Message>
               ))}
             </MessageList>
             <div
-            as={MessageInput}
+              as={MessageInput}
               style={{
                 position: "sticky",
                 bottom: 0,

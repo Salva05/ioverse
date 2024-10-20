@@ -40,7 +40,7 @@ const pages = [
   {
     id: 1,
     display: "Chat",
-    path: "chat",
+    path: "/chat",
     icon: <ChatIcon sx={{ color: "#fff" }} />,
   },
   {
@@ -146,30 +146,47 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       </DrawerHeader>
       <Divider sx={{ backgroundColor: "#444" }} />
       <List>
-        {pages.map((page, index) => (
-          <ListItem key={page.id} disablePadding>
-            <ListItemButton
-              onClick={() => {
-                if (page.path === "chat") {
-                  if (isAuthenticated) {
-                    refetch();
+        {pages.map((page) => {
+          // Determine if the current page's path matches the location's pathname
+          const isSelected = location.pathname === page.path;
+
+          return (
+            <ListItem key={page.id} disablePadding>
+              <ListItemButton
+                selected={isSelected}
+                onClick={() => {
+                  if (page.path === "/chat") {
+                    if (isAuthenticated) {
+                      refetch();
+                    }
                   }
-                }
-                navigate(page.path);
-              }}
-            >
-              <ListItemIcon>{page.icon}</ListItemIcon>
-              <ListItemText primary={page.display} />
-              {!isAuthenticated && page.path === "chat" && (
-                <Tooltip title="Login required">
-                  <IconButton>
-                    <VpnKeyIcon fontSize="small" sx={{ color: 'rgba(227, 227, 227, 0.79)'}} />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </ListItemButton>
-          </ListItem>
-        ))}
+                  navigate(page.path);
+                }}
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: theme.palette.action.selected,
+                    "&:hover": {
+                      backgroundColor: theme.palette.action.hover,
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon>{page.icon}</ListItemIcon>
+                <ListItemText primary={page.display} />
+                {!isAuthenticated && page.path === "/chat" && (
+                  <Tooltip title="Login required">
+                    <IconButton>
+                      <VpnKeyIcon
+                        fontSize="small"
+                        sx={{ color: "rgba(227, 227, 227, 0.79)" }}
+                      />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
       <Divider sx={{ backgroundColor: "#444" }} />
       {location.pathname === "/chat" && (
