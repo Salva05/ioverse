@@ -13,6 +13,7 @@ import shareConversation from "../utils/shareConversation";
 import unshareConversation from "../utils/unshareConversation";
 import ScheduleSendIcon from '@mui/icons-material/ScheduleSend';
 import UnshareLinkDialog from "./UnshareLinkDialog";
+import handleDownload from "../services/handleDownload";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={800} />;
@@ -167,7 +168,9 @@ export default function ChatDial() {
     {
       icon: <SaveIcon />,
       name: "Save",
-      handleAction: () => {},
+      handleAction: () => {
+        handleDownload(activeConversation.id);
+      },
     },
   ];
 

@@ -20,18 +20,33 @@ const chatService = {
     return response.data;
   },
 
+  // GET Download the conversation as PDF
+  downloadConversation: async (id) => {
+    const response = await axiosInstance.get(
+      `/chatbot/conversations/${id}/download`,
+      {
+        responseType: "blob", // Expects a file
+      }
+    );
+    return response.data;
+  },
+
   // DELETE
   deleteConversation: async (id) => {
-    const response = await axiosInstance.delete(`/chatbot/conversations/${id}/`);
+    const response = await axiosInstance.delete(
+      `/chatbot/conversations/${id}/`
+    );
     return response.data;
   },
 
   // POST
   sendMessage: async (messageData) => {
-    const response = await axiosInstance.post("/chatbot/messages/", messageData); // Requires trailing slash for POSTs
+    const response = await axiosInstance.post(
+      "/chatbot/messages/",
+      messageData
+    ); // Requires trailing slash for POSTs
     return response.data;
   },
-
 };
 
 export default chatService;
