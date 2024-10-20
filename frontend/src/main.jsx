@@ -1,6 +1,5 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Chat from "./pages/Chat";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./components/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,7 +10,7 @@ import Login from "./pages/Login";
 import { AuthProvider } from "./contexts/AuthContext";
 import SharedConversation from "./pages/SharedConversation";
 import ProtectedRoute from "./pages/ProtectedRoute";
-import NewChat from "./pages/NewChat";
+import ChatSystem from "./pages/ChatSystem";
 
 // Manages chaching, fetching and synchronization of server side data
 const queryClient = new QueryClient();
@@ -25,7 +24,7 @@ const router = createBrowserRouter([
         path: "chat",
         element: (
           <ProtectedRoute>
-            <NewChat />
+            <ChatSystem />
           </ProtectedRoute>
         ),
       },
