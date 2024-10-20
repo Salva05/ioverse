@@ -7,28 +7,31 @@ import MainContent from "./MainContent";
 import { Outlet } from "react-router-dom";
 import { useMediaQuery, useTheme } from "@mui/material";
 
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DrawerContext } from "../contexts/DrawerContext";
 
 export default function Layout() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(!isSmallScreen); // Initialize based on screen size
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => {
-    setOpen(false)
-    // Shift focus to the menu button
-    const menuButton = document.getElementById('menu-button');
+    setOpen(false);
+    const menuButton = document.getElementById("menu-button");
     if (menuButton) {
       menuButton.focus();
     }
   };
-  
+
+  React.useEffect(() => {
+    setOpen(!isSmallScreen);
+  }, [isSmallScreen]);
+
   return (
     <DrawerContext.Provider value={{ open, isSmallScreen }}>
-      <Box sx={{ display: "flex", }}>
+      <Box sx={{ display: "flex", height: "100vh", width: "100%" }}>
         <CssBaseline />
         <AppBar
           open={open}

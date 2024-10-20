@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import { AuthProvider } from "./contexts/AuthContext";
 import SharedConversation from "./pages/SharedConversation";
 import ProtectedRoute from "./pages/ProtectedRoute";
+import NewChat from "./pages/NewChat";
 
 // Manages chaching, fetching and synchronization of server side data
 const queryClient = new QueryClient();
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
         path: "chat",
         element: (
           <ProtectedRoute>
-            <Chat />
+            <NewChat />
           </ProtectedRoute>
         ),
       },
