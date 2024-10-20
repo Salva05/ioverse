@@ -6,7 +6,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.http import HttpResponse
 from django.conf import settings
 from django.utils import timezone
@@ -15,13 +14,14 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Frame, PageTemplate, NextPageTemplate
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.platypus.flowables import HRFlowable
 
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ReadOnlyConversationSerializer, SharedConversationSerializer
 from .services.chat_service import ChatService
 import logging
+import html
 import re
 
 logger = logging.getLogger(__name__)
@@ -198,34 +198,19 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
         # Function to convert Markdown to ReportLab-compatible HTML
         def markdown_to_reportlab(text):
-            """
-            Converts basic Markdown syntax to ReportLab's supported tags.
-            """
-            # Escape any existing angle brackets to prevent HTML injection
-            text = re.sub(r'<', '&lt;', text)
-            text = re.sub(r'>', '&gt;', text)
+            # Decode HTML entities
+            text = html.unescape(text)
             
-            # Convert **bold** to <b>bold</b>
+            # Convert Markdown to HTML tags
             text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
-            
-            # Convert *italics* to <i>italics</i>
             text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
-            
-            # Convert __underline__ to <u>underline</u>
             text = re.sub(r'__(.*?)__', r'<u>\1</u>', text)
-            
-            # Convert `code` to <font face="Courier">code</font>
             text = re.sub(r'`(.*?)`', r'<font face="Courier">\1</font>', text)
             
-            # Handle line breaks
-            text = text.replace('\n', '<br/>')
+            # Replace <br> tags and newline characters with <br/>
+            text = re.sub(r'(<br\s*\/?>|\n)', '<br/>', text)
             
             return text
-
-        # Alternatively, using a Markdown parser to convert to HTML
-        # def markdown_to_reportlab(text):
-        #     html = markdown.markdown(text)
-        #     return html
 
         # Loop through the messages and format them
         for msg in messages:
@@ -241,7 +226,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
                 content = f'<b>AI:</b> {formatted_message}'
                 story.append(Paragraph(content, ai_style))
             
-            # Optional: Add a subtle separator between messages
+            # Subtle separator between messages
             story.append(Spacer(1, 4))
             story.append(HRFlowable(width="100%", thickness=0.5, color=colors.lightgrey))
             story.append(Spacer(1, 8))
