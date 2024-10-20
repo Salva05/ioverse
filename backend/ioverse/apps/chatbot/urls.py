@@ -10,5 +10,5 @@ router.register(r'conversations', ConversationViewSet, basename='conversations')
 urlpatterns = router.urls
 
 urlpatterns += [
-    path('shared/<uuid:share_token>/', SharedConversationView.as_view(), name='shared-conversation-detail')
+    path('shared/<uuid:share_token>/', SharedConversationView.as_view(), name='shared-conversation-detail'),
 ]

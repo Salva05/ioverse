@@ -7,12 +7,22 @@ from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.http import HttpResponse
 from django.conf import settings
 from django.utils import timezone
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Frame, PageTemplate, NextPageTemplate
+from reportlab.platypus.flowables import HRFlowable
+
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ReadOnlyConversationSerializer, SharedConversationSerializer
 from .services.chat_service import ChatService
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +120,138 @@ class ConversationViewSet(viewsets.ModelViewSet):
         else:
             return Response({'detail': 'Conversation is not shared.'}, status=status.HTTP_400_BAD_REQUEST)
         
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def download(self, request, pk=None):
+        """
+        Custom action to download a conversation as a PDF with improved styling and Markdown support.
+        """
+        conversation = self.get_object()
+
+        # Retrieve the messages of the conversation
+        messages = Message.objects.filter(conversation_id=conversation.id).order_by('timestamp')
+
+        # Create a file-like HTTP response to hold the PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="conversation_{conversation.id}.pdf"'
+
+        # Create a PDF document using ReportLab
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=letter,
+            rightMargin=72,
+            leftMargin=72,
+            topMargin=72,
+            bottomMargin=72
+        )
+        story = []  # List to hold the PDF elements
+
+        # Styles and formatting
+        styles = getSampleStyleSheet()
+        
+        # Define a more professional base style
+        base_style = ParagraphStyle(
+            'BaseStyle',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=12,
+            leading=15,
+            textColor=colors.black,
+            alignment=TA_LEFT,
+        )
+        
+        # Style for user messages
+        user_style = ParagraphStyle(
+            'UserStyle',
+            parent=base_style,
+            textColor=colors.darkblue,  # Subtle color for differentiation
+            leftIndent=10,
+            spaceBefore=6,
+            spaceAfter=6,
+        )
+        
+        # Style for AI messages
+        ai_style = ParagraphStyle(
+            'AIStyle',
+            parent=base_style,
+            textColor=colors.darkgreen,  # Subtle color for differentiation
+            leftIndent=10,
+            spaceBefore=6,
+            spaceAfter=6,
+        )
+        
+        # Style for the conversation title
+        title_style = ParagraphStyle(
+            'TitleStyle',
+            parent=styles['Title'],
+            fontName='Helvetica-Bold',
+            fontSize=16,
+            leading=20,
+            textColor=colors.black,
+            alignment=TA_LEFT,
+            spaceAfter=20,
+        )
+        
+        # Add conversation title
+        story.append(Paragraph(conversation.title, title_style))
+        story.append(HRFlowable(width="100%", thickness=1, color=colors.grey))
+        story.append(Spacer(1, 12))  # Adds space after the title
+
+        # Function to convert Markdown to ReportLab-compatible HTML
+        def markdown_to_reportlab(text):
+            """
+            Converts basic Markdown syntax to ReportLab's supported tags.
+            """
+            # Escape any existing angle brackets to prevent HTML injection
+            text = re.sub(r'<', '&lt;', text)
+            text = re.sub(r'>', '&gt;', text)
+            
+            # Convert **bold** to <b>bold</b>
+            text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+            
+            # Convert *italics* to <i>italics</i>
+            text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
+            
+            # Convert __underline__ to <u>underline</u>
+            text = re.sub(r'__(.*?)__', r'<u>\1</u>', text)
+            
+            # Convert `code` to <font face="Courier">code</font>
+            text = re.sub(r'`(.*?)`', r'<font face="Courier">\1</font>', text)
+            
+            # Handle line breaks
+            text = text.replace('\n', '<br/>')
+            
+            return text
+
+        # Alternatively, using a Markdown parser to convert to HTML
+        # def markdown_to_reportlab(text):
+        #     html = markdown.markdown(text)
+        #     return html
+
+        # Loop through the messages and format them
+        for msg in messages:
+            # Process Markdown in the message body
+            formatted_message = markdown_to_reportlab(msg.message_body)
+            
+            if msg.sender.lower() == 'user':
+                # User message formatting with a label
+                content = f'<b>User:</b> {formatted_message}'
+                story.append(Paragraph(content, user_style))
+            else:
+                # AI message formatting with a label
+                content = f'<b>AI:</b> {formatted_message}'
+                story.append(Paragraph(content, ai_style))
+            
+            # Optional: Add a subtle separator between messages
+            story.append(Spacer(1, 4))
+            story.append(HRFlowable(width="100%", thickness=0.5, color=colors.lightgrey))
+            story.append(Spacer(1, 8))
+
+        # Build the PDF document
+        doc.build(story)
+
+        return response
+        
+        
 class SharedConversationView(APIView):
     permission_classes = [permissions.AllowAny] # Public access
     
@@ -127,4 +269,5 @@ class SharedConversationView(APIView):
 
         serializer = SharedConversationSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
     
