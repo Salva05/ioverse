@@ -104,7 +104,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
         # Build the frontend share URL
         share_url = f"{settings.FRONTEND_URL}/shared-conversation/{conversation.share_token}/"
         
-        return Response({'share_url': share_url}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                'share_url': share_url,
+                'shared_at': conversation.shared_at,
+                'expires_at': conversation.expires_at,
+            }, 
+            status=status.HTTP_200_OK
+        )
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unshare(self, request, pk=None):
