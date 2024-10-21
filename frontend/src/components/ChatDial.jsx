@@ -1,140 +1,27 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
-import SaveIcon from "@mui/icons-material/Save";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import ShareIcon from "@mui/icons-material/Share";
-import { useMediaQuery, SpeedDial, Fade } from "@mui/material";
+import { useMediaQuery, SpeedDial } from "@mui/material";
 import { DrawerContext } from "../contexts/DrawerContext";
 import { ConversationContext } from "../contexts/ConversationContext";
-import ShareLinkDialog from "./ShareLinkDialog";
-import shareConversation from "../utils/shareConversation";
-import unshareConversation from "../utils/unshareConversation";
-import ScheduleSendIcon from '@mui/icons-material/ScheduleSend';
-import UnshareLinkDialog from "./UnshareLinkDialog";
-import handleDownload from "../services/handleDownload";
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Fade {...props} ref={ref} timeout={800} />;
-});
 
 export default function ChatDial() {
-  const { activateConversation, setActiveConversation, activeConversation } =
+  const { setActiveConversation } =
     useContext(ConversationContext);
   const theme = useTheme();
-  const { open: drawerOpen, isSmallScreen } = useContext(DrawerContext);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [unshareDialogOpen, setUnshareDialogOpen] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
-  const [isUnsharing, setIsUnsharing] = useState(false);
-  const isSharingRef = useRef(false);
-  const isUnsharingRef = useRef(false);
-
-  const isShared = activeConversation?.is_shared;
+  const { open: drawerOpen } = useContext(DrawerContext);
 
   // Detect when screen width is below 1109px
   const isNarrowScreen = useMediaQuery("(max-width:1109px)");
   const [dialOpen, setDialOpen] = useState(false);
 
-  // Share logic
-  const handleOpenShareDialog = () => setDialogOpen(true);
-  const handleCloseShareDialog = () => setDialogOpen(false);
-
-  const handleConfirmShareDialog = async (duration) => {
-    if (isSharingRef.current) return; // Prevent multiple submissions
-    isSharingRef.current = true;
-    setIsSharing(true);
-    try {
-      const data = await shareConversation(activeConversation.id, duration);
-      activateConversation(activeConversation.id); // This causes the rerender and update of the icon
-      console.log(`Sharing link duration set to: ${duration} hours`);
-      console.log("Share URL:", data.share_url);
-      
-      // Automatically open the Share Details dialog after sharing
-      setDialogOpen(false);
-      setUnshareDialogOpen(true);
-    } catch (error) {
-      console.error("Error sharing conversation:", error);
-    } finally {
-      isSharingRef.current = false;
-      setIsSharing(false);
-    }
-  };
-
-  // Unshare logic
-
-  useEffect(() => {
-    const checkExpiration = async () => {
-      if (dialOpen && calculateRemainingHours() <= 0 && isShared) {
-        if (isUnsharingRef.current) return;
-
-        isUnsharingRef.current = true;
-        setIsUnsharing(true);
-
-        try {
-          await unshareConversation(activeConversation.id);
-          console.log(
-            `Conversation with ID ${activeConversation.id} unshared successfully`
-          );
-
-          // Update the active conversation state
-          setActiveConversation({
-            ...activeConversation,
-            is_shared: false,
-            shared_at: null,
-            expires_at: null,
-          });
-        } catch (error) {
-          console.error("Error unsharing conversation:", error);
-        } finally {
-          isUnsharingRef.current = false;
-          setIsUnsharing(false);
-        }
-      }
-    };
-
-    checkExpiration();
-  }, [dialOpen]);
-
-  const handleOpenUnshareDialog = () => setUnshareDialogOpen(true);
-  const handleCloseUnshareDialog = () => setUnshareDialogOpen(false);
-
-  const handleConfirmUnshareDialog = async () => {
-    if (isUnsharingRef.current) return;
-    isUnsharingRef.current = true;
-    setIsUnsharing(true);
-    try {
-      await unshareConversation(activeConversation.id);
-      activateConversation(activeConversation.id);
-      console.log(
-        `Conversation with ID ${activeConversation.id} unshared successfully`
-      );
-    } catch (error) {
-      console.error("Error unsharing conversation:", error);
-    } finally {
-      isUnsharingRef.current = false;
-      setIsUnsharing(false);
-      setUnshareDialogOpen(false);
-    }
-  };
-
-  const calculateRemainingHours = () => {
-    if (!activeConversation?.expires_at) return 0;
-
-    const expiresAt = new Date(activeConversation.expires_at);
-    const now = new Date();
-    // Calculate the difference in milliseconds
-    const remainingMs = expiresAt - now;
-    // Convert milliseconds to hours
-    const remainingHours = remainingMs / (1000 * 60 * 60);
-    return remainingHours > 0 ? Math.ceil(remainingHours) : 0;
-  };
-
-  // ChatDial logic
+  // Dial logic
   const handleOpen = () => setDialOpen(true);
   const handleClose = () => setDialOpen(false);
 
+  // Dial positioning
   const drawerWidth = 240;
   const spacing = parseInt(theme.spacing(2), 10);
   const leftPosition = spacing;
@@ -148,28 +35,6 @@ export default function ChatDial() {
       name: "New",
       handleAction: () => {
         setActiveConversation(null);
-      },
-    },
-    isShared
-      ? {
-          icon: <ScheduleSendIcon />,
-          name: "Sharing",
-          handleAction: () => {
-            handleOpenUnshareDialog();
-          },
-        }
-      : {
-          icon: <ShareIcon />,
-          name: "Share",
-          handleAction: () => {
-            handleOpenShareDialog();
-          },
-        },
-    {
-      icon: <SaveIcon />,
-      name: "Save",
-      handleAction: () => {
-        handleDownload(activeConversation.id);
       },
     },
   ];
@@ -224,25 +89,6 @@ export default function ChatDial() {
           />
         ))}
       </SpeedDial>
-      {!isShared && activeConversation && (
-        <ShareLinkDialog
-          open={dialogOpen}
-          onClose={handleCloseShareDialog}
-          onConfirm={handleConfirmShareDialog}
-          TransitionComponent={Transition}
-          isSharing={isSharing}
-        />
-      )}
-      {isShared && activeConversation && (
-        <UnshareLinkDialog
-          open={unshareDialogOpen}
-          onClose={handleCloseUnshareDialog}
-          onConfirm={handleConfirmUnshareDialog}
-          TransitionComponent={Transition}
-          isUnsharing={isUnsharing}
-          remainingHours={calculateRemainingHours()}
-        />
-      )}
     </>
   );
 }

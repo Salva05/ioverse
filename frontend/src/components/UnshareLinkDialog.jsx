@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -15,9 +15,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { ConversationContext } from "../contexts/ConversationContext";
-import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
@@ -69,30 +68,44 @@ const StyledOutlinedIconButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-export default function ShareDetailsDialog({
+export default function UnshareDetailsDialog({
   open,
   onClose,
   onConfirm,
   TransitionComponent,
   isUnsharing,
   remainingHours,
+  share_token,
 }) {
-  const { activeConversation } = useContext(ConversationContext);
-
   // Generate the shared link
   const baseDomain = window.location.origin; // Detects the current domain
-  const sharedLink = `${baseDomain}/shared-conversation/${activeConversation?.share_token}`;
+  const sharedLink = `${baseDomain}/shared-conversation/${share_token}`;
 
   // State to show copy success message
   const [copySuccess, setCopySuccess] = useState(false);
 
+  const handleClose = (event, reason) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    onClose();
+  };
+
+  const handleConfirm = (event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    onConfirm();
+  };
+
   return (
     <StyledDialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       TransitionComponent={TransitionComponent}
       maxWidth="xs"
       fullWidth
+      onClick={(e) => e.stopPropagation()}
     >
       <Backdrop
         open={isUnsharing}
@@ -106,7 +119,9 @@ export default function ShareDetailsDialog({
       >
         Sharing Details
       </DialogTitle>
-      <DialogContent>
+      <DialogContent
+        onClick={(e) => e.stopPropagation()}
+      >
         <Box sx={{ textAlign: "center", mb: 2 }}>
           <Typography variant="body1" gutterBottom sx={{ color: "#e0e0e0" }}>
             This conversation will be available for the next{" "}
@@ -150,7 +165,10 @@ export default function ShareDetailsDialog({
               }}
             >
               <Tooltip title={copySuccess ? "Copied!" : "Copy to clipboard"}>
-                <StyledOutlinedIconButton sx={{ ml: 1 }}>
+                <StyledOutlinedIconButton
+                  sx={{ ml: 1 }}
+                  
+                >
                   {copySuccess ? (
                     <ContentCopyTwoToneIcon />
                   ) : (
@@ -166,14 +184,14 @@ export default function ShareDetailsDialog({
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
         <StyledCancelButton
-          onClick={onClose}
+          onClick={handleClose}
           variant="outlined"
           disabled={isUnsharing}
         >
           Close
         </StyledCancelButton>
         <StyledButton
-          onClick={onConfirm}
+          onClick={handleConfirm}
           variant="contained"
           disabled={isUnsharing}
         >

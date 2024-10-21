@@ -57,16 +57,20 @@ export default function ShareLinkDialog({
     setDuration(value === "" ? "" : Number(value));
   };
 
-  const handleConfirm = (e) => {
-    e.stopPropagation();
-    onConfirm();
-  };
-
-  const handleCancel = (e) => {
-    e.stopPropagation();
+  const handleCancel = (event, reason) => {
+    if (event) {
+      event.stopPropagation();
+    }
     onClose();
   };
-  
+
+  const handleConfirm = (event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    onConfirm(duration);
+  };
+
   return (
     <StyledDialog
       open={open}
@@ -74,6 +78,7 @@ export default function ShareLinkDialog({
       TransitionComponent={TransitionComponent}
       maxWidth="xs"
       fullWidth
+      onClick={(e) => e.stopPropagation()}
     >
       <Backdrop
         open={isSharing}
@@ -86,7 +91,9 @@ export default function ShareLinkDialog({
       >
         Share Link Duration
       </DialogTitle>
-      <DialogContent>
+      <DialogContent
+        onClick={(e) => e.stopPropagation()}
+      >
         <Box sx={{ textAlign: "center", mb: 2 }}>
           <Typography variant="body1" gutterBottom sx={{ color: "#e0e0e0" }}>
             Select the duration (in hours)
@@ -134,11 +141,9 @@ export default function ShareLinkDialog({
                 },
               },
             }}
-            slotProps={{
-              input: {
-                min: 1,
-                max: 72,
-              },
+            inputProps={{
+              min: 1,
+              max: 72,
             }}
           />
         </Box>
@@ -153,7 +158,11 @@ export default function ShareLinkDialog({
         >
           Cancel
         </StyledCancelButton>
-        <StyledButton onClick={() => onConfirm(duration)} variant="contained">
+        <StyledButton
+          onClick={handleConfirm}
+          variant="contained"
+          disabled={isSharing}
+        >
           Share
         </StyledButton>
       </DialogActions>
