@@ -11,6 +11,7 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
+  Toolbar,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ReactMarkdown from "react-markdown";
@@ -184,6 +185,7 @@ export default function ChatSystem() {
           overflowY: "auto",
         }}
       >
+        <Toolbar />
         {/* Chat Container */}
         <Box
           sx={{
@@ -241,7 +243,7 @@ export default function ChatSystem() {
             backgroundColor: theme.palette.background.paper,
             position: "fixed",
             bottom: 0,
-            width: `calc(100% - ${drawerOpen ? drawerWidth : 0}px)`,
+            width: `calc(100% - ${drawerOpen && !isMobile ? drawerWidth : 0}px)`,
             maxWidth: "800px",
             zIndex: 1000,
           }}
