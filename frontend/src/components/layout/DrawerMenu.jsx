@@ -15,14 +15,14 @@ import MailIcon from "@mui/icons-material/Mail";
 import ChatIcon from "@mui/icons-material/Chat";
 import { styled, useTheme } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ConversationContext } from "../contexts/ConversationContext";
-import OptionsMenu from "./OptionsMenu";
-import chatService from "../services/chatService";
+import { ConversationContext } from "../../contexts/ConversationContext";
+import OptionsMenu from "../chat/OptionsMenu";
+import chat from "../../api/chat";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Fade from "@mui/material/Fade";
 import { toast } from "react-toastify";
-import SearchBar from "./SearchBar";
-import { AuthContext } from "../contexts/AuthContext";
+import SearchBar from "../chat/SearchBar";
+import { AuthContext } from "../../contexts/AuthContext";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Tooltip, Typography } from "@mui/material";
 
@@ -70,7 +70,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
     refetch,
   } = useQuery({
     queryKey: ["conversations"],
-    queryFn: chatService.getConversations,
+    queryFn: chat.getConversations,
     enabled: isAuthenticated && location.pathname === "/chat",
   });
 
@@ -125,7 +125,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   // Rename mutation
   const renameMutation = useMutation({
     mutationFn: async ({ conversationId, new_title }) =>
-      await chatService.renameConversation(conversationId, new_title),
+      await chat.renameConversation(conversationId, new_title),
     onSuccess: (data, { conversationId, new_title }) => {
       // Update the specific conversation in the cache
       queryClient.setQueryData(["conversations"], (oldData) => {

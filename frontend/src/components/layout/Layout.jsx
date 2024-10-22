@@ -9,7 +9,7 @@ import { useMediaQuery, useTheme } from "@mui/material";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { DrawerContext } from "../contexts/DrawerContext";
+import { DrawerContext } from "../../contexts/DrawerContext";
 
 export default function Layout() {
   const theme = useTheme();

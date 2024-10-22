@@ -150,14 +150,14 @@ export default function SignIn(props) {
       {/* Display the message passed from ProtectedRoute */}
       <SignInContainer
         direction="column"
-        justifyContent="center" // Center the content vertically
-        alignItems="center" // Optional: Center the content horizontally
+        justifyContent="center"
+        alignItems="center"
       >
         <Box
           sx={{
             width: "100%",
-            maxWidth: "450px", // Consistent maximum width for both alert and card
-            margin: "0 auto", // Center the box horizontally
+            maxWidth: "450px",
+            margin: "0 auto",
           }}
         >
           {message && (

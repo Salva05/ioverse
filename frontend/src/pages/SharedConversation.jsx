@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { List, ListItem, ListItemText, Container, Alert, useTheme, useMediaQuery } from "@mui/material";
-import chatService from "../services/chatService";
+import chat from "../api/chat";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
@@ -92,7 +92,7 @@ export default function SharedConversation() {
   useEffect(() => {
     const fetchConversation = async () => {
       try {
-        const response = await chatService.getSharedConversation(share_token);
+        const response = await chat.getSharedConversation(share_token);
         setConversation(response.messages);
         setConversationTitle(response.title || "Untitled");
         scrollToBottom();
@@ -103,7 +103,6 @@ export default function SharedConversation() {
     };
 
     fetchConversation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [share_token]);
 
   const scrollToBottom = () => {
@@ -135,9 +134,9 @@ export default function SharedConversation() {
           alignItems: "center",
           width: "100%",
           height: "100vh",
-          paddingTop: "64px", // Height of AppBar
+          paddingTop: "64px",
           backgroundColor: theme.palette.background.default,
-          overflowY: "auto", // Enable scrolling on the entire page
+          overflowY: "auto",
         }}
       >
         <Container

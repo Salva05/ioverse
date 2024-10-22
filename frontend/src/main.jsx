@@ -12,7 +12,7 @@ import SharedConversation from "./pages/SharedConversation";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import ChatSystem from "./pages/ChatSystem";
 import "./styles/general.css";
-// Manages chaching, fetching and synchronization of server side data
+
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
@@ -46,7 +46,6 @@ createRoot(document.getElementById("root")).render(
       <QueryClientProvider client={queryClient}>
         <ConversationProvider>
           <ThemeProvider theme={theme}>
-            {/*Custom MUI theming*/}
             <RouterProvider router={router} />
           </ThemeProvider>
         </ConversationProvider>

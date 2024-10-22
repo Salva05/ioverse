@@ -4,8 +4,8 @@ import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { useMediaQuery, SpeedDial } from "@mui/material";
-import { DrawerContext } from "../contexts/DrawerContext";
-import { ConversationContext } from "../contexts/ConversationContext";
+import { DrawerContext } from "../../contexts/DrawerContext";
+import { ConversationContext } from "../../contexts/ConversationContext";
 
 export default function ChatDial() {
   const { setActiveConversation } =

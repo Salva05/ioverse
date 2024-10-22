@@ -18,15 +18,15 @@ import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ShareLinkDialog from "./ShareLinkDialog";
 import UnshareLinkDialog from "./UnshareLinkDialog";
-import handleDownload from "../services/handleDownload";
-import chatService from "../services/chatService";
+import handleDownload from "../../services/handleDownload";
+import chat from "../../api/chat";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ScheduleSendOutlinedIcon from "@mui/icons-material/ScheduleSendOutlined";
-import shareConversation from "../utils/shareConversation";
-import unshareConversation from "../utils/unshareConversation";
+import shareConversation from "../../utils/shareConversation";
+import unshareConversation from "../../utils/unshareConversation";
 import { toast } from "react-toastify";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -124,7 +124,7 @@ export default function OptionsMenu({ conversationId, onRename }) {
   // Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: async () =>
-      await chatService.deleteConversation(conversationId),
+      await chat.deleteConversation(conversationId),
     onSuccess: () => {
       // Invalidate the conversations query to refetch updated data
       queryClient.invalidateQueries(["conversations"]);

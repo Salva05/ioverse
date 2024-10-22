@@ -1,8 +1,8 @@
-import chatService from "./chatService";
+import chat from "../api/chat";
 
 const handleDownload = async (conversationId) => {
   try {
-    const data = await chatService.downloadConversation(conversationId);
+    const data = await chat.downloadConversation(conversationId);
 
     // Create a blob from the response data
     const blob = new Blob([data], { type: "application/pdf" });

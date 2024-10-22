@@ -1,4 +1,4 @@
-import axiosInstance from "../api/axiosInstance";
+import axiosInstance from "./axiosInstance";
 
 // Service for chat-related API calls
 const chatService = {

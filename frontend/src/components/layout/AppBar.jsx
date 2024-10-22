@@ -5,14 +5,14 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "@mui/material";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import ChatOptionsMenu from "./ChatOptionsMenu";
-import { AuthContext } from "../contexts/AuthContext";
-import LogoutButton from "./LogoutButton";
+import ChatOptionsMenu from "../chat/ChatOptionsMenu";
+import { AuthContext } from "../../contexts/AuthContext";
+import LogoutButton from "../LogoutButton";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",

@@ -22,8 +22,8 @@ import { DrawerContext } from "../contexts/DrawerContext";
 import { ConversationContext } from "../contexts/ConversationContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { mapMessages } from "../utils/mapMessages";
-import chatService from "../services/chatService";
-import ChatDial from "../components/ChatDial";
+import chat from "../api/chat";
+import ChatDial from "../components/chat/ChatDial";
 import TypingEffect from "../components/TypingEffect";
 
 const drawerWidth = 240;
@@ -62,8 +62,8 @@ const MessageItem = ({ sender, message }) => {
         <ListItemText
           sx={{
             "& code": {
-              whiteSpace: "pre-wrap", // Ensure code blocks wrap correctly
-              wordBreak: "break-word", // Ensure long code doesn't overflow
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
             },
           }}
         >
@@ -125,11 +125,10 @@ export default function ChatSystem() {
   const handleSend = async (messageText) => {
     if (!messageText.trim()) return; // Prevent sending empty messages
 
-    // Manually update the local state
     addMessage(messageText, false);
-    setInput(""); // Clear the input after sending
+    setInput("");
 
-    // Show typing indicator
+    // Typing indicator
     setTyping(true);
     scrollToBottom();
 
@@ -146,14 +145,13 @@ export default function ChatSystem() {
 
     addMessage(ai_message.message_body, true);
 
-    // Hide typing indicator
     setTyping(false);
     scrollToBottom();
   };
 
   async function processMessageToBackend(message) {
     try {
-      const response = await chatService.sendMessage(message);
+      const response = await chat.sendMessage(message);
       return response.ai_message;
     } catch (error) {
       console.error("Error sending message:", error);

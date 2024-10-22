@@ -1,6 +1,6 @@
 // ConversationContext.js
 import React, { createContext, useState } from "react";
-import chatService from "../services/chatService";
+import chat from "../api/chat";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const ConversationContext = createContext();
@@ -20,7 +20,7 @@ export const ConversationProvider = ({ children }) => {
       setActiveConversation(conversation);
     } else {
       // If not in cache, fetch from the server
-      const response = await chatService.getConversation(id);
+      const response = await chat.getConversation(id);
       setActiveConversation(response);
     }
   };

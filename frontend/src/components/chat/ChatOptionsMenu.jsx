@@ -1,8 +1,8 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Menu, MenuItem, IconButton, Box, Tooltip, Fade } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SettingsSharpIcon from "@mui/icons-material/SettingsSharp";
-import { ConversationContext } from "../contexts/ConversationContext";
+import { ConversationContext } from "../../contexts/ConversationContext";
 
 export default function ChatOptionsMenu() {
   const { setActiveConversation } =
