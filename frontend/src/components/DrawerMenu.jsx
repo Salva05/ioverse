@@ -24,7 +24,7 @@ import { toast } from "react-toastify";
 import SearchBar from "./SearchBar";
 import { AuthContext } from "../contexts/AuthContext";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { Tooltip } from "@mui/material";
+import { Tooltip, Typography } from "@mui/material";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -282,11 +282,35 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                               onBlur={() => setEditingConversationId(null)}
                               autoFocus
                               size="small"
-                              variant="standard"
-                              // Additional styling if needed
+                              variant="outlined" // Changed from 'standard' to 'outlined' for borders
+                              fullWidth
+                              InputProps={{
+                                // Ensures the text inside the TextField is black for readability
+                                style: { color: "#000" },
+                              }}
+                              // Optional: Add a name attribute for better form handling if needed
+                              name="conversationTitle"
+                              // Optional: Improve mobile experience by specifying the return key label
+                              inputProps={
+                                {
+                                  // 'done' is not a standard HTML attribute, but this hints to some mobile browsers
+                                  // Alternatively, use a form submission or other methods as below
+                                  // Placeholder: 'done' is not widely supported, so we rely on onKeyDown
+                                }
+                              }
                             />
                           ) : (
-                            conversation.title
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                color: "#fff", // Set text color to white
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {conversation.title}
+                            </Typography>
                           )
                         }
                         sx={{
@@ -295,8 +319,10 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                           flexGrow: 1,
                           // Conditionally apply maskImage only when not in edit mode
                           ...(editingConversationId !== conversation.id && {
-                            maskImage: "linear-gradient(to right, black 85%, transparent)",
-                            WebkitMaskImage: "linear-gradient(to right, black 85%, transparent)", // For Safari
+                            maskImage:
+                              "linear-gradient(to right, black 85%, transparent)",
+                            WebkitMaskImage:
+                              "linear-gradient(to right, black 85%, transparent)", // For Safari
                           }),
                         }}
                       />
