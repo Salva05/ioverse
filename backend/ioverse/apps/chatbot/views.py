@@ -79,7 +79,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Conversation.objects.filter(user = self.request.user)
     
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['post'])
     def share(self, request, pk=None):
         """
         Custom action to share a conversation.
@@ -113,7 +113,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
     
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['post'])
     def unshare(self, request, pk=None):
         """
         Custom action to unshare a conversation.
@@ -127,7 +127,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
         else:
             return Response({'detail': 'Conversation is not shared.'}, status=status.HTTP_400_BAD_REQUEST)
         
-    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
         """
         Custom action to download a conversation as a PDF with improved styling and Markdown support.
@@ -242,7 +242,19 @@ class ConversationViewSet(viewsets.ModelViewSet):
         doc.build(story)
 
         return response
+    
+    @action(detail=True, methods=['patch'])
+    def rename(self, request, pk=None):
+        conversation = self.get_object()
+        new_title = request.data.get('new_title', None)
         
+        if not new_title:
+            return Response({'error': 'Title is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        conversation.title = new_title
+        conversation.save()
+        
+        return Response({'success': 'Title updated successfully'}, status=status.HTTP_200_OK)
         
 class SharedConversationView(APIView):
     permission_classes = [permissions.AllowAny] # Public access
