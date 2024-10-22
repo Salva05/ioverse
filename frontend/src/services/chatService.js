@@ -31,6 +31,12 @@ const chatService = {
     return response.data;
   },
 
+  // PATCH New Title - Rename
+  renameConversation: async (id, new_title) => {
+    const response = await axiosInstance.patch(`/chatbot/conversations/${id}/rename/`, { new_title })
+    return response.data;
+  },
+
   // DELETE
   deleteConversation: async (id) => {
     const response = await axiosInstance.delete(

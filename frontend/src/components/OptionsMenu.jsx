@@ -21,13 +21,13 @@ import UnshareLinkDialog from "./UnshareLinkDialog";
 import handleDownload from "../services/handleDownload";
 import chatService from "../services/chatService";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ScheduleSendOutlinedIcon from "@mui/icons-material/ScheduleSendOutlined";
 import shareConversation from "../utils/shareConversation";
 import unshareConversation from "../utils/unshareConversation";
+import { toast } from "react-toastify";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={800} />;
@@ -44,7 +44,7 @@ const calculateRemainingHours = (expires_at) => {
   return remainingHours > 0 ? Math.ceil(remainingHours) : 0;
 };
 
-export default function OptionsMenu({ conversationId }) {
+export default function OptionsMenu({ conversationId, onRename }) {
   const [isOptionMenuOpen, setOptionMenuOpen] = useState(false);
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -83,6 +83,8 @@ export default function OptionsMenu({ conversationId }) {
     },
     onError: (error) => {
       console.error("Error sharing conversation:", error);
+      const errorMessage = error.response?.data?.detail || "An error occurred while sharing the conversation.";
+      toast.error("Error sharing the conversation: " + errorMessage)
     },
     onSettled: () => {
       setIsSharing(false);
@@ -110,10 +112,29 @@ export default function OptionsMenu({ conversationId }) {
     },
     onError: (error) => {
       console.error("Error unsharing conversation:", error);
+      const errorMessage = error.response?.data?.detail || "An error occurred while unsharing the conversation.";
+      toast.error("Error unsharing the conversation: " + errorMessage)
     },
     onSettled: () => {
       setIsUnsharing(false);
       isUnsharingRef.current = false;
+    },
+  });
+
+  // Delete Mutation
+  const deleteMutation = useMutation({
+    mutationFn: async () =>
+      await chatService.deleteConversation(conversationId),
+    onSuccess: () => {
+      // Invalidate the conversations query to refetch updated data
+      queryClient.invalidateQueries(["conversations"]);
+      setConfirmOpen(false);
+      // Optionally, handle UI updates or activate another conversation
+    },
+    onError: (error) => {
+      console.error("Failed to delete conversation:", error);
+      const errorMessage = error.response?.data?.detail || "An error occurred while deleting the conversation.";
+      toast.error("Error deleting the conversation: " + errorMessage)
     },
   });
 
@@ -147,21 +168,6 @@ export default function OptionsMenu({ conversationId }) {
     checkExpiration();
   }, [isOptionMenuOpen, conversation, conversationId, unshareMutation]);
 
-  // Delete Mutation
-  const deleteMutation = useMutation({
-    mutationFn: async () =>
-      await chatService.deleteConversation(conversationId),
-    onSuccess: () => {
-      // Invalidate the conversations query to refetch updated data
-      queryClient.invalidateQueries(["conversations"]);
-      setConfirmOpen(false);
-      // Optionally, handle UI updates or activate another conversation
-    },
-    onError: (error) => {
-      console.error("Failed to delete conversation:", error);
-    },
-  });
-
   // Handler functions
   const handleConfirmShareDialog = (duration) => {
     if (isSharingRef.current) return;
@@ -188,7 +194,10 @@ export default function OptionsMenu({ conversationId }) {
       handleAction: (e, popupState) => {
         e.stopPropagation();
         popupState.close();
-        console.log("Rename");
+        // Defer the execution of 'onRename' to the end of the call stack
+        // preventing the loss of focus due to menu closure immediately after
+        // the rendering of the parent's ListItem component
+        setTimeout(() => onRename(conversationId), 0); // Notify the parent to enter in edit mode
       },
     },
     {
@@ -217,15 +226,6 @@ export default function OptionsMenu({ conversationId }) {
         e.stopPropagation();
         popupState.close();
         handleDownload(conversationId);
-      },
-    },
-    {
-      name: "Archive",
-      icon: <ArchiveOutlinedIcon fontSize="small" />,
-      handleAction: (e, popupState) => {
-        e.stopPropagation();
-        popupState.close();
-        console.log("Archive");
       },
     },
     {

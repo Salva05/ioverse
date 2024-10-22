@@ -18,11 +18,11 @@ export default function Layout() {
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => {
-    setOpen(false);
     const menuButton = document.getElementById("menu-button");
     if (menuButton) {
       menuButton.focus();
     }
+    setOpen(false);
   };
 
   return (

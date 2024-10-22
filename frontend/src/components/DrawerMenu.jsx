@@ -9,6 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
 import MailIcon from "@mui/icons-material/Mail";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -17,7 +18,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ConversationContext } from "../contexts/ConversationContext";
 import OptionsMenu from "./OptionsMenu";
 import chatService from "../services/chatService";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Fade from "@mui/material/Fade";
 import { toast } from "react-toastify";
 import SearchBar from "./SearchBar";
@@ -57,8 +58,10 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const location = useLocation();
   const { activeConversation, activateConversation } =
     useContext(ConversationContext);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated } = useContext(AuthContext);
+  const [editingConversationId, setEditingConversationId] = useState(null);
   const {
     data: conversationsData,
     error,
@@ -112,6 +115,52 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
     return sortedConversations[0];
+  };
+
+  // Rename hanlder
+  const handleRename = (conversationId) => {
+    setEditingConversationId(conversationId);
+  };
+
+  // Rename mutation
+  const renameMutation = useMutation({
+    mutationFn: async ({ conversationId, new_title }) =>
+      await chatService.renameConversation(conversationId, new_title),
+    onSuccess: (data, { conversationId, new_title }) => {
+      // Update the specific conversation in the cache
+      queryClient.setQueryData(["conversations"], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          results: oldData.results.map((conv) =>
+            conv.id === conversationId ? { ...conv, title: new_title } : conv
+          ),
+        };
+      });
+    },
+    onError: (error) => {
+      console.log("Error renaming the conversation:", error);
+      // Extract meaningful message from the error
+      const errorMessage =
+        error.response?.data?.detail ||
+        "An error occurred while renaming the conversation.";
+      toast.error("Error renaming the conversation: " + errorMessage);
+    },
+  });
+
+  const handleTitleKeyDown = (e, conversationId) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const newTitle = e.target.value.trim();
+      if (newTitle) {
+        renameMutation.mutate({ conversationId, new_title: newTitle });
+        setEditingConversationId(null);
+      } else {
+        toast.error("Title cannot be empty.");
+      }
+    } else if (e.key === "Escape") {
+      setEditingConversationId(null);
+    }
   };
 
   const handleConversationClick = (id) => {
@@ -223,18 +272,38 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                       }}
                     >
                       <ListItemText
-                        primary={conversation.title}
+                        primary={
+                          editingConversationId === conversation.id ? (
+                            <TextField
+                              defaultValue={conversation.title}
+                              onKeyDown={(e) =>
+                                handleTitleKeyDown(e, conversation.id)
+                              }
+                              onBlur={() => setEditingConversationId(null)}
+                              autoFocus
+                              size="small"
+                              variant="standard"
+                              // Additional styling if needed
+                            />
+                          ) : (
+                            conversation.title
+                          )
+                        }
                         sx={{
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           flexGrow: 1,
-                          maskImage:
-                            "linear-gradient(to right, black 85%, transparent)",
-                          WebkitMaskImage:
-                            "linear-gradient(to right, black 85%, transparent)", // For Safari
+                          // Conditionally apply maskImage only when not in edit mode
+                          ...(editingConversationId !== conversation.id && {
+                            maskImage: "linear-gradient(to right, black 85%, transparent)",
+                            WebkitMaskImage: "linear-gradient(to right, black 85%, transparent)", // For Safari
+                          }),
                         }}
                       />
-                      <OptionsMenu conversationId={conversation.id} />
+                      <OptionsMenu
+                        conversationId={conversation.id}
+                        onRename={handleRename}
+                      />
                     </ListItemButton>
                   </ListItem>
                 </Fade>
