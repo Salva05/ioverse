@@ -1,5 +1,4 @@
-// OptionsMenu.jsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useMemo, useState } from "react";
 import {
   IconButton,
   Menu,
@@ -13,18 +12,20 @@ import {
   Typography,
   Fade,
 } from "@mui/material";
-import { MoreVert } from "@mui/icons-material";
-import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
+import {
+  MoreVert,
+  DeleteOutlineOutlined as DeleteOutlineOutlinedIcon,
+  DriveFileRenameOutlineOutlined as DriveFileRenameOutlineOutlinedIcon,
+  SendOutlined as SendOutlinedIcon,
+  FileDownloadOutlined as FileDownloadOutlinedIcon,
+  ScheduleSendOutlined as ScheduleSendOutlinedIcon,
+} from "@mui/icons-material";
+import PopupState, { bindMenu } from "material-ui-popup-state";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ShareLinkDialog from "./ShareLinkDialog";
 import UnshareLinkDialog from "./UnshareLinkDialog";
 import handleDownload from "../../services/handleDownload";
 import chat from "../../api/chat";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
-import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import ScheduleSendOutlinedIcon from "@mui/icons-material/ScheduleSendOutlined";
 import shareConversation from "../../utils/shareConversation";
 import unshareConversation from "../../utils/unshareConversation";
 import { toast } from "react-toastify";
@@ -44,6 +45,13 @@ const calculateRemainingHours = (expires_at) => {
   return remainingHours > 0 ? Math.ceil(remainingHours) : 0;
 };
 
+// Handler for errors
+const handleError = (msg, genericMsg, error) => {
+  console.error(msg, error);
+  const errorMessage = error.response?.data?.detail || genericMsg;
+  toast.error(msg + errorMessage);
+};
+
 export default function OptionsMenu({ conversationId, onRename }) {
   const [isOptionMenuOpen, setOptionMenuOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -56,9 +64,13 @@ export default function OptionsMenu({ conversationId, onRename }) {
   const isUnsharingRef = useRef(false);
 
   // Retrieve the specific conversation from the cache
-  const conversation = queryClient
-    .getQueryData(["conversations"])
-    ?.results.find((conv) => conv.id === conversationId);
+  const conversation = useMemo(
+    () =>
+      queryClient
+        .getQueryData(["conversations"])
+        ?.results.find((conv) => conv.id === conversationId),
+    [queryClient, conversationId]
+  );
 
   // Share Mutation
   const shareMutation = useMutation({
@@ -77,14 +89,15 @@ export default function OptionsMenu({ conversationId, onRename }) {
           ),
         };
       });
-      // Optionally, you can refetch the active conversation or update it in context
       setShareDialogOpen(false);
       setUnshareDialogOpen(true);
     },
     onError: (error) => {
-      console.error("Error sharing conversation:", error);
-      const errorMessage = error.response?.data?.detail || "An error occurred while sharing the conversation.";
-      toast.error("Error sharing the conversation: " + errorMessage)
+      handleError(
+        "Error sharing conversation: ",
+        "An error occurred while sharing the conversation.",
+        error
+      );
     },
     onSettled: () => {
       setIsSharing(false);
@@ -111,9 +124,11 @@ export default function OptionsMenu({ conversationId, onRename }) {
       setUnshareDialogOpen(false);
     },
     onError: (error) => {
-      console.error("Error unsharing conversation:", error);
-      const errorMessage = error.response?.data?.detail || "An error occurred while unsharing the conversation.";
-      toast.error("Error unsharing the conversation: " + errorMessage)
+      handleError(
+        "Error unsharing conversation: ",
+        "An error occurred while unsharing the conversation.",
+        error
+      )
     },
     onSettled: () => {
       setIsUnsharing(false);
@@ -123,18 +138,18 @@ export default function OptionsMenu({ conversationId, onRename }) {
 
   // Delete Mutation
   const deleteMutation = useMutation({
-    mutationFn: async () =>
-      await chat.deleteConversation(conversationId),
+    mutationFn: async () => await chat.deleteConversation(conversationId),
     onSuccess: () => {
       // Invalidate the conversations query to refetch updated data
       queryClient.invalidateQueries(["conversations"]);
       setConfirmOpen(false);
-      // Optionally, handle UI updates or activate another conversation
     },
     onError: (error) => {
-      console.error("Failed to delete conversation:", error);
-      const errorMessage = error.response?.data?.detail || "An error occurred while deleting the conversation.";
-      toast.error("Error deleting the conversation: " + errorMessage)
+      handleError(
+        "Failed to delete conversation: ",
+        "An error occurred while deleting the conversation.",
+        error
+      );
     },
   });
 
@@ -268,7 +283,7 @@ export default function OptionsMenu({ conversationId, onRename }) {
                 },
               }}
               onClose={(e, reason) => {
-                setOptionMenuOpen(true);
+                setOptionMenuOpen(false);
                 if (e) e.stopPropagation();
                 popupState.close();
               }}

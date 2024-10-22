@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/TypingEffect.css";
+import "../../styles/TypingEffect.css";
 
 const TypingEffect = () => {
   return (

@@ -1,7 +1,7 @@
 import axiosInstance from "./axiosInstance";
 
 // Service for chat-related API calls
-const chatService = {
+const chat = {
   // GET
   getConversations: async () => {
     const response = await axiosInstance.get("/chatbot/conversations");
@@ -55,4 +55,4 @@ const chatService = {
   },
 };
 
-export default chatService;
+export default chat;

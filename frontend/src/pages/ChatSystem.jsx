@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   Box,
-  Paper,
   List,
-  ListItem,
-  ListItemText,
   TextField,
   IconButton,
   InputAdornment,
@@ -14,70 +11,16 @@ import {
   Toolbar,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import ReactMarkdown from "react-markdown";
-import rehypeSanitize from "rehype-sanitize";
-import remarkGfm from "remark-gfm";
-import he from "he";
 import { DrawerContext } from "../contexts/DrawerContext";
 import { ConversationContext } from "../contexts/ConversationContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { mapMessages } from "../utils/mapMessages";
 import chat from "../api/chat";
 import ChatDial from "../components/chat/ChatDial";
-import TypingEffect from "../components/TypingEffect";
+import TypingEffect from "../components/chat/TypingEffect";
+import MessageItem from "../components/chat/MessageItem";
 
 const drawerWidth = 240;
-
-const MessageItem = ({ sender, message }) => {
-  const isUser = sender === "You";
-  const theme = useTheme();
-
-  return (
-    <ListItem
-      sx={{
-        justifyContent: isUser ? "flex-end" : "flex-start",
-        display: "flex",
-        paddingX: { xs: "4px", sm: "8px", md: "12px" },
-        width: "100%",
-      }}
-    >
-      <Paper
-        elevation={3}
-        sx={{
-          marginY: "8px",
-          padding: { xs: "8px 12px", sm: "10px 15px", md: "12px 18px" },
-          backgroundColor: isUser
-            ? theme.palette.primary.main
-            : theme.palette.grey[300],
-          color: isUser
-            ? theme.palette.primary.contrastText
-            : theme.palette.text.primary,
-          borderRadius: isUser ? "15px 0 15px 15px" : "0 15px 15px 15px",
-          maxWidth: "560px",
-          width: "auto",
-          wordBreak: "break-word",
-          overflowWrap: "break-word",
-        }}
-      >
-        <ListItemText
-          sx={{
-            "& code": {
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            },
-          }}
-        >
-          <ReactMarkdown
-            rehypePlugins={[rehypeSanitize]}
-            remarkPlugins={[remarkGfm]}
-          >
-            {he.decode(message)}
-          </ReactMarkdown>
-        </ListItemText>
-      </Paper>
-    </ListItem>
-  );
-};
 
 export default function ChatSystem() {
   const { activeConversation, activateConversation } =
