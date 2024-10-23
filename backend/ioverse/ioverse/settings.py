@@ -32,6 +32,16 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
+# Path to keys
+PRIVATE_KEY_PATH = BASE_DIR / 'keys/private.pem'
+PUBLIC_KEY_PATH = BASE_DIR / 'keys/public.pem'
+
+with open(PRIVATE_KEY_PATH, 'r') as private_file:
+    PRIVATE_KEY = private_file.read()
+    
+with open(PUBLIC_KEY_PATH, 'r') as public_file:
+    PUBLIC_KEY = public_file.read()
+
 ALLOWED_HOSTS = ['*']
 
 
@@ -51,8 +61,6 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
@@ -72,6 +80,10 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ALGORITHM': 'RS256',
+    'SIGNING_KEY': PRIVATE_KEY,
+    'VERIFYING_KEY': PUBLIC_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 CACHES = {
