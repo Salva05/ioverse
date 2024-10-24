@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import he from "he";
 
-const MessageItem = ({ sender, message }) => {
+const MessageItem = ({ sender, message, isOptimistic }) => {
   const isUser = sender === "You";
   const theme = useTheme();
 
@@ -29,11 +29,14 @@ const MessageItem = ({ sender, message }) => {
           color: isUser
             ? theme.palette.primary.contrastText
             : theme.palette.text.primary,
-          borderRadius: isUser ? "15px 0 15px 15px" : "0 15px 15px 15px",
+          borderRadius: isUser
+            ? "15px 0 15px 15px"
+            : "0 15px 15px 15px",
           maxWidth: "560px",
           width: "auto",
           wordBreak: "break-word",
           overflowWrap: "break-word",
+          opacity: isOptimistic ? 0.6 : 1, // Visual cue for optimistic messages
         }}
       >
         <ListItemText

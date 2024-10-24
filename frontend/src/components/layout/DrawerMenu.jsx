@@ -269,6 +269,12 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                             backgroundColor: theme.palette.action.hover,
                           },
                         },
+                        "&:not(.Mui-selected)": {
+                          backgroundColor: "#2d2d2d",
+                          "&:hover": {
+                            backgroundColor: theme.palette.action.hover,
+                          },
+                        },
                       }}
                     >
                       <ListItemText
@@ -282,28 +288,18 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                               onBlur={() => setEditingConversationId(null)}
                               autoFocus
                               size="small"
-                              variant="outlined" // Changed from 'standard' to 'outlined' for borders
+                              variant="outlined"
                               fullWidth
                               InputProps={{
-                                // Ensures the text inside the TextField is black for readability
-                                style: { color: "#000" },
+                                style: { color: "#fff" },
                               }}
-                              // Optional: Add a name attribute for better form handling if needed
                               name="conversationTitle"
-                              // Optional: Improve mobile experience by specifying the return key label
-                              inputProps={
-                                {
-                                  // 'done' is not a standard HTML attribute, but this hints to some mobile browsers
-                                  // Alternatively, use a form submission or other methods as below
-                                  // Placeholder: 'done' is not widely supported, so we rely on onKeyDown
-                                }
-                              }
                             />
                           ) : (
                             <Typography
                               variant="body1"
                               sx={{
-                                color: "#fff", // Set text color to white
+                                color: "#fff",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -317,7 +313,6 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           flexGrow: 1,
-                          // Conditionally apply maskImage only when not in edit mode
                           ...(editingConversationId !== conversation.id && {
                             maskImage:
                               "linear-gradient(to right, black 85%, transparent)",

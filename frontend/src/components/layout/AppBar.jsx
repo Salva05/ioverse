@@ -70,7 +70,7 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
           )}
         </Box>
         <Typography variant="h6" noWrap component="div">
-          Dark Menu
+          IOverse
         </Typography>
         {isAuthenticated ? (
           <Box

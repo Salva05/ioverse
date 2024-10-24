@@ -7,7 +7,6 @@ import { ConversationProvider } from "./contexts/ConversationContext";
 import theme from "./themes/theme";
 import { ThemeProvider } from "@mui/material";
 import Login from "./pages/Login";
-import { AuthProvider } from "./contexts/AuthContext";
 import SharedConversation from "./pages/SharedConversation";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import ChatSystem from "./pages/ChatSystem";
@@ -42,14 +41,12 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <ConversationProvider>
-          <ThemeProvider theme={theme}>
-            <RouterProvider router={router} />
-          </ThemeProvider>
-        </ConversationProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConversationProvider>
+        <ThemeProvider theme={theme}>
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </ConversationProvider>
+    </QueryClientProvider>
   </StrictMode>
 );

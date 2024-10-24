@@ -6,6 +6,7 @@ import DrawerMenu from "./DrawerMenu";
 import MainContent from "./MainContent";
 import { Outlet } from "react-router-dom";
 import { useMediaQuery, useTheme } from "@mui/material";
+import { AuthProvider } from "../../contexts/AuthContext";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,35 +27,37 @@ export default function Layout() {
   };
 
   return (
-    <DrawerContext.Provider value={{ open, isSmallScreen }}>
-      <Box sx={{ display: "flex", height: "100vh", width: "100%" }}>
-        <CssBaseline />
-        <AppBar
-          open={open}
-          isSmallScreen={isSmallScreen}
-          handleDrawerOpen={handleDrawerOpen}
-        />
-        <DrawerMenu
-          open={open}
-          isSmallScreen={isSmallScreen}
-          handleDrawerClose={handleDrawerClose}
-        />
-        <MainContent open={open} isSmallScreen={isSmallScreen}>
-          <Outlet />
-        </MainContent>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-      </Box>
-    </DrawerContext.Provider>
+    <AuthProvider>
+      <DrawerContext.Provider value={{ open, isSmallScreen }}>
+        <Box sx={{ display: "flex", height: "100vh", width: "100%" }}>
+          <CssBaseline />
+          <AppBar
+            open={open}
+            isSmallScreen={isSmallScreen}
+            handleDrawerOpen={handleDrawerOpen}
+          />
+          <DrawerMenu
+            open={open}
+            isSmallScreen={isSmallScreen}
+            handleDrawerClose={handleDrawerClose}
+          />
+          <MainContent open={open} isSmallScreen={isSmallScreen}>
+            <Outlet />
+          </MainContent>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
+        </Box>
+      </DrawerContext.Provider>
+    </AuthProvider>
   );
 }

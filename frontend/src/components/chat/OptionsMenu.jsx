@@ -64,13 +64,9 @@ export default function OptionsMenu({ conversationId, onRename }) {
   const isUnsharingRef = useRef(false);
 
   // Retrieve the specific conversation from the cache
-  const conversation = useMemo(
-    () =>
-      queryClient
-        .getQueryData(["conversations"])
-        ?.results.find((conv) => conv.id === conversationId),
-    [queryClient, conversationId]
-  );
+  const conversation = queryClient
+    .getQueryData(["conversations"])
+    ?.results.find((conv) => conv.id === conversationId);
 
   // Share Mutation
   const shareMutation = useMutation({
@@ -128,7 +124,7 @@ export default function OptionsMenu({ conversationId, onRename }) {
         "Error unsharing conversation: ",
         "An error occurred while unsharing the conversation.",
         error
-      )
+      );
     },
     onSettled: () => {
       setIsUnsharing(false);
