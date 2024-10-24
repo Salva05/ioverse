@@ -43,7 +43,7 @@ export default function ChatSystem() {
   }, [activeConversation]);
 
   const updateLocalState = () => {
-    const mappedMessages = mapMessages(activeConversation.messages);
+    const mappedMessages = mapMessages(activeConversation.messages);  // Gives the messages a common structure
     setMessages(mappedMessages);
   };
 
@@ -107,6 +107,14 @@ export default function ChatSystem() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  // Function to listen for 'enter' key and send message
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent the new line
+      handleSend(input);
+    }
+  }
 
   // Auto-scroll when messages change
   useEffect(() => {
@@ -202,6 +210,7 @@ export default function ChatSystem() {
             placeholder="Type your message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
