@@ -25,6 +25,8 @@ import SearchBar from "../chat/SearchBar";
 import { AuthContext } from "../../contexts/AuthContext";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { Tooltip, Typography } from "@mui/material";
+import sortedConversation from "../../utils/sortedConversation";
+import "../../styles/scrollbar.css";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -56,7 +58,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const { activeConversation, activateConversation } =
+  const { activeConversationId, activateConversation } =
     useContext(ConversationContext);
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,7 +72,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
     refetch,
   } = useQuery({
     queryKey: ["conversations"],
-    queryFn: chat.getConversations,
+    queryFn: async () => await chat.getConversations(),
     enabled: isAuthenticated && location.pathname === "/chat",
   });
 
@@ -94,28 +96,14 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
     if (
       conversationsData &&
       conversationsData.results.length > 0 &&
-      !activeConversation
+      !activeConversationId
     ) {
-      const latestConversation = sortedConversations();
-      activateConversation(latestConversation.id);
+      const latestConversation = sortedConversation(conversationsData);
+      if (latestConversation) {
+        activateConversation(latestConversation.id);
+      }
     }
   }, [conversationsData]);
-
-  // Update the active conversation when a conversation get deleted
-  useEffect(() => {
-    if (conversationsData && conversationsData.results.length > 0) {
-      const latestConversation = sortedConversations();
-      activateConversation(latestConversation.id);
-    }
-  }, [conversationsData]);
-
-  const sortedConversations = () => {
-    // Sort conversations by 'created_at' in descending order
-    const sortedConversations = [...conversationsData.results].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    );
-    return sortedConversations[0];
-  };
 
   // Rename hanlder
   const handleRename = (conversationId) => {
@@ -183,6 +171,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       anchor="left"
       open={open}
       onClose={handleDrawerClose}
+      className="drawer-scrollbar"
     >
       <DrawerHeader>
         <IconButton onClick={handleDrawerClose}>
@@ -255,12 +244,12 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
           ) : (
             filteredConversations
               // Backend should also sort
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
               .map((conversation) => (
                 <Fade in={true} timeout={1500} key={conversation.id}>
                   <ListItem key={conversation.id} disablePadding>
                     <ListItemButton
-                      selected={activeConversation?.id === conversation.id}
+                      selected={activeConversationId === conversation.id}
                       onClick={() => handleConversationClick(conversation.id)}
                       sx={{
                         "&.Mui-selected": {
@@ -274,6 +263,12 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                           "&:hover": {
                             backgroundColor: theme.palette.action.hover,
                           },
+                        },
+                        "&.Mui-focused, &.Mui-focusVisible": {
+                          backgroundColor:
+                            activeConversationId === conversation.id
+                              ? theme.palette.action.selected
+                              : "#2d2d2d",
                         },
                       }}
                     >
@@ -294,6 +289,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                                 style: { color: "#fff" },
                               }}
                               name="conversationTitle"
+                              onFocus={(e) => e.stopPropagation()}
                             />
                           ) : (
                             <Typography

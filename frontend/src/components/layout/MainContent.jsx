@@ -9,7 +9,7 @@ const Main = styled("main", {
   shouldForwardProp: (prop) => prop !== "open" && prop !== "isSmallScreen",
 })(({ theme, open, isSmallScreen }) => ({
   flexGrow: 1,
-  padding: theme.spacing(3),
+  padding: theme.spacing(0.5),
   display: "flex",
   flexDirection: "column",
   height: "100vh",

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, useState } from "react";
+import React, { useEffect, useRef, useMemo, useState, useContext } from "react";
 import {
   IconButton,
   Menu,
@@ -29,6 +29,8 @@ import chat from "../../api/chat";
 import shareConversation from "../../utils/shareConversation";
 import unshareConversation from "../../utils/unshareConversation";
 import { toast } from "react-toastify";
+import { ConversationContext } from "../../contexts/ConversationContext";
+import sortedConversation from "../../utils/sortedConversation";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={800} />;
@@ -53,6 +55,8 @@ const handleError = (msg, genericMsg, error) => {
 };
 
 export default function OptionsMenu({ conversationId, onRename }) {
+  const { activeConversationId, activateConversation } =
+    useContext(ConversationContext);
   const [isOptionMenuOpen, setOptionMenuOpen] = useState(false);
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -135,9 +139,19 @@ export default function OptionsMenu({ conversationId, onRename }) {
   // Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: async () => await chat.deleteConversation(conversationId),
-    onSuccess: () => {
+    onSuccess: async () => {
       // Invalidate the conversations query to refetch updated data
-      queryClient.invalidateQueries(["conversations"]);
+      await queryClient.invalidateQueries(["conversations"]);
+
+      // Get cached conversations data
+      const conversationsData = queryClient.getQueryData(["conversations"]); 
+      
+      // Update the active conversation
+      if (conversationId == activeConversationId && conversationsData) {
+        const latestConversation = sortedConversation(conversationsData);
+        activateConversation(latestConversation?.id);
+      }
+
       setConfirmOpen(false);
     },
     onError: (error) => {

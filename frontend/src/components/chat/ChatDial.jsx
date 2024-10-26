@@ -8,7 +8,7 @@ import { DrawerContext } from "../../contexts/DrawerContext";
 import { ConversationContext } from "../../contexts/ConversationContext";
 
 export default function ChatDial() {
-  const { setActiveConversation } =
+  const { setActiveConversationId } =
     useContext(ConversationContext);
   const theme = useTheme();
   const { open: drawerOpen } = useContext(DrawerContext);
@@ -34,7 +34,7 @@ export default function ChatDial() {
       icon: <AddOutlinedIcon />,
       name: "New",
       handleAction: () => {
-        setActiveConversation(null);
+        setActiveConversationId(null);
       },
     },
   ];

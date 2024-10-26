@@ -5,7 +5,7 @@ import SettingsSharpIcon from "@mui/icons-material/SettingsSharp";
 import { ConversationContext } from "../../contexts/ConversationContext";
 
 export default function ChatOptionsMenu() {
-  const { setActiveConversation } =
+  const { setActiveConversationId } =
     useContext(ConversationContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -27,7 +27,7 @@ export default function ChatOptionsMenu() {
       name: "New",
       icon: <AddCircleIcon fontSize="small" sx={{ marginRight: 1 }} />,
       handleClick: () => {
-        setActiveConversation(null);
+        setActiveConversationId(null);
         handleMenuClose();
       },
     },

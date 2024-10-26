@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect, useContext, useMemo } from "react";
 import {
   Box,
   List,
@@ -13,93 +13,143 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import { DrawerContext } from "../contexts/DrawerContext";
 import { ConversationContext } from "../contexts/ConversationContext";
-import { useQueryClient } from "@tanstack/react-query";
-import { mapMessages } from "../utils/mapMessages";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import chat from "../api/chat";
 import ChatDial from "../components/chat/ChatDial";
 import TypingEffect from "../components/chat/TypingEffect";
 import MessageItem from "../components/chat/MessageItem";
+import { toast } from "react-toastify";
 
 const drawerWidth = 240;
 
 export default function ChatSystem() {
-  const { activeConversation, activateConversation } =
+  const { activeConversationId, activateConversation } =
     useContext(ConversationContext);
+  const [tempMessage, setTempMessage] = useState(null);
   const [typing, setTyping] = useState(false);
   const queryClient = useQueryClient();
-  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { open: drawerOpen } = useContext(DrawerContext);
 
+  // Ensure that onload, any previous temp message is removed
+  // Has to be done here to prevent flickering effect
   useEffect(() => {
-    if (activeConversation && activeConversation.messages) {
-      updateLocalState();
-    } else {
-      setMessages([]);
-    }
-  }, [activeConversation]);
+    setTempMessage(null);
+  }, [activeConversationId]);
 
-  const updateLocalState = () => {
-    const mappedMessages = mapMessages(activeConversation.messages);  // Gives the messages a common structure
-    setMessages(mappedMessages);
-  };
+  // Fetch conversation from existing query
+  const conversation = useMemo(() => {
+    return queryClient
+      .getQueryData(["conversations"])
+      ?.results.find((conv) => conv.id === activeConversationId);
+  }, [activeConversationId, queryClient.getQueryData(["conversations"])]);
 
-  const addMessage = (message, isAi) => {
-    const formattedMessage = message.replace(/\n/g, "  \n");
+  const sendMessageMutation = useMutation({
+    mutationKey: ["sendMessage"],
+    mutationFn: async ({ message_body, conversation_id }) => {
+      return await chat.sendMessage({ message_body, conversation_id });
+    },
+    onMutate: async ({ message_body }) => {
+      // Cancel outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries(["conversations"]);
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        message: formattedMessage,
-        sentTime: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        sender: isAi ? "Chatbot" : "You",
-        direction: isAi ? "incoming" : "outgoing",
-      },
-    ]);
-  };
+      const previousConversations = queryClient.getQueryData(["conversations"]);
+
+      const optimisticMessage = {
+        id: Date.now(),
+        conversation_id: activeConversationId,
+        message_body,
+        sender: "user",
+        timestamp: new Date().toISOString(),
+      };
+
+      // If new conversation mock a conversation
+      if (!conversation) {
+        setTempMessage(optimisticMessage.message_body);
+      }
+
+      queryClient.setQueryData(["conversations"], (oldData) => {
+        if (!oldData) return oldData;
+
+        return {
+          ...oldData,
+          results: oldData.results.map((conv) =>
+            conv.id === activeConversationId
+              ? { ...conv, messages: [...conv.messages, optimisticMessage] }
+              : conv
+          ),
+        };
+      });
+
+      // Set typing indicator
+      setTyping(true);
+
+      return { previousConversations, optimisticMessage };
+    },
+    onSuccess: async (data, variables, context) => {
+      const { optimisticMessage } = context;
+
+      if (!conversation) {
+        await queryClient.invalidateQueries(["conversations"]);
+        activateConversation(data.user_message.conversation_id);
+      } else {
+        queryClient.setQueryData(["conversations"], (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            results: oldData.results.map((conv) =>
+              conv.id === activeConversationId
+                ? {
+                    ...conv,
+                    messages: [
+                      ...conv.messages.filter(
+                        (msg) => msg.id !== optimisticMessage.id
+                      ),
+                      data.user_message,
+                      data.ai_message,
+                    ],
+                  }
+                : conv
+            ),
+          };
+        });
+      }
+      
+      setTyping(false);
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousConversations) {
+        queryClient.setQueryData(
+          ["conversations"],
+          context.previousConversations
+        );
+      }
+
+      const errorMessage =
+        error.response?.data?.detail ||
+        "An error occurred while sending the message.";
+      toast.error("Error: " + errorMessage);
+    },
+  });
 
   // Function to handle sending a message
-  const handleSend = async (messageText) => {
-    if (!messageText.trim()) return; // Prevent sending empty messages
+  const handleSend = async (message) => {
+    if (!message.trim()) return;
 
-    addMessage(messageText, false);
+    sendMessageMutation.mutate({
+      message_body: message,
+      conversation_id: activeConversationId,
+    });
+
     setInput("");
-
-    // Typing indicator
-    setTyping(true);
     scrollToBottom();
 
-    const backend_message = {
-      conversation_id: activeConversation ? activeConversation.id : null,
-      message_body: messageText,
-    };
-
-    // Process the message and get AI response
-    const ai_message = await processMessageToBackend(backend_message);
-
-    // If it's the first message of a new conversation, trigger a refetch() in DrawerMenu
-    if (!activeConversation) queryClient.invalidateQueries(["conversations"]);
-
-    addMessage(ai_message.message_body, true);
-
-    setTyping(false);
-    scrollToBottom();
+    if (!activeConversationId) queryClient.invalidateQueries(["conversations"]);
   };
-
-  async function processMessageToBackend(message) {
-    try {
-      const response = await chat.sendMessage(message);
-      return response.ai_message;
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  }
 
   // Function to scroll to the bottom of the messages
   const scrollToBottom = () => {
@@ -110,16 +160,16 @@ export default function ChatSystem() {
 
   // Function to listen for 'enter' key and send message
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // Prevent the new line
       handleSend(input);
     }
-  }
+  };
 
   // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [conversation]);
 
   return (
     <>
@@ -157,14 +207,20 @@ export default function ChatSystem() {
             }}
           >
             <List sx={{ flexGrow: 1 }}>
-              {messages.length > 0 ? (
-                messages.map((msg, index) => (
+              {conversation?.messages && conversation.messages.length > 0 ? (
+                conversation.messages.map((msg) => (
                   <MessageItem
-                    key={index}
+                    key={msg.id}
                     sender={msg.sender}
-                    message={msg.message}
+                    message={msg.message_body}
                   />
                 ))
+              ) : tempMessage ? (
+                <MessageItem
+                  key={Date.now()}
+                  sender={"user"}
+                  message={tempMessage}
+                />
               ) : (
                 <Typography
                   variant={isMobile ? "body2" : "body1"}
@@ -192,7 +248,9 @@ export default function ChatSystem() {
             backgroundColor: theme.palette.background.paper,
             position: "fixed",
             bottom: 0,
-            width: `calc(100% - ${drawerOpen && !isMobile ? drawerWidth : 0}px)`,
+            width: `calc(100% - ${
+              drawerOpen && !isMobile ? drawerWidth : 0
+            }px)`,
             maxWidth: "800px",
             zIndex: 1000,
           }}

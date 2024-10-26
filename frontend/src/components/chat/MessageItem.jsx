@@ -6,7 +6,7 @@ import rehypeSanitize from "rehype-sanitize";
 import he from "he";
 
 const MessageItem = ({ sender, message, isOptimistic }) => {
-  const isUser = sender === "You";
+  const isUser = sender === "user";
   const theme = useTheme();
 
   return (
@@ -36,11 +36,11 @@ const MessageItem = ({ sender, message, isOptimistic }) => {
           width: "auto",
           wordBreak: "break-word",
           overflowWrap: "break-word",
-          opacity: isOptimistic ? 0.6 : 1, // Visual cue for optimistic messages
         }}
       >
         <ListItemText
           sx={{
+            whiteSpace: "pre-wrap",
             "& code": {
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
@@ -50,6 +50,7 @@ const MessageItem = ({ sender, message, isOptimistic }) => {
           <ReactMarkdown
             rehypePlugins={[rehypeSanitize]}
             remarkPlugins={[remarkGfm]}
+            breaks={true}
           >
             {he.decode(message)}
           </ReactMarkdown>
