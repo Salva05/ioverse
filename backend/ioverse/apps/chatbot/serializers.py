@@ -1,11 +1,9 @@
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import User
 
 from .models import Message, Conversation
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
-from django.db import transaction
 
-from datetime import timedelta
 import logging
 import bleach
 
@@ -69,3 +67,25 @@ class SharedConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = ['title', 'messages']
+        
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password_confirm = serializers.CharField(write_only=True, required=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'password_confirm', 'email']
+        
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
+        
+    def create(self, validated_data):
+        validated_data.pop('password_confirm')
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+        return user

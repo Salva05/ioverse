@@ -18,7 +18,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.platypus.flowables import HRFlowable
 
 from .models import Message, Conversation
-from .serializers import MessageSerializer, ReadOnlyConversationSerializer, SharedConversationSerializer
+from .serializers import MessageSerializer, ReadOnlyConversationSerializer, SharedConversationSerializer, UserRegistrationSerializer
 from .services.chat_service import ChatService
 import logging
 import html
@@ -274,4 +274,12 @@ class SharedConversationView(APIView):
         serializer = SharedConversationSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+class UserRegistrationView(APIView):
+    permission_classes = [AllowAny]
     
+    def post(self, request, *args, **kwargs):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
