@@ -86,6 +86,7 @@ export default function SignIn(props) {
   };
 
   const handleSubmit = async (event) => {
+    setError("");
     event.preventDefault();
 
     if (!validateInputs()) {

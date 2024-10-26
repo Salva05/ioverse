@@ -19,6 +19,9 @@ import {
   SitemarkIcon,
 } from "../components/signup/CustomIcons";
 import { useNavigate } from "react-router-dom";
+import register from "../api/registration";
+import { AuthContext } from "../contexts/AuthContext";
+import { Alert } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -65,15 +68,19 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 export default function SignUp(props) {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
+  const [error, setError] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState("");
   const navigate = useNavigate();
 
+  const { authenticate } = React.useContext(AuthContext);
+
   const validateInputs = () => {
     const email = document.getElementById("email");
     const password = document.getElementById("password");
+    const password_confirm = document.getElementById("password_confirm");
     const username = document.getElementById("username");
 
     let isValid = true;
@@ -87,9 +94,18 @@ export default function SignUp(props) {
       setEmailErrorMessage("");
     }
 
-    if (!password.value || password.value.length < 4) {
+    if (!password.value || password.value.length < 8) {
       setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 4 characters long.");
+      setPasswordErrorMessage("Password must be at least 8 characters long.");
+      isValid = false;
+    } else {
+      setPasswordError(false);
+      setPasswordErrorMessage("");
+    }
+
+    if (password_confirm.value !== password.value) {
+      setPasswordError(true);
+      setPasswordErrorMessage("Passwords do not match.");
       isValid = false;
     } else {
       setPasswordError(false);
@@ -108,17 +124,71 @@ export default function SignUp(props) {
     return isValid;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
+    setError("");
+
     event.preventDefault();
     if (nameError || emailError || passwordError) {
       return;
     }
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get("username"),
+    const userData = {
+      username: data.get("username"),
       email: data.get("email"),
       password: data.get("password"),
-    });
+      password_confirm: data.get("password_confirm"),
+    };
+
+    try {
+      const response = await register(userData);
+
+      if (response.status === 201) {
+        const errorMessage = await authenticate(
+          userData.username,
+          userData.password
+        );
+
+        if (errorMessage) {
+          setError(errorMessage);
+        } else {
+          navigate("/chat");
+        }
+      } else {
+        console.error("Unexpected response status:", response.status);
+        setError("Unexpected response status:", response.status);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        // Access the error messages returned by the backend
+        const errorDetails = error.response.data.errors;
+        console.log("Registration failed:", errorDetails);
+
+        // Set the specific errors to display in the form
+        if (errorDetails.username) {
+          setNameError(true);
+          setNameErrorMessage(errorDetails.username[0]);
+        }
+        if (errorDetails.email){
+          setEmailError(true);
+          setEmailErrorMessage(errorDetails.email[0]);
+        } 
+        if (errorDetails.password) {
+          setPasswordError(true);
+          setPasswordErrorMessage(errorDetails.password[0]);
+        }
+        if (errorDetails.password_confirm) {
+          setPasswordError(true);
+          setPasswordErrorMessage(errorDetails.password_confirm[0]);
+        }
+      } else {
+        console.log("Registration error:", error);
+        const errorMessage =
+          error.response?.data?.detail ||
+          "An error occurred while registering.";
+        setError("Error: " + errorMessage);
+      }
+    }
   };
 
   return (
@@ -139,6 +209,11 @@ export default function SignUp(props) {
             onSubmit={handleSubmit}
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
+            {error && (
+              <Alert severity="error" sx={{ width: "100%" }}>
+                {error}
+              </Alert>
+            )}
             <FormControl>
               <FormLabel htmlFor="name">Username</FormLabel>
               <TextField
@@ -177,6 +252,22 @@ export default function SignUp(props) {
                 autoComplete="new-password"
                 type="password"
                 id="password"
+                variant="outlined"
+                error={passwordError}
+                helperText={passwordErrorMessage}
+                color={passwordError ? "error" : "primary"}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="password">Confirm Password</FormLabel>
+              <TextField
+                required
+                fullWidth
+                name="password_confirm"
+                placeholder="••••••"
+                autoComplete="new-password"
+                type="password"
+                id="password_confirm"
                 variant="outlined"
                 error={passwordError}
                 helperText={passwordErrorMessage}
