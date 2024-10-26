@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConversationProvider } from "./contexts/ConversationContext";
 import theme from "./themes/theme";
 import { ThemeProvider } from "@mui/material";
+import SignUp from "./pages/Register";
 import Login from "./pages/Login";
 import SharedConversation from "./pages/SharedConversation";
 import ProtectedRoute from "./pages/ProtectedRoute";
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "register",
+        element: <SignUp />,
       },
       {
         path: "/shared-conversation/:share_token",

@@ -202,7 +202,6 @@ export default function SignIn(props) {
                   type="text"
                   name="username"
                   placeholder="Username"
-                  autoComplete="username"
                   autoFocus
                   required
                   fullWidth
@@ -231,7 +230,7 @@ export default function SignIn(props) {
                   placeholder="••••••"
                   type="password"
                   id="password"
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   autoFocus
                   required
                   fullWidth
@@ -256,9 +255,9 @@ export default function SignIn(props) {
                 Don&apos;t have an account?{" "}
                 <span>
                   <Link
-                    href="/material-ui/getting-started/templates/sign-in/"
+                    onClick={() => navigate("/register")}
                     variant="body2"
-                    sx={{ alignSelf: "center" }}
+                    sx={{ alignSelf: "center", cursor: "pointer"}}
                   >
                     Sign up
                   </Link>

@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import OutlinedInput from '@mui/material/OutlinedInput';
+import { TextField } from '@mui/material';
 
 function ForgotPassword({ open, handleClose }) {
   return (
@@ -29,7 +30,7 @@ function ForgotPassword({ open, handleClose }) {
           Enter your account&apos;s email address, and we&apos;ll send you a link to
           reset your password.
         </DialogContentText>
-        <OutlinedInput
+        <TextField
           autoFocus
           required
           margin="dense"

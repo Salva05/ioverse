@@ -79,9 +79,20 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
             <LogoutButton />
           </Box>
         ) : (
-          <Button color="inherit" onClick={() => navigate("login")}>
-            Login
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Button color="inherit" onClick={() => navigate("register")}>
+              Register
+            </Button>
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              sx={{ backgroundColor: "white", mx: 1 }}
+            />
+            <Button color="inherit" onClick={() => navigate("login")}>
+              Login
+            </Button>
+          </Box>
         )}
       </Toolbar>
     </StyledAppBar>
