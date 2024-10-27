@@ -161,7 +161,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# settings.py
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -177,12 +176,17 @@ LOGGING = {
         'chat': {
             'format': '%(asctime)s - %(message)s',
         },
+        'text_to_image': {
+            'format': '[{asctime}] {levelname} {name} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        # Handlers for chatbot app
         'chatbot_file': {
             'class': 'logging.FileHandler',
             'filename': 'chatbot_project.log',
@@ -193,8 +197,20 @@ LOGGING = {
             'filename': 'chat.log',
             'formatter': 'chat',
         },
+        # Handlers for text_to_image app
+        'text_to_image_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'text_to_image_project.log',
+            'formatter': 'json',
+        },
+        'text_to_image_image_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'text_to_image.log',
+            'formatter': 'text_to_image',
+        },
     },
     'loggers': {
+        # Loggers for chatbot app
         'chatbot_project': {
             'handlers': ['chatbot_file', 'console'],
             'level': 'INFO',
@@ -202,6 +218,17 @@ LOGGING = {
         },
         'chat_log': {
             'handlers': ['chat_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Loggers for text_to_image app
+        'text_to_image_project': {
+            'handlers': ['text_to_image_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'text_to_image_log': {
+            'handlers': ['text_to_image_image_file'],
             'level': 'INFO',
             'propagate': False,
         },

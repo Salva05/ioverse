@@ -5,7 +5,7 @@ from .core.text_to_image_logic_service import TextToImageLogicService
 from tenacity import retry, stop_after_attempt, wait_exponential
 import logging
 
-logger = logging.getLogger("text_to_image")
+logger = logging.getLogger('text_to_image_log')
 
 class TextToImage:
     def __init__(

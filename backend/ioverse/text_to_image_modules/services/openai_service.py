@@ -5,13 +5,13 @@ from .abstract_ai_service import AbstractAIService
 from ..config.settings import get_settings
 import logging
 
-logger = logging.getLogger("text_to_image")
+logger = logging.getLogger('text_to_image_log')
 
 class OpenAIService(AbstractAIService):
     def __init__(self, api_key: str = None):
         settings = get_settings()
-        openai.api_key = api_key or settings.openai_api_key
-        self.client = OpenAI(api_key=self.api_key)
+        # openai.api_key = api_key or settings.openai_api_key
+        self.client = OpenAI()
 
     def generate_image(self, prompt: str, **kwargs) -> Dict[str, Any]:
         try:

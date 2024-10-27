@@ -5,7 +5,7 @@ from .models import ImageGeneration
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('text_to_image_project')
 
 class ImageGenerationSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField( # Defaults to the current authenticated user
@@ -102,20 +102,6 @@ class ImageGenerationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'model_used': 'Invalid model selected.'})
 
         return attrs
-
-    def create(self, validated_data):
-        image_generation = ImageGeneration.objects.create(
-            user=validated_data['user'],
-            prompt=validated_data['prompt'],
-            model_used=validated_data.get('model_used', 'dall-e-2'),
-            n=validated_data.get('n', 1),
-            quality=validated_data.get('quality'),
-            response_format=validated_data.get('response_format', 'url'),
-            size=validated_data.get('size', '1024x1024'),
-            style=validated_data.get('style'),
-            # Other fields will be set after image generation
-        )
-        return image_generation
 
 class ImageGenerationListSerializer(serializers.ModelSerializer):
     image_thumbnail = serializers.SerializerMethodField()
