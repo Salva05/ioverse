@@ -1,0 +1,195 @@
+from rest_framework import serializers
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from .models import ImageGeneration
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+class ImageGenerationSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField( # Defaults to the current authenticated user
+        default=serializers.CurrentUserDefault()
+    )
+    image_url = serializers.URLField(required=False, allow_null=True, read_only=True)
+    image_file = serializers.ImageField(required=False, allow_null=True, read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    revised_prompt = serializers.CharField(required=False, allow_null=True, read_only=True)
+    share_token = serializers.UUIDField(read_only=True)
+    is_shared = serializers.BooleanField(required=False)
+    shared_at = serializers.DateTimeField(read_only=True)
+    expires_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = ImageGeneration
+        fields = [
+            'id',
+            'user',
+            'prompt',
+            'image_url',
+            'image_file',
+            'created_at',
+            'model_used',
+            'n',
+            'quality',
+            'response_format',
+            'size',
+            'style',
+            'revised_prompt',
+            'is_shared',
+            'shared_at',
+            'expires_at',
+            'share_token',
+        ]
+        read_only_fields = [
+            'id',
+            'user',
+            'image_url',
+            'image_file',
+            'created_at',
+            'revised_prompt',
+            'shared_at',
+            'expires_at',
+            'share_token',
+        ]
+
+    def validate(self, attrs):
+        # Copy attrs to avoid modifying the original data
+        data = attrs.copy()
+        model_used = data.get('model_used', 'dall-e-2')  # Default to 'dall-e-2' if not provided
+        prompt = data.get('prompt', '')
+        n = data.get('n', 1)
+        quality = data.get('quality')
+        style = data.get('style')
+        size = data.get('size', '1024x1024')
+
+        # Validate 'prompt'
+        if not prompt.strip():
+            raise serializers.ValidationError({'prompt': 'Prompt cannot be empty.'})
+
+        if model_used == 'dall-e-3':
+            # For 'dall-e-3', prompt length must be <= 4000 characters
+            if len(prompt) > 4000:
+                raise serializers.ValidationError({'prompt': 'For dall-e-3, prompt length must be 4000 characters or fewer.'})
+            # 'n' must be 1
+            if n != 1:
+                raise serializers.ValidationError({'n': 'For dall-e-3, only n=1 is supported.'})
+            # 'quality' must be one of the allowed choices
+            if quality not in dict(ImageGeneration.QUALITY_CHOICES):
+                raise serializers.ValidationError({'quality': 'Invalid quality for dall-e-3.'})
+            # 'style' must be one of the allowed choices
+            if style not in dict(ImageGeneration.STYLE_CHOICES):
+                raise serializers.ValidationError({'style': 'Invalid style for dall-e-3.'})
+            # 'size' must be one of the allowed choices for dall-e-3
+            if size not in dict(ImageGeneration.SIZE_CHOICES_DALLE_3):
+                raise serializers.ValidationError({'size': 'Invalid size for dall-e-3.'})
+        elif model_used == 'dall-e-2':
+            # For 'dall-e-2', prompt length must be <= 1000 characters
+            if len(prompt) > 1000:
+                raise serializers.ValidationError({'prompt': 'For dall-e-2, prompt length must be 1000 characters or fewer.'})
+            # 'quality' and 'style' should not be provided
+            if quality:
+                raise serializers.ValidationError({'quality': 'Quality is not supported for dall-e-2.'})
+            if style:
+                raise serializers.ValidationError({'style': 'Style is not supported for dall-e-2.'})
+            # 'size' must be one of the allowed choices for dall-e-2
+            if size not in dict(ImageGeneration.SIZE_CHOICES_DALLE_2):
+                raise serializers.ValidationError({'size': 'Invalid size for dall-e-2.'})
+            # 'n' must be between 1 and 10
+            if not (1 <= n <= 10):
+                raise serializers.ValidationError({'n': 'For dall-e-2, n must be between 1 and 10.'})
+        else:
+            raise serializers.ValidationError({'model_used': 'Invalid model selected.'})
+
+        return attrs
+
+    def create(self, validated_data):
+        image_generation = ImageGeneration.objects.create(
+            user=validated_data['user'],
+            prompt=validated_data['prompt'],
+            model_used=validated_data.get('model_used', 'dall-e-2'),
+            n=validated_data.get('n', 1),
+            quality=validated_data.get('quality'),
+            response_format=validated_data.get('response_format', 'url'),
+            size=validated_data.get('size', '1024x1024'),
+            style=validated_data.get('style'),
+            # Other fields will be set after image generation
+        )
+        return image_generation
+
+class ImageGenerationListSerializer(serializers.ModelSerializer):
+    image_thumbnail = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = ImageGeneration
+        fields = [
+            'id',
+            'prompt',
+            'created_at',
+            'image_thumbnail',
+        ]
+
+    def get_image_thumbnail(self, obj):
+        # Return a small version or URL of the image for listing purposes
+        if obj.image_file and hasattr(obj.image_file, 'url'):
+            return obj.image_file.url
+        elif obj.image_url:
+            return obj.image_url
+        else:
+            return None
+
+class ImageGenerationDetailSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    image_url = serializers.URLField(read_only=True)
+    image_file = serializers.ImageField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    revised_prompt = serializers.CharField(read_only=True)
+    share_token = serializers.UUIDField(read_only=True)
+    is_shared = serializers.BooleanField(required=False)
+    shared_at = serializers.DateTimeField(read_only=True)
+    expires_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = ImageGeneration
+        fields = [
+            'id',
+            'user',
+            'prompt',
+            'revised_prompt',
+            'image_url',
+            'image_file',
+            'created_at',
+            'model_used',
+            'n',
+            'quality',
+            'response_format',
+            'size',
+            'style',
+            'is_shared',
+            'shared_at',
+            'expires_at',
+            'share_token',
+        ]
+        read_only_fields = [
+            'id',
+            'user',
+            'revised_prompt',
+            'image_url',
+            'image_file',
+            'created_at',
+            'shared_at',
+            'expires_at',
+            'share_token',
+        ]
+
+    def update(self, instance, validated_data):
+        # Allow updating 'is_shared' field
+        is_shared = validated_data.get('is_shared', instance.is_shared)
+        if is_shared != instance.is_shared:
+            if is_shared:
+                instance.share()
+            else:
+                instance.unshare()
+        instance.save()
+        return instance
