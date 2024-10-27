@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 import environ
 from datetime import timedelta
 from pathlib import Path
@@ -211,6 +211,9 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
