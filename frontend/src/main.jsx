@@ -12,6 +12,7 @@ import SharedConversation from "./pages/SharedConversation";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import ChatSystem from "./pages/ChatSystem";
 import "./styles/general.css";
+import TextToImage from "./pages/TextToImage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ChatSystem />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "text-to-image",
+        element: (
+          <ProtectedRoute>
+            <TextToImage />
           </ProtectedRoute>
         ),
       },

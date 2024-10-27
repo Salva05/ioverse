@@ -18,7 +18,7 @@ class TextToImageService:
         image_generation = ImageGeneration.objects.create(
             user=user,
             prompt=validated_data['prompt'],
-            model_used=validated_data.get('model_used', 'dall-e-3'),
+            model_used=validated_data.get('model_used', 'dall-e-2'),
             n=validated_data.get('n', 1),
             quality=validated_data.get('quality', 'standard'),
             response_format=validated_data.get('response_format', 'url'),

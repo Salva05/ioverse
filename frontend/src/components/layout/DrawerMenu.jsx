@@ -6,13 +6,13 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
+import MmsOutlinedIcon from '@mui/icons-material/MmsOutlined';
 import LinearProgress from "@mui/material/LinearProgress";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
-import MailIcon from "@mui/icons-material/Mail";
-import ChatIcon from "@mui/icons-material/Chat";
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import { styled, useTheme } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ConversationContext } from "../../contexts/ConversationContext";
@@ -44,13 +44,15 @@ const pages = [
     id: 1,
     display: "Chat",
     path: "/chat",
-    icon: <ChatIcon sx={{ color: "#fff" }} />,
+    icon: <ChatOutlinedIcon sx={{ color: "#fff" }} />,
+    protected: true,
   },
   {
     id: 2,
-    display: "Mailing",
-    path: "/",
-    icon: <MailIcon sx={{ color: "#fff" }} />,
+    display: "Text To Image",
+    path: "/text-to-image",
+    icon: <MmsOutlinedIcon sx={{ color: "#fff" }} />,
+    protected: true,
   },
 ];
 
@@ -211,7 +213,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
               >
                 <ListItemIcon>{page.icon}</ListItemIcon>
                 <ListItemText primary={page.display} />
-                {!isAuthenticated && page.path === "/chat" && (
+                {!isAuthenticated && page.protected && (
                   <Tooltip title="Login required">
                     <IconButton>
                       <VpnKeyIcon

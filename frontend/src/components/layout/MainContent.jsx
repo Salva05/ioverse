@@ -13,6 +13,7 @@ const Main = styled("main", {
   display: "flex",
   flexDirection: "column",
   height: "100vh",
+  overflowY: "auto",
   transition: theme.transitions.create(["margin", "width"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
