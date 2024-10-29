@@ -15,6 +15,7 @@ import {
   Divider,
 } from "@mui/material";
 import textToImage from "../api/textToImage";
+import OptionsBar from "../components/texttoimage/OptionsBar";
 
 const TextToImage = () => {
   const [prompt, setPrompt] = useState("");
@@ -371,12 +372,15 @@ const TextToImage = () => {
           </Divider>
           <Stack spacing={2} alignItems="center">
             {generatedImages.map((src, index) => (
-              <img
-                key={index}
-                src={src}
-                alt={`Generated ${index + 1}`}
-                style={{ maxWidth: "100%", height: "auto" }}
-              />
+              <>
+                <OptionsBar />
+                <img
+                  key={index}
+                  src={src}
+                  alt={`Generated ${index + 1}`}
+                  style={{ maxWidth: "100%", height: "auto", marginTop: "10px" }}
+                />
+              </>
             ))}
           </Stack>
         </Box>
