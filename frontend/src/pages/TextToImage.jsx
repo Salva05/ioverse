@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import textToImage from "../api/textToImage";
 import OptionsBar from "../components/texttoimage/OptionsBar";
+import { toast } from "react-toastify";
 
 const TextToImage = () => {
   const [prompt, setPrompt] = useState("");
@@ -29,7 +30,9 @@ const TextToImage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Reusable MenuItem styles
+  // Generated images data
+  const [payload, setPayload] = useState(null);
+
   const menuItemStyles = {
     "&:hover": {
       backgroundColor: "#f2f2f2",
@@ -110,20 +113,24 @@ const TextToImage = () => {
         payload.n = 1; // Must be 1 for DALL-E 3
       }
 
+      setPayload(payload);
+
       setLoading(true);
 
       try {
-        const imageGeneration = await textToImage.createImage(payload);
+        const response = await textToImage.generateImages(payload);
 
         // Process the response
         let images = [];
 
-        const imageSrc =
-          imageGeneration.image_url || imageGeneration.image_file;
-        if (imageSrc) {
-          images.push(imageSrc);
+        if (response.images && response.images.length > 0) {
+          images = response.images.map((img) =>
+            img.image_url
+              ? img.image_url
+              : `data:image/png;base64,${img.image_base64}`
+          );
         } else {
-          toast.error("No image returned from the server.");
+          toast.error("Unexpected error occurred.");
         }
 
         setGeneratedImages(images);
@@ -226,7 +233,10 @@ const TextToImage = () => {
             fullWidth
             variant="outlined"
             value={n}
-            onChange={(e) => setN(parseInt(e.target.value, 10))}
+            onChange={(e) => {
+              const value = parseInt(e.target.value, 10);
+              setN(value > 10 ? 10 : value);
+            }}
             error={!!errors.n}
             helperText={errors.n}
             inputProps={{ min: 1, max: 10 }}
@@ -372,15 +382,23 @@ const TextToImage = () => {
           </Divider>
           <Stack spacing={2} alignItems="center">
             {generatedImages.map((src, index) => (
-              <>
-                <OptionsBar />
+              <React.Fragment key={index}>
+                <OptionsBar payload={payload} src={src} />
                 <img
-                  key={index}
                   src={src}
                   alt={`Generated ${index + 1}`}
-                  style={{ maxWidth: "100%", height: "auto", marginTop: "10px" }}
+                  style={{
+                    maxWidth: "100%",
+                    height: "auto",
+                    marginTop: "10px",
+                    paddingBottom: "20px",
+                    borderBottom:
+                      index < generatedImages.length - 1
+                        ? "1px solid #D4D0CD"
+                        : "none",
+                  }}
                 />
-              </>
+              </React.Fragment>
             ))}
           </Stack>
         </Box>
