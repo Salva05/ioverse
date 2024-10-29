@@ -12,12 +12,12 @@ class TextToImage:
         self,
         ai_service: AbstractAIService,
         logic_service: TextToImageLogicService,
-        model: str = "dall-e-3", 
+        model: str = "dall-e-2", 
         n: int = 1,
-        size: str = "1024x1024",
-        quality: str = "standard",
+        size: str = "512x512",
+        quality: str = None,
         response_format: str = "url",
-        style: str = "vivid"
+        style: str = None
     ):
         self.ai_service = ai_service
         self.logic_service = logic_service
@@ -44,7 +44,7 @@ class TextToImage:
                 style=self.style, 
             )
             image_data = self.logic_service.process_response(response)
-            logger.info(f"Image generated.")
+            logger.info(f"{len(image_data)} image(s) generated.")
             return image_data
         except InvalidResponseError as e:
             logger.error(f"Invalid response: {e}", exc_info=True)
@@ -55,12 +55,12 @@ class TextToImage:
 
     def set_parameters(
         self,
-        model: str = "dall-e-3",
+        model: str = "dall-e-2",
         n: int = 1,
-        size: str = "1024x1024",
-        quality: str = "standard",
+        size: str = "512x512",
+        quality: str = None,
         response_format: str = "url",
-        style: str = "vivid"
+        style: str = None
     ):
         self.n = n
         self.size = size

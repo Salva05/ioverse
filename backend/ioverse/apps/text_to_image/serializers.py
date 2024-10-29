@@ -13,6 +13,7 @@ class ImageGenerationSerializer(serializers.ModelSerializer):
     )
     image_url = serializers.URLField(required=False, allow_null=True, read_only=True)
     image_file = serializers.ImageField(required=False, allow_null=True, read_only=True)
+    image_data = serializers.CharField(write_only=True, required=False)
     created_at = serializers.DateTimeField(read_only=True)
     revised_prompt = serializers.CharField(required=False, allow_null=True, read_only=True)
     share_token = serializers.UUIDField(read_only=True)
@@ -26,6 +27,7 @@ class ImageGenerationSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'prompt',
+            'image_data',
             'image_url',
             'image_file',
             'created_at',
@@ -61,7 +63,7 @@ class ImageGenerationSerializer(serializers.ModelSerializer):
         n = data.get('n', 1)
         quality = data.get('quality')
         style = data.get('style')
-        size = data.get('size', '1024x1024')
+        size = data.get('size', '512x512')
 
         # Validate 'prompt'
         if not prompt.strip():

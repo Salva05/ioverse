@@ -14,10 +14,13 @@ class OpenAIService(AbstractAIService):
         self.client = OpenAI()
 
     def generate_image(self, prompt: str, **kwargs) -> Dict[str, Any]:
+        # Remove any items with None values from kwargs
+        filtered_kwargs = {key: value for key, value in kwargs.items() if value is not None}
+        
         try:
             response = self.client.images.generate(
                 prompt=prompt,
-                **kwargs
+                **filtered_kwargs
             )
             return response
         except openai.OpenAIError as e:
