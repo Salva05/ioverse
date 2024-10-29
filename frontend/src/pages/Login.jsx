@@ -43,7 +43,6 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
-  minHeight: "90vh",
   padding: theme.spacing(2),
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
@@ -258,7 +257,7 @@ export default function SignIn(props) {
                   <Link
                     onClick={() => navigate("/register")}
                     variant="body2"
-                    sx={{ alignSelf: "center", cursor: "pointer"}}
+                    sx={{ alignSelf: "center", cursor: "pointer" }}
                   >
                     Sign up
                   </Link>

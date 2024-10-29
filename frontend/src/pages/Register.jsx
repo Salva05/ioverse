@@ -43,8 +43,6 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const SignUpContainer = styled(Stack)(({ theme }) => ({
-  height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
-  minHeight: "100%",
   padding: theme.spacing(2),
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
@@ -169,10 +167,10 @@ export default function SignUp(props) {
           setNameError(true);
           setNameErrorMessage(errorDetails.username[0]);
         }
-        if (errorDetails.email){
+        if (errorDetails.email) {
           setEmailError(true);
           setEmailErrorMessage(errorDetails.email[0]);
-        } 
+        }
         if (errorDetails.password) {
           setPasswordError(true);
           setPasswordErrorMessage(errorDetails.password[0]);
