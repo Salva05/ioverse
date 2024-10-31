@@ -13,11 +13,12 @@ const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "background.paper",
+  bgcolor: "transparent",
   boxShadow: 24,
-  p: 4,
   outline: "none",
-  borderRadius: "8px",
+  borderRadius: "0",
+  maxHeight: "90vh",
+  overflow: "auto",
 };
 
 const See = ({ src }) => {
@@ -29,10 +30,8 @@ const See = ({ src }) => {
 
     if (src.startsWith("data:image/")) {
       const blob = dataURLtoBlob(src);
-      console.log("Blob:", blob);
       if (blob) {
         blobUrl = URL.createObjectURL(blob);
-        console.log("Blob URL:", blobUrl);
         setHref(blobUrl);
       }
     } else {
@@ -80,8 +79,8 @@ const See = ({ src }) => {
             src={href}
             alt="Preview"
             style={{
-              maxWidth: "100%",
-              maxHeight: "80vh",
+              width: "auto",
+              height: "auto",
               display: "block",
               margin: "0 auto",
             }}

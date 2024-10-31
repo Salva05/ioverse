@@ -1,7 +1,6 @@
 import { toast } from "react-toastify";
 import axiosInstance from "../api/axiosInstance";
 
-// Async function to share the conversation
 const shareConversation = async (conversationId, hours) => {
   try {
     const response = await axiosInstance.post(

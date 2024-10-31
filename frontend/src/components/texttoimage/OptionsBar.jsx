@@ -8,7 +8,7 @@ const Options = ({ payload, src }) => {
   return (
     <ButtonGroup size="small" aria-label="Small button group">
       <See src={src}/>
-      <Save />
+      <Save payload={payload} src={src}/>
       <Share />
     </ButtonGroup>
   );

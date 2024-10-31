@@ -27,6 +27,13 @@ const textToImage = {
     );
     return response.data;
   },
+
+  // DELETE
+  deleteImage: async (id) => {
+    const response = await axiosInstance.delete(
+      `/text-to-image/image-generations/${id}/`
+    );
+  },
 };
 
 export default textToImage;

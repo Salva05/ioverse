@@ -1,4 +1,3 @@
-// TextToImage.jsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
@@ -170,7 +169,7 @@ const TextToImage = () => {
       sx={{
         p: 3,
         maxWidth: "800px",
-        width: "100%", // Ensure full width up to maxWidth
+        width: "100%",
         margin: "0 auto",
       }}
     >
@@ -197,7 +196,7 @@ const TextToImage = () => {
           mb: 4,
         }}
       >
-        To enhance photorealism in your images, use detailed descriptions
+        To enhance photorealism, use detailed descriptions
         including lighting, textures, and perspectives. Clear and specific
         prompts help DALL-E generate images that closely match your vision.
       </Typography>

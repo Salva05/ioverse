@@ -5,6 +5,8 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import Snackbar from "@mui/material/Snackbar";
 import { styled } from "@mui/material/styles";
+import textToImage from "../../../api/textToImage";
+import { toast } from "react-toastify";
 
 const Explosion = styled("div")({
   position: "absolute",
@@ -20,23 +22,55 @@ const Explosion = styled("div")({
   },
 });
 
-const Save = () => {
+const Save = ({ payload, src }) => {
   const [showExplosion, setShowExplosion] = useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [imageId, setImageId] = useState(0);
 
-  const handleFavoriteClick = () => {
+  const handleClick = async () => {
     const newIsSaved = !isSaved;
+
+    // the state of 'newIsSaved' will drive the backend call
+    if (newIsSaved) {
+      // POST
+      let imageSrc = src
+      if (src.startsWith('data:image')) {
+        imageSrc = src.split(',')[1];
+      }
+
+      // include the src in the payload
+      payload.image_data = imageSrc; // check whether is url or base64
+
+      try {
+        const response = await textToImage.createImage(payload);
+        setImageId(response.id);  // For eventual removal of the saved image
+        console.log("Image saved successfully.");
+      } catch (err) {
+        console.log("An error occurred while saving the image:", err);
+        toast.error(`Error: ${err.response?.statusText || "Request failed"}`);
+      }
+    } else {
+      // DELETE
+      try {
+        const response = await textToImage.deleteImage(imageId);
+        console.log("Image removed successfully.");
+      } catch (err) {
+        console.log("An error occurred deleting the image:", err);
+        toast.error(err);
+      }
+    }
+
     setIsSaved(newIsSaved);
 
     if (newIsSaved) {
-      // Show explosion and Snackbar when saving
+      // Show explosion when saving
       setShowExplosion(true);
-      setIsSnackbarOpen(true);
-
+      
       // Explosion effect duration
       setTimeout(() => setShowExplosion(false), 300);
     }
+    setIsSnackbarOpen(true);
   };
 
   const handleSnackbarClose = () => {
@@ -46,7 +80,7 @@ const Save = () => {
   return (
     <>
       <Tooltip placement="top" title={isSaved ? "Discard" : "Save"}>
-        <Button onClick={handleFavoriteClick}>
+        <Button onClick={handleClick}>
           {showExplosion && <Explosion />}
           {isSaved ? (
             <FavoriteIcon fontSize="small" color="error" />
@@ -59,7 +93,7 @@ const Save = () => {
         open={isSnackbarOpen}
         autoHideDuration={1000}
         onClose={handleSnackbarClose}
-        message="Saved"
+        message={isSaved ? "Saved" : "Removed"}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       />
     </>

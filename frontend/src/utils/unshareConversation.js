@@ -1,7 +1,6 @@
 import { toast } from "react-toastify";
 import axiosInstance from "../api/axiosInstance";
 
-// Async function to unshare the conversation
 const unshareConversation = async (conversationId) => {
   try {
     const response = await axiosInstance.post(
