@@ -1,5 +1,5 @@
 // TextToImage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   TextField,
@@ -29,6 +29,8 @@ const TextToImage = () => {
   const [generatedImages, setGeneratedImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loadedImages, setLoadedImages] = useState(0);
+  const imagesContainerRef = useRef(null);
 
   // Generated images data
   const [payload, setPayload] = useState(null);
@@ -134,6 +136,7 @@ const TextToImage = () => {
         }
 
         setGeneratedImages(images);
+        setLoadedImages(0);
       } catch (error) {
         console.error("Error generating image:", error);
         toast.error("Failed to generate image. Please try again.");
@@ -151,6 +154,16 @@ const TextToImage = () => {
       setN(1);
     }
   }, [modelUsed]);
+
+  useEffect(() => {
+    if (generatedImages.length > 0 && loadedImages === generatedImages.length) {
+      imagesContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [loadedImages, generatedImages]);
+
+  const handleImageLoad = () => {
+    setLoadedImages((prevCount) => prevCount + 1);
+  };
 
   return (
     <Box
@@ -359,7 +372,7 @@ const TextToImage = () => {
 
       {/* Generated Images */}
       {generatedImages.length > 0 && (
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{ mt: 4 }} ref={imagesContainerRef}>
           <Divider
             sx={{
               borderColor: "black",
@@ -386,6 +399,7 @@ const TextToImage = () => {
                 <OptionsBar payload={payload} src={src} />
                 <img
                   src={src}
+                  onLoad={handleImageLoad}
                   alt={`Generated ${index + 1}`}
                   style={{
                     maxWidth: "100%",
