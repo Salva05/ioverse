@@ -118,7 +118,7 @@ export default function ChatSystem() {
           };
         });
       }
-      
+
       setTyping(false);
     },
     onError: (error, variables, context) => {
@@ -133,6 +133,9 @@ export default function ChatSystem() {
         error.response?.data?.detail ||
         "An error occurred while sending the message.";
       toast.error("Error: " + errorMessage);
+    },
+    onSettled: () => {
+      setTyping(false);
     },
   });
 

@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import PropTypes from "prop-types";
-import { dataUrlToBlobUrl } from "../../../utils/dataURLtoBlob"
+import { dataURLtoBlob } from "../../../utils/dataURLtoBlob";
 
 const See = ({ src }) => {
   const [href, setHref] = useState("");
@@ -13,7 +13,7 @@ const See = ({ src }) => {
     let blobUrl = null;
 
     if (src.startsWith("data:image/")) {
-      blobUrl = dataUrlToBlobUrl(src);
+      blobUrl = dataURLtoBlob(src);
       if (blobUrl) {
         setHref(blobUrl);
       }

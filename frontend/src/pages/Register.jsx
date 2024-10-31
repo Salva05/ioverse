@@ -47,6 +47,9 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
   },
+  [theme.breakpoints.down("sm")]: {
+    marginBottom: "80px",
+  },
   "&::before": {
     content: '""',
     display: "block",

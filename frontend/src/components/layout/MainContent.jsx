@@ -37,5 +37,9 @@ const Main = styled("main", {
 }));
 
 export default function MainContent({ open, isSmallScreen, children }) {
-  return <Main open={open} isSmallScreen={isSmallScreen}>{children}</Main>;
+  return (
+    <Main open={open} isSmallScreen={isSmallScreen}>
+      {children}
+    </Main>
+  );
 }

@@ -44,6 +44,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
   padding: theme.spacing(2),
+  overflowY: "auto",
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
   },
@@ -106,7 +107,11 @@ export default function SignIn(props) {
         navigate("/chat");
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      if (err.response && err.response.status === 401) {
+        setError("Invalid username or password.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
       console.error(err);
     }
   };
