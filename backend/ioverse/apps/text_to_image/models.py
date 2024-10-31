@@ -1,5 +1,6 @@
 # models.py
 
+import os
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
@@ -206,6 +207,15 @@ class ImageGeneration(models.Model):
         else:
             raise ValidationError({'model_used': "Invalid model selected."})
 
+    def delete(self, *args, **kwargs):
+        print("Deleted")
+        # If the image file exists, delete it
+        if self.image_file and os.path.isfile(self.image_file.path):
+            os.remove(self.image_file.path)
+        
+        # Call the superclass delete method
+        super().delete(*args, **kwargs)
+        
     def __str__(self):
         return f"Image {self.id} by {self.user.username}"
 

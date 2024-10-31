@@ -1,6 +1,10 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.decorators import throttle_classes
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 from .models import ImageGeneration
 from .serializers import (
@@ -10,6 +14,7 @@ from .serializers import (
 )
 from .services.image_creation_service import ImageCreationService
 from .services.image_generation_service import ImageGenerationService
+
 import logging
 
 logger = logging.getLogger('text_to_image_project')
@@ -22,7 +27,8 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     queryset = ImageGeneration.objects.all()
     serializer_class = ImageGenerationSerializer  # Default serializer
-
+    throttle_scope = 'images'
+    
     # Initialize the ImageGenerationService
     image_generation_service = ImageGenerationService()
 
@@ -43,7 +49,7 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
         elif self.action == 'create':
             return ImageGenerationSerializer
         return ImageGenerationDetailSerializer
-
+    
     def create(self, request, *args, **kwargs):
         """
         Save a generated image selected by the user.
