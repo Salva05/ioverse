@@ -183,8 +183,7 @@ export default function ChatSystem() {
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          height: "100vh",
-          overflowY: "auto",
+          minHeight: '100vh'
         }}
       >
         <Toolbar />
