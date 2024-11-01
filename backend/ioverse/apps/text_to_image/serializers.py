@@ -181,3 +181,19 @@ class ImageGenerationDetailSerializer(serializers.ModelSerializer):
                 instance.unshare()
         instance.save()
         return instance
+
+class SharedImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ImageGeneration
+        fields = ['image']
+
+    def get_image(self, obj):
+        # Conditionally return either the image URL or file path based on the response format
+        if obj.response_format == 'url' and obj.image_url:
+            return obj.image_url
+        elif obj.response_format == 'b64_json' and obj.image_file:
+            # Construct the absolute URI for the image file if using a file-based image
+            return self.context['request'].build_absolute_uri(obj.image_file.url)
+        return None

@@ -1,16 +1,21 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.decorators import throttle_classes
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.conf import settings
 
 from .models import ImageGeneration
 from .serializers import (
     ImageGenerationSerializer,
     ImageGenerationDetailSerializer,
-    ImageGenerationListSerializer
+    ImageGenerationListSerializer,
+    SharedImageSerializer
 )
 from .services.image_creation_service import ImageCreationService
 from .services.image_generation_service import ImageGenerationService
@@ -85,7 +90,55 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
         """
         response = self.image_generation_service.generate_images(request.data)
         return response
-            
+    
+    @action(detail=True, methods=['post'])
+    def share(self, request, pk=None):
+        """
+        Custom action to share an image.
+        Sets `is_shared` to True and returns the shareable URL.
+        """
+        image = self.get_object()
+        hours = request.data.get('hours')
+        if not hours:
+            return Response({'error': 'Hours duration is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            hours = int(hours)
+            if hours < 1 or hours > 72:
+                raise ValueError
+        except ValueError:
+            return Response({'error': "Hours must be an integer between 1 and 72"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not image.is_shared:
+            # Share the image
+            image.share(duration_hours=hours)
+
+        # Build the frontend share URL
+        share_url = f"{settings.FRONTEND_URL}/shared-image/{image.share_token}/"
+        
+        return Response(
+            {
+                'share_url': share_url,
+                'shared_at': image.shared_at,
+                'expires_at': image.expires_at,
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    @action(detail=True, methods=['post'])
+    def unshare(self, request, pk=None):
+        """
+        Custom action to unshare an image.
+        Sets 'is_shared' to False
+        """
+        image = self.get_object()
+        
+        if image.is_shared:
+            image.unshare()
+            return Response({'detail': 'Image unshared successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Image is not shared.'}, status=status.HTTP_400_BAD_REQUEST)
+        
     def destroy(self, request, *args, **kwargs):
         """
         Delete an ImageGeneration instance.
@@ -94,3 +147,21 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
         image_generation.delete()
         logger.info(f"ImageGeneration {image_generation.id} deleted by user {request.user.username}.")
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class SharedImageView(APIView):
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request, share_token, format=None):
+        """
+        Retrieve a shared image using the 'share_token'
+        Only returns the image if 'is_shared=True'
+        """
+        image = get_object_or_404(ImageGeneration, share_token=share_token, is_shared=True)
+        
+        # Check for expiration
+        if image.expires_at and timezone.now() > image.expires_at:
+            image.unshare()
+            return Response({'detail': 'This shared link has expired'}, status=status.HTTP_200_OK)
+
+        serializer = SharedImageSerializer(image, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
