@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import Snackbar from "@mui/material/Snackbar";
 import { styled } from "@mui/material/styles";
-import textToImage from "../../../api/textToImage";
-import { toast } from "react-toastify";
+import { imageService } from "../../../services/imageService";
 
 const Explosion = styled("div")({
   position: "absolute",
@@ -22,43 +21,27 @@ const Explosion = styled("div")({
   },
 });
 
-const Save = ({ payload, src }) => {
+const Save = ({ payload, src, imageId, setImageId }) => {
   const [showExplosion, setShowExplosion] = useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [imageId, setImageId] = useState(0);
+
+  useEffect(() => {
+    setIsSaved(false);
+    setShowExplosion(false);
+    setIsSnackbarOpen(false);
+  }, [src]);
 
   const handleClick = async () => {
     const newIsSaved = !isSaved;
 
     // the state of 'newIsSaved' will drive the backend call
     if (newIsSaved) {
-      // POST
-      let imageSrc = src
-      if (src.startsWith('data:image')) {
-        imageSrc = src.split(',')[1];
-      }
-
-      // include the src in the payload
-      payload.image_data = imageSrc; // check whether is url or base64
-
-      try {
-        const response = await textToImage.createImage(payload);
-        setImageId(response.id);  // For eventual removal of the saved image
-        console.log("Image saved successfully.");
-      } catch (err) {
-        console.log("An error occurred while saving the image:", err);
-        toast.error(`Error: ${err.response?.statusText || "Request failed"}`);
-      }
+      const response = await imageService.saveImage(payload, src);
+      setImageId(response.id);  // For eventual removal or to share
     } else {
-      // DELETE
-      try {
-        const response = await textToImage.deleteImage(imageId);
-        console.log("Image removed successfully.");
-      } catch (err) {
-        console.log("An error occurred deleting the image:", err);
-        toast.error(err);
-      }
+      const response = await imageService.deleteImage(imageId);
+      setImageId(null);
     }
 
     setIsSaved(newIsSaved);

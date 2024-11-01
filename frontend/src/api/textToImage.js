@@ -34,6 +34,12 @@ const textToImage = {
       `/text-to-image/image-generations/${id}/`
     );
   },
+
+  // GET Shared image
+  getSharedImage: async (share_token) => {
+    const response = await axiosInstance.get(`/text-to-image/shared/${share_token}`);
+    return response.data;
+  },
 };
 
 export default textToImage;

@@ -9,6 +9,7 @@ import { ThemeProvider } from "@mui/material";
 import SignUp from "./pages/Register";
 import Login from "./pages/Login";
 import SharedConversation from "./pages/SharedConversation";
+import SharedImage from "./pages/SharedImage";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import ChatSystem from "./pages/ChatSystem";
 import "./styles/general.css";
@@ -46,8 +47,12 @@ const router = createBrowserRouter([
         element: <SignUp />,
       },
       {
-        path: "/shared-conversation/:share_token",
+        path: "shared-conversation/:share_token",
         element: <SharedConversation />,
+      },
+      {
+        path: "shared-image/:share_token",
+        element: <SharedImage />,
       },
     ],
   },

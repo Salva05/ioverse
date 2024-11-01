@@ -29,6 +29,7 @@ const TextToImage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [loadedImages, setLoadedImages] = useState(0);
+  const [imageIds, setImageIds] = useState(Array(n).fill(null));
   const imagesContainerRef = useRef(null);
 
   // Generated images data
@@ -116,6 +117,11 @@ const TextToImage = () => {
 
       setPayload(payload);
 
+      // Reset states among image generations
+      setGeneratedImages([]);
+      setImageIds(Array(n).fill(null));
+      setLoadedImages(0);
+
       setLoading(true);
 
       try {
@@ -135,7 +141,7 @@ const TextToImage = () => {
         }
 
         setGeneratedImages(images);
-        setLoadedImages(0);
+        setImageIds(Array(images.length).fill(null));
       } catch (error) {
         console.error("Error generating image:", error);
         toast.error("Failed to generate image. Please try again.");
@@ -196,9 +202,9 @@ const TextToImage = () => {
           mb: 4,
         }}
       >
-        To enhance photorealism, use detailed descriptions
-        including lighting, textures, and perspectives. Clear and specific
-        prompts help DALL-E generate images that closely match your vision.
+        To enhance photorealism, use detailed descriptions including lighting,
+        textures, and perspectives. Clear and specific prompts help DALL-E
+        generate images that closely match your vision.
       </Typography>
       <Stack spacing={2}>
         {/* Prompt Input */}
@@ -247,7 +253,13 @@ const TextToImage = () => {
             value={n}
             onChange={(e) => {
               const value = parseInt(e.target.value, 10);
-              setN(value > 10 ? 10 : value);
+              if (isNaN(value) || value < 1) {
+                setN(1); // Default to 1 if input is invalid
+              } else if (value > 10) {
+                setN(10); // Cap the value at 10
+              } else {
+                setN(value);
+              }
             }}
             error={!!errors.n}
             helperText={errors.n}
@@ -395,7 +407,18 @@ const TextToImage = () => {
           <Stack spacing={2} alignItems="center">
             {generatedImages.map((src, index) => (
               <React.Fragment key={index}>
-                <OptionsBar payload={payload} src={src} />
+                <OptionsBar
+                  payload={payload}
+                  src={src}
+                  imageId={imageIds[index]}
+                  setImageId={(id) => {
+                    setImageIds((prev) => {
+                      const newImageIds = [...prev];
+                      newImageIds[index] = id;
+                      return newImageIds;
+                    });
+                  }}
+                />
                 <img
                   src={src}
                   onLoad={handleImageLoad}

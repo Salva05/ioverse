@@ -8,12 +8,12 @@ import {
   TextField,
   Slider,
   Typography,
-  Backdrop,
-  CircularProgress,
   Box,
   Fade,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import shareImage from "../../../utils/shareImage";
+import { toast } from "react-toastify";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={800} />;
@@ -44,10 +44,14 @@ const StyledCancelButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export default function ShareDialog({ state, setOpenState, setUnshareDialogOpen }) {
+export default function ShareDialog({
+  state,
+  setOpenState,
+  handleShare,
+  imageId,
+}) {
   const [duration, setDuration] = useState(24);
-  const [isSharing, setIsSharing] = useState(false);
-  
+
   const handleSliderChange = (event, newValue) => {
     setDuration(newValue);
   };
@@ -61,18 +65,22 @@ export default function ShareDialog({ state, setOpenState, setUnshareDialogOpen 
     if (event) {
       event.stopPropagation();
     }
-    setOpenState(false)
+    setOpenState(false);
   };
 
-  const handleConfirm = (event) => {
+  const handleConfirm = async (event) => {
     if (event) {
       event.stopPropagation();
+
+      try {
+        const response = await shareImage(imageId, duration);
+        setOpenState(false);
+        handleShare(response.share_url, response.expires_at);
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to share the image. Please try again.");
+      }
     }
-    
-    // ...
-    setUnshareDialogOpen(true);
-    setOpenState(false);
-    console.log("mock action..");
   };
 
   return (
@@ -84,12 +92,6 @@ export default function ShareDialog({ state, setOpenState, setUnshareDialogOpen 
       fullWidth
       onClick={(e) => e.stopPropagation()}
     >
-      <Backdrop
-        open={isSharing}
-        sx={{ position: "absolute", zIndex: 1301, color: "#fff" }}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
       <DialogTitle
         sx={{ textAlign: "center", fontWeight: "bold", color: "#ffffff" }}
       >
@@ -153,18 +155,10 @@ export default function ShareDialog({ state, setOpenState, setUnshareDialogOpen 
       <DialogActions
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
-        <StyledCancelButton
-          onClick={handleCancel}
-          variant="outlined"
-          disabled={isSharing}
-        >
+        <StyledCancelButton onClick={handleCancel} variant="outlined">
           Cancel
         </StyledCancelButton>
-        <StyledButton
-          onClick={handleConfirm}
-          variant="contained"
-          disabled={isSharing}
-        >
+        <StyledButton onClick={handleConfirm} variant="contained">
           Share
         </StyledButton>
       </DialogActions>

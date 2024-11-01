@@ -6,8 +6,6 @@ import {
   DialogActions,
   Button,
   Typography,
-  Backdrop,
-  CircularProgress,
   Box,
   TextField,
   IconButton,
@@ -18,6 +16,8 @@ import { styled } from "@mui/system";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
+import unshareImage from "../../../utils/unshareImage";
+import { toast } from "react-toastify";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={800} />;
@@ -74,12 +74,15 @@ const StyledOutlinedIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export default function UnshareDialog({
+  reset,
+  imageId,
   state,
   setOpenState,
+  sharedUrl,
+  remainingHours,
 }) {
   // Generate the shared link
   const baseDomain = window.location.origin; // Detects the current domain
-  const sharedLink = `${baseDomain}/shared-conversation/${"mock"}`;
   const [isUnsharing, setIsUnsharing] = useState(false);
 
   // State to show copy success message
@@ -92,13 +95,19 @@ export default function UnshareDialog({
     setOpenState(false);
   };
 
-  const handleConfirm = (event) => {
+  const handleConfirm = async (event) => {
     if (event) {
       event.stopPropagation();
     }
-    
-    // ...
-    setOpenState(false);
+
+    try {
+      const response = await unshareImage(imageId);
+      setOpenState(false);
+      reset();
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to share the image. Please try again.");
+    }
   };
 
   return (
@@ -110,13 +119,6 @@ export default function UnshareDialog({
       fullWidth
       onClick={(e) => e.stopPropagation()}
     >
-      <Backdrop
-        open={isUnsharing}
-        sx={{ position: "absolute", zIndex: 1301, color: "#fff" }}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-
       <DialogTitle
         sx={{ textAlign: "center", fontWeight: "bold", color: "#ffffff" }}
       >
@@ -135,7 +137,7 @@ export default function UnshareDialog({
                 fontSize: "1.2rem",
               }}
             >
-              Mock Remaining Hours
+              {remainingHours} hour(s)
             </Typography>
             .
           </Typography>
@@ -150,7 +152,7 @@ export default function UnshareDialog({
             }}
           >
             <StyledLinkField
-              value={sharedLink}
+              value={sharedUrl}
               fullWidth
               InputProps={{
                 readOnly: true,
@@ -159,7 +161,7 @@ export default function UnshareDialog({
               size="small"
             />
             <CopyToClipboard
-              text={sharedLink}
+              text={sharedUrl}
               onCopy={() => {
                 setCopySuccess(true);
                 setTimeout(() => setCopySuccess(false), 2000);
@@ -181,18 +183,10 @@ export default function UnshareDialog({
       <DialogActions
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
-        <StyledCancelButton
-          onClick={handleClose}
-          variant="outlined"
-          disabled={isUnsharing}
-        >
+        <StyledCancelButton onClick={handleClose} variant="outlined">
           Close
         </StyledCancelButton>
-        <StyledButton
-          onClick={handleConfirm}
-          variant="contained"
-          disabled={isUnsharing}
-        >
+        <StyledButton onClick={handleConfirm} variant="contained">
           Stop Sharing
         </StyledButton>
       </DialogActions>
