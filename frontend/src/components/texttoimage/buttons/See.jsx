@@ -17,8 +17,6 @@ const modalStyle = {
   boxShadow: 24,
   outline: "none",
   borderRadius: "0",
-  maxHeight: "90vh",
-  overflow: "auto",
 };
 
 const See = ({ src }) => {
@@ -81,6 +79,8 @@ const See = ({ src }) => {
             style={{
               width: "auto",
               height: "auto",
+              maxWidth: "100vw",
+              maxHeight: "90vh",
               display: "block",
               margin: "0 auto",
             }}

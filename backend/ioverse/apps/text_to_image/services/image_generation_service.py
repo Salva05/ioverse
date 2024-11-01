@@ -35,7 +35,6 @@ class ImageGenerationService:
         # Extract and validate data
         extracted_data = extract_data(data)
         errors = validate_extracted_data(extracted_data)
-        print("extracted_data=", extracted_data)
         if errors:
             logger.error(f"Validation errors: {errors}")
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
