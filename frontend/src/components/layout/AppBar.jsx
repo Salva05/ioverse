@@ -13,6 +13,7 @@ import Divider from "@mui/material/Divider";
 import ChatOptionsMenu from "../chat/ChatOptionsMenu";
 import { AuthContext } from "../../contexts/AuthContext";
 import LogoutButton from "../LogoutButton";
+import PersonIcon from "@mui/icons-material/Person";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -74,8 +75,22 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
         </Typography>
         {isAuthenticated ? (
           <Box
-            sx={{ width: "125px", display: "flex", justifyContent: "flex-end" }}
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              overflow: "visible",
+            }}
           >
+            <IconButton onClick={() => navigate("account")}>
+              <PersonIcon sx={{ color: "white" }} fontSize="medium" />
+            </IconButton>
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              sx={{ backgroundColor: "white", mx: 1 }}
+            />
             <LogoutButton />
           </Box>
         ) : (

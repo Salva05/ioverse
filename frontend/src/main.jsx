@@ -14,6 +14,7 @@ import ProtectedRoute from "./pages/ProtectedRoute";
 import ChatSystem from "./pages/ChatSystem";
 import "./styles/general.css";
 import TextToImage from "./pages/TextToImage";
+import Account from "./pages/Account";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,14 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
+      {
+        path: "account",
+        element: (
+          <ProtectedRoute>
+            <Account />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "chat",
         element: (
