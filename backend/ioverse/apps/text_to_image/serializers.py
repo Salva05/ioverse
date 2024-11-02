@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
+
+from django.contrib.auth.models import User
 from django.utils import timezone
+
 from .models import ImageGeneration
 
 import logging
@@ -197,3 +199,10 @@ class SharedImageSerializer(serializers.ModelSerializer):
             # Construct the absolute URI for the image file if using a file-based image
             return self.context['request'].build_absolute_uri(obj.image_file.url)
         return None
+    
+class UserSerializer(serializers.ModelSerializer):
+    joined_date = serializers.DateTimeField(source='date_joined', format='%B %d, %Y')
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined', 'joined_date']
