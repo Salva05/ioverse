@@ -9,6 +9,7 @@ from django.views.decorators.cache import cache_page
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.conf import settings
+from django.db.models import Q
 
 from .models import ImageGeneration
 from .serializers import (
@@ -40,9 +41,17 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Retrieve ImageGeneration objects for the authenticated user.
+        Retrieve ImageGeneration objects for the authenticated user,
+        excluding expired 'url' images.
         """
-        return ImageGeneration.objects.filter(user=self.request.user)
+        user = self.request.user
+        now = timezone.now()
+        expiration_threshold = now - timezone.timedelta(minutes=60)
+        
+        return ImageGeneration.objects.filter(user=user).filter(
+            Q(response_format='b64_json') |
+            Q(response_format='url', created_at__gte=expiration_threshold)
+        )
 
     def get_serializer_class(self):
         """

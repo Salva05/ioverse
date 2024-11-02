@@ -7,8 +7,6 @@ import {
   useMediaQuery,
   TextField,
   InputAdornment,
-  ImageList,
-  ImageListItem,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
@@ -17,10 +15,13 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import { ConversationContext } from "../contexts/ConversationContext";
 import chat from "../api/chat";
 import TabPanel from "../components/account/TabPanel";
 import UserInfo from "../components/account/UserInfo";
 import ConversationList from "../components/account/ConversationList";
+import { getGroupLabel } from "../utils/getGroupLabel";
+import GeneratedImagesList from "../components/account/GeneratedImagesList";
 
 const a11yProps = (index) => {
   return {
@@ -33,7 +34,9 @@ const Account = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
-  const { isAuthenticated } = useContext(AuthContext);
+
+  const { isAuthenticated, user } = useContext(AuthContext);
+  const { activateConversation } = useContext(ConversationContext);
 
   const [tabValue, setTabValue] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +46,7 @@ const Account = () => {
     setTabValue(newValue);
   };
 
+  // Query to fetch conversations
   const {
     data: conversationsData,
     error,
@@ -56,7 +60,30 @@ const Account = () => {
     cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Handle errors
+  // Query to fetch images
+  const {
+    data: imagesData,
+    error: imagesError,
+    isError: isImagesError,
+    isLoading: isImagesLoading,
+  } = useQuery({
+    queryKey: ["generatedImages"],
+    queryFn: async () => await axios.get("/api/image-generation/").then(res => res.data),
+    enabled: isAuthenticated && tabValue === 2, // Fetch only when authenticated and on Generated Images tab
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Handle errors for images
+  useMemo(() => {
+    if (isImagesError) {
+      toast.error(
+        "Error loading images: " + (imagesError?.message || "Unknown error")
+      );
+    }
+  }, [isImagesError, imagesError]);
+
+  // Handle errors for conversations
   useMemo(() => {
     if (isError) {
       toast.error(
@@ -82,18 +109,12 @@ const Account = () => {
     }));
   }, [conversationsData]);
 
-  // Group conversations by date
+  // Group conversations by custom date labels
   const groupedConversations = useMemo(() => {
     const groups = {};
 
     conversations.forEach((conv) => {
-      let groupLabel = format(conv.createdAt, "MMMM dd, yyyy");
-
-      if (isToday(conv.createdAt)) {
-        groupLabel = "Today";
-      } else if (isYesterday(conv.createdAt)) {
-        groupLabel = "Yesterday";
-      }
+      const groupLabel = getGroupLabel(conv.createdAt);
 
       if (!groups[groupLabel]) {
         groups[groupLabel] = [];
@@ -138,8 +159,8 @@ const Account = () => {
 
   // Handle conversation click
   const handleConversationClick = (conversationId) => {
-    // TODO
-    /* navigate(); */
+    activateConversation(conversationId);
+    navigate("/chat");
   };
 
   // Handle group toggle
@@ -166,11 +187,10 @@ const Account = () => {
       {/* User Information */}
       <UserInfo
         user={{
-          avatar: "/static/images/avatar/1.jpg",
-          name: "John Doe",
-          email: "john.doe@example.com",
-          joinedDate: "January 1, 2024",
-          subscription: "Premium",
+          /* avatar: "/static/images/avatar/1.jpg", */
+          name: user.username,
+          email: user.email,
+          joinedDate: user.joined_date,
         }}
       />
 
@@ -209,15 +229,15 @@ const Account = () => {
           >
             <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" color="text.secondary">
-                Full Name
+                Username
               </Typography>
-              <Typography variant="body1">John Doe</Typography>
+              <Typography variant="body1">{user.username}</Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" color="text.secondary">
                 Email
               </Typography>
-              <Typography variant="body1">john.doe@example.com</Typography>
+              <Typography variant="body1">{user.email}</Typography>
             </Box>
           </Box>
           <Box
@@ -229,15 +249,15 @@ const Account = () => {
           >
             <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" color="text.secondary">
-                Username
+                Chats
               </Typography>
-              <Typography variant="body1">@johndoe</Typography>
+              <Typography variant="body1">{user.chats}</Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" color="text.secondary">
-                Membership
+                Images
               </Typography>
-              <Typography variant="body1">Premium</Typography>
+              <Typography variant="body1">{user.images}</Typography>
             </Box>
           </Box>
         </Box>
@@ -275,8 +295,7 @@ const Account = () => {
 
       <TabPanel value={tabValue} index={2}>
         {/* Generated Images */}
-        <ImageList>
-        </ImageList>
+        <GeneratedImagesList />
       </TabPanel>
     </Box>
   );

@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from .models import ImageGeneration
+from ..chatbot.models import Conversation
 
 import logging
 
@@ -110,13 +111,23 @@ class ImageGenerationSerializer(serializers.ModelSerializer):
 class ImageGenerationListSerializer(serializers.ModelSerializer):
     image_thumbnail = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(read_only=True)
-
+    image_url = serializers.URLField(required=False, allow_null=True, read_only=True)
+    image_file = serializers.ImageField(required=False, allow_null=True, read_only=True)
+    
     class Meta:
         model = ImageGeneration
         fields = [
             'id',
+            'size',
+            'style',
             'prompt',
+            'quality',
+            'image_url',
+            'is_shared',
+            'image_file',
+            'model_used',
             'created_at',
+            'response_format',
             'image_thumbnail',
         ]
 
@@ -202,7 +213,25 @@ class SharedImageSerializer(serializers.ModelSerializer):
     
 class UserSerializer(serializers.ModelSerializer):
     joined_date = serializers.DateTimeField(source='date_joined', format='%B %d, %Y')
+    chats = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined', 'joined_date']
+        fields = [
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'date_joined',
+            'joined_date',
+            'chats',
+            'images'
+        ]
+
+    def get_chats(self, obj):
+        return Conversation.objects.filter(user=obj).count()
+
+    def get_images(self, obj):
+        return ImageGeneration.objects.filter(user=obj).count()

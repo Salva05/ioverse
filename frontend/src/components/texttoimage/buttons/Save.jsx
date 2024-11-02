@@ -6,6 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Snackbar from "@mui/material/Snackbar";
 import { styled } from "@mui/material/styles";
 import { imageService } from "../../../services/imageService";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Explosion = styled("div")({
   position: "absolute",
@@ -25,6 +26,7 @@ const Save = ({ payload, src, imageId, setImageId }) => {
   const [showExplosion, setShowExplosion] = useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setIsSaved(false);
@@ -38,6 +40,8 @@ const Save = ({ payload, src, imageId, setImageId }) => {
     // the state of 'newIsSaved' will drive the backend call
     if (newIsSaved) {
       const response = await imageService.saveImage(payload, src);
+      // refetch the query for the images in the Account
+      queryClient.invalidateQueries(["generatedImages"]);
       setImageId(response.id);  // For eventual removal or to share
     } else {
       const response = await imageService.deleteImage(imageId);

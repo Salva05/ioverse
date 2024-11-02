@@ -5,7 +5,7 @@ const textToImage = {
   // GET
   getImages: async () => {
     const response = await axiosInstance.get(
-      "/text-to-image/image-generations"
+      "/text-to-image/image-generations/"
     );
     return response.data;
   },

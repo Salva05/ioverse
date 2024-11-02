@@ -2,12 +2,14 @@ import React, { createContext, useEffect, useState, useCallback } from "react";
 import loginService from "../services/authService";
 import TokenManager from "../services/tokenManager";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../api/axiosInstance";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null); // Retain base user information
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [logoutTimer, setLogoutTimer] = useState(null); // Timer for logout
@@ -79,6 +81,28 @@ export const AuthProvider = ({ children }) => {
     };
   }, [scheduleLogout]);
 
+  // Fetch user data when authenticated
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await axiosInstance.get("/current-user/");
+          setUser(response.data);
+        } catch (err) {
+          console.error("Failed to fetch user data:", err);
+          setError("Failed to fetch user data.");
+          setIsAuthenticated(false);
+          TokenManager.clearTokens();
+          navigate("/login");
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    fetchCurrentUser();
+  }, [isAuthenticated, navigate]);
+
   const authenticate = useCallback(
     async (username, password) => {
       setLoading(true);
@@ -98,7 +122,9 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (err) {
         console.error("Authentication failed:", err);
-        setError(err.response?.data?.detail || err.message || "Authentication failed.");
+        setError(
+          err.response?.data?.detail || err.message || "Authentication failed."
+        );
         setIsAuthenticated(false);
         TokenManager.clearTokens();
         throw err;
@@ -112,10 +138,11 @@ export const AuthProvider = ({ children }) => {
   // Handles user logout
   const logout = useCallback(() => {
     setIsAuthenticated(false);
+    setUser(null);
     TokenManager.clearTokens();
     clearLogoutTimer();
     // Redirect to login page
-    navigate('/login');
+    navigate("/login");
   }, []);
 
   // Synchronizes authentication state across multiple tabs
@@ -137,11 +164,14 @@ export const AuthProvider = ({ children }) => {
 
   const contextValue = {
     isAuthenticated,
+    user,
     loading,
     error,
     authenticate,
     logout,
   };
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };

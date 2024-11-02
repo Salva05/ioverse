@@ -16,7 +16,7 @@ const UserInfo = ({ user }) => {
       >
         <Avatar
           alt="User Avatar"
-          src={user.avatar}
+          src=""
           sx={{
             width: isSmallScreen ? 80 : 120,
             height: isSmallScreen ? 80 : 120,
@@ -36,9 +36,6 @@ const UserInfo = ({ user }) => {
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Joined: {user.joinedDate}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Subscription: {user.subscription}
           </Typography>
         </Box>
       </Box>

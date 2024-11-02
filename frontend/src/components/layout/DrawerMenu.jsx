@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -6,13 +6,13 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import MmsOutlinedIcon from '@mui/icons-material/MmsOutlined';
+import MmsOutlinedIcon from "@mui/icons-material/MmsOutlined";
 import LinearProgress from "@mui/material/LinearProgress";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
-import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import { styled, useTheme } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ConversationContext } from "../../contexts/ConversationContext";
@@ -62,6 +62,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const location = useLocation();
   const { activeConversationId, activateConversation } =
     useContext(ConversationContext);
+  const conversationRefs = useRef({});
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated } = useContext(AuthContext);
@@ -156,6 +157,16 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
   const handleConversationClick = (id) => {
     activateConversation(id);
   };
+  
+  // to scroll to the active conversatio
+  useEffect(() => {
+    if (activeConversationId && conversationRefs.current[activeConversationId]) {
+      conversationRefs.current[activeConversationId].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [activeConversationId]);
 
   return (
     <Drawer
@@ -251,6 +262,9 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                 <Fade in={true} timeout={1500} key={conversation.id}>
                   <ListItem key={conversation.id} disablePadding>
                     <ListItemButton
+                      ref={(el) =>
+                        (conversationRefs.current[conversation.id] = el)
+                      }
                       selected={activeConversationId === conversation.id}
                       onClick={() => handleConversationClick(conversation.id)}
                       sx={{

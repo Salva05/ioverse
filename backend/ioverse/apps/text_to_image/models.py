@@ -73,7 +73,8 @@ class ImageGeneration(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Created At",
-        help_text="The date and time when the image was generated."
+        help_text="The date and time when the image was generated.",
+        db_index=True
     )
     model_used = models.CharField(
         max_length=20,
@@ -100,7 +101,8 @@ class ImageGeneration(models.Model):
         choices=RESPONSE_FORMAT_CHOICES,
         default="url",
         verbose_name="Response Format",
-        help_text="The response format (e.g., 'url', 'b64_json')."
+        help_text="The response format (e.g., 'url', 'b64_json').",
+        db_index=True
     )
     size = models.CharField(
         max_length=20,
