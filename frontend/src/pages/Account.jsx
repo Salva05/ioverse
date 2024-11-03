@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useContext } from "react";
+import React, { useState, useMemo, useContext, useEffect } from "react";
 import {
   Typography,
   Box,
@@ -75,7 +75,7 @@ const Account = () => {
   });
 
   // Handle errors for images
-  useMemo(() => {
+  useEffect(() => {
     if (isImagesError) {
       toast.error(
         "Error loading images: " + (imagesError?.message || "Unknown error")
@@ -84,7 +84,7 @@ const Account = () => {
   }, [isImagesError, imagesError]);
 
   // Handle errors for conversations
-  useMemo(() => {
+  useEffect(() => {
     if (isError) {
       toast.error(
         "Error loading conversations: " + (error?.message || "Unknown error")

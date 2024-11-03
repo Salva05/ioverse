@@ -12,8 +12,6 @@ import {
   Fade,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import shareImage from "../../../utils/shareImage";
-import { toast } from "react-toastify";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={800} />;
@@ -44,12 +42,7 @@ const StyledCancelButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export default function ShareDialog({
-  state,
-  setOpenState,
-  handleShare,
-  imageId,
-}) {
+export default function ShareDialog({ open, onShare, setOpenState }) {
   const [duration, setDuration] = useState(24);
 
   const handleSliderChange = (event, newValue) => {
@@ -61,30 +54,21 @@ export default function ShareDialog({
     setDuration(value === "" ? "" : Number(value));
   };
 
-  const handleCancel = (event) => {
-    event.stopPropagation();
+  const handleCancel = (event, reason) => {
+    if (event) {
+      event.stopPropagation();
+    }
     setOpenState(false);
   };
 
-  const handleConfirm = async (event) => {
-    if (event) {
-      event.stopPropagation();
-
-      try {
-        const response = await shareImage(imageId, duration);
-        setOpenState(false);
-        handleShare(response.share_url, response.expires_at);
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to share the image. Please try again.");
-      }
-    }
+  const handleConfirm = async () => {
+    onShare(duration);
   };
 
   return (
     <StyledDialog
-      open={state}
-      onClose={(e) => handleCancel}
+      open={open}
+      onClose={handleCancel}
       TransitionComponent={Transition}
       maxWidth="xs"
       fullWidth
@@ -156,7 +140,7 @@ export default function ShareDialog({
         <StyledCancelButton onClick={handleCancel} variant="outlined">
           Cancel
         </StyledCancelButton>
-        <StyledButton onClick={(e) => handleConfirm(e)} variant="contained">
+        <StyledButton onClick={handleConfirm} variant="contained">
           Share
         </StyledButton>
       </DialogActions>

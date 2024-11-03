@@ -4,7 +4,7 @@ import Save from "./buttons/Save";
 import See from "./buttons/See";
 import Share from "./buttons/Share";
 
-const Options = ({ payload, src, imageId, setImageId }) => {
+const OptionsBar = ({ payload, src, imageId, setImageId }) => {
   return (
     <ButtonGroup size="small" aria-label="Small button group">
       <See src={src} />
@@ -19,4 +19,4 @@ const Options = ({ payload, src, imageId, setImageId }) => {
   );
 };
 
-export default Options;
+export default OptionsBar;

@@ -144,7 +144,9 @@ const TextToImage = () => {
         setImageIds(Array(images.length).fill(null));
       } catch (error) {
         console.error("Error generating image:", error);
-        toast.error("Failed to generate image. Please try again.");
+        const errorMessage =
+          error.response?.data?.message || "Failed to generate image.";
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }

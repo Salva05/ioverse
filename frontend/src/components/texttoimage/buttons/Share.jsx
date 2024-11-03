@@ -21,16 +21,16 @@ const Share = ({ imageId }) => {
     }
   };
 
-  const isDisabled = imageId <= 0;
+  const isDisabled = !imageId;
   const tooltipTitle = isDisabled
     ? "Save the image to share"
     : isSharing
     ? "Stop Sharing"
     : "Share";
 
-  const handleShare = (token, expires_at) => {
+  const handleShare = (url, expires_at) => {
     // Additional logic
-    setSharedUrl(token);
+    setSharedUrl(url);
     setIsSharing(true);
     setUnshareDialogOpen(true);
     setExpiresAt(expires_at);
