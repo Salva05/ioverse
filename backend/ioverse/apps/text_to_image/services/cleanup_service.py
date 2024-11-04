@@ -17,7 +17,8 @@ def clean():
             created_at__lt=expiration_threshold
         )
         deleted_count, _ = expired_images.delete()
-        logger.info(f"Cleaned up {deleted_count} expired URL images.")
+        if (deleted_count > 0):
+            logger.info(f"Cleaned up {deleted_count} expired URL images.")
     except Exception as e:
         logger.exception(f"Error during cleanup: {e}")
 
