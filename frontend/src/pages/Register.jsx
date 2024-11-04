@@ -21,7 +21,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import register from "../api/registration";
 import { AuthContext } from "../contexts/AuthContext";
-import { Alert } from "@mui/material";
+import { Alert, Toolbar } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -45,7 +45,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignUpContainer = styled(Stack)(({ theme }) => ({
   padding: theme.spacing(2),
   position: 'relative',
-  minHeight: '100vh',
+  flexGrow: 1,
   justifyContent: 'center',
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
@@ -198,6 +198,7 @@ export default function SignUp(props) {
   return (
     <>
       <CssBaseline enableColorScheme />
+      <Toolbar />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <SitemarkIcon />

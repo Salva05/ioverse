@@ -183,7 +183,6 @@ export default function ChatSystem() {
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          minHeight: '100vh'
         }}
       >
         <Toolbar />
@@ -195,7 +194,7 @@ export default function ChatSystem() {
             display: "flex",
             flexDirection: "column",
             flexGrow: 1,
-            paddingBottom: "70px",
+            paddingBottom: "80px",
           }}
         >
           {/* Scrollable Messages Area */}

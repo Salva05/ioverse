@@ -29,7 +29,7 @@ export default function Layout() {
   return (
     <AuthProvider>
       <DrawerContext.Provider value={{ open, isSmallScreen }}>
-        <Box sx={{ display: "flex", height: "100vh", width: "100%" }}>
+        <Box sx={{ display: "flex", width: "100%" }}>
           <CssBaseline />
           <AppBar
             open={open}

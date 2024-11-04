@@ -22,6 +22,7 @@ import {
 } from "../components/login/CustomIcons";
 import { AuthContext } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Toolbar } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -44,7 +45,6 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
   position: "relative",
-  minHeight: "100vh",
   flexGrow: 1,
   justifyContent: "center",
   alignItems: "center",
@@ -156,6 +156,7 @@ export default function SignIn(props) {
   return (
     <>
       <CssBaseline enableColorScheme />
+      <Toolbar/>
       {/* Display the message passed from ProtectedRoute */}
       <SignInContainer
         direction="column"
@@ -172,7 +173,7 @@ export default function SignIn(props) {
           {message && (
             <Alert
               severity="info"
-              sx={{ marginBottom: "1rem", marginTop: "1rem" }}
+              sx={{ marginBottom: "1rem" }}
             >
               {message}
             </Alert>

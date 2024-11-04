@@ -31,7 +31,7 @@ const Main = styled("main", {
       marginLeft: 0,
       width: `calc(100% - ${drawerWidth}px)`,
     }),
-  paddingTop: theme.spacing(8),
+  paddingTop: theme.spacing(2),
 }));
 
 export default function MainContent({ open, isSmallScreen, children }) {

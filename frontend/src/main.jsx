@@ -15,6 +15,7 @@ import ChatSystem from "./pages/ChatSystem";
 import "./styles/general.css";
 import TextToImage from "./pages/TextToImage";
 import Account from "./pages/Account";
+import Assistant from "./pages/Assistant";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,12 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <TextToImage />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: "assistant",
+        element: (
+            <Assistant />
         ),
       },
       {

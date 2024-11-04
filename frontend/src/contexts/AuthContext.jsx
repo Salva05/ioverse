@@ -3,7 +3,7 @@ import loginService from "../services/authService";
 import TokenManager from "../services/tokenManager";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
-
+import { useQueryClient } from "@tanstack/react-query";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [logoutTimer, setLogoutTimer] = useState(null); // Timer for logout
+  const queryClient = useQueryClient();
 
   // Clears existing logout timers to prevent multiple timers running simultaneously
   const clearLogoutTimer = () => {
@@ -141,6 +142,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     TokenManager.clearTokens();
     clearLogoutTimer();
+    queryClient.clear();
     // Redirect to login page
     navigate("/login");
   }, []);

@@ -24,6 +24,7 @@ import { toast } from "react-toastify";
 import SearchBar from "../chat/SearchBar";
 import { AuthContext } from "../../contexts/AuthContext";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import AssistantOutlinedIcon from '@mui/icons-material/AssistantOutlined';
 import { Tooltip, Typography } from "@mui/material";
 import sortedConversation from "../../utils/sortedConversation";
 import "../../styles/scrollbar.css";
@@ -53,6 +54,13 @@ const pages = [
     path: "/text-to-image",
     icon: <MmsOutlinedIcon sx={{ color: "#fff" }} />,
     protected: true,
+  },
+  {
+    id: 3,
+    display: "Assistant",
+    path: "/assistant",
+    icon: <AssistantOutlinedIcon sx={{ color: "#fff" }} />,
+    protected: false,
   },
 ];
 
@@ -156,8 +164,19 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
 
   const handleConversationClick = (id) => {
     activateConversation(id);
+    handleDrawerClose();
   };
   
+  // Handle Navigation Item Click
+  const handlePageClick = (page) => {
+    if (page.path === "/chat") {
+      if (isAuthenticated) {
+        refetch();
+      }
+    }
+    navigate(page.path);
+  };
+
   // to scroll to the active conversatio
   useEffect(() => {
     if (activeConversationId && conversationRefs.current[activeConversationId]) {
@@ -205,14 +224,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
             <ListItem key={page.id} disablePadding>
               <ListItemButton
                 selected={isSelected}
-                onClick={() => {
-                  if (page.path === "/chat") {
-                    if (isAuthenticated) {
-                      refetch();
-                    }
-                  }
-                  navigate(page.path);
-                }}
+                onClick={() => handlePageClick(page)}
                 sx={{
                   "&.Mui-selected": {
                     backgroundColor: theme.palette.action.selected,

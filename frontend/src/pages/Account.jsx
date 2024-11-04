@@ -7,6 +7,8 @@ import {
   useMediaQuery,
   TextField,
   InputAdornment,
+  CssBaseline,
+  Toolbar,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
@@ -35,7 +37,7 @@ const Account = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
 
-  const { isAuthenticated, user } = useContext(AuthContext);
+  const { isAuthenticated, user, loading } = useContext(AuthContext);
   const { activateConversation } = useContext(ConversationContext);
 
   const [tabValue, setTabValue] = useState(0);
@@ -68,7 +70,8 @@ const Account = () => {
     isLoading: isImagesLoading,
   } = useQuery({
     queryKey: ["generatedImages"],
-    queryFn: async () => await axios.get("/api/image-generation/").then(res => res.data),
+    queryFn: async () =>
+      await axios.get("/api/image-generation/").then((res) => res.data),
     enabled: isAuthenticated && tabValue === 2, // Fetch only when authenticated and on Generated Images tab
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -171,133 +174,142 @@ const Account = () => {
     }));
   };
 
+  if (loading || !user) {
+    // Optionally show a spinner or loading message
+    return <Typography>Loading account information...</Typography>;
+  }
+  
   return (
-    <Box
-      sx={{
-        padding: isSmallScreen ? 2 : 4,
-        backgroundColor: "white",
-        minHeight: "100vh",
-      }}
-    >
-      {/* Title Section */}
-      <Typography variant="h4" gutterBottom>
-        Account
-      </Typography>
-
-      {/* User Information */}
-      <UserInfo
-        user={{
-          /* avatar: "/static/images/avatar/1.jpg", */
-          name: user.username,
-          email: user.email,
-          joinedDate: user.joined_date,
+    <>
+      <CssBaseline />
+      <Toolbar />
+      <Box
+        sx={{
+          padding: isSmallScreen ? 2 : 4,
+          backgroundColor: "white",
+          minHeight: "100vh",
         }}
-      />
+      >
+        {/* Title Section */}
+        <Typography variant="h4" gutterBottom>
+          Account
+        </Typography>
 
-      {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleChange}
-          aria-label="Account Tabs"
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
-        >
-          <Tab label="General Information" {...a11yProps(0)} />
-          <Tab label="Chats" {...a11yProps(1)} />
-          <Tab label="Generated Images" {...a11yProps(2)} />
-        </Tabs>
-      </Box>
-
-      {/* Tab Panels */}
-      <TabPanel value={tabValue} index={0}>
-        {/* General Information */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
+        {/* User Information */}
+        <UserInfo
+          user={{
+            /* avatar: "/static/images/avatar/1.jpg", */
+            name: user.username,
+            email: user.email,
+            joinedDate: user.joined_date,
           }}
-        >
+        />
+
+        {/* Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={tabValue}
+            onChange={handleChange}
+            aria-label="Account Tabs"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
+            <Tab label="General Information" {...a11yProps(0)} />
+            <Tab label="Chats" {...a11yProps(1)} />
+            <Tab label="Generated Images" {...a11yProps(2)} />
+          </Tabs>
+        </Box>
+
+        {/* Tab Panels */}
+        <TabPanel value={tabValue} index={0}>
+          {/* General Information */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: isSmallScreen ? "column" : "row",
+              flexDirection: "column",
               gap: 2,
             }}
           >
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Username
-              </Typography>
-              <Typography variant="body1">{user.username}</Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isSmallScreen ? "column" : "row",
+                gap: 2,
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Username
+                </Typography>
+                <Typography variant="body1">{user.username}</Typography>
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Email
+                </Typography>
+                <Typography variant="body1">{user.email}</Typography>
+              </Box>
             </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Email
-              </Typography>
-              <Typography variant="body1">{user.email}</Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isSmallScreen ? "column" : "row",
+                gap: 2,
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Chats
+                </Typography>
+                <Typography variant="body1">{user.chats}</Typography>
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Images
+                </Typography>
+                <Typography variant="body1">{user.images}</Typography>
+              </Box>
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: isSmallScreen ? "column" : "row",
-              gap: 2,
-            }}
-          >
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Chats
-              </Typography>
-              <Typography variant="body1">{user.chats}</Typography>
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Images
-              </Typography>
-              <Typography variant="body1">{user.images}</Typography>
-            </Box>
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={1}>
+          {/* Chats/Conversations */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* Search Bar */}
+            <TextField
+              variant="outlined"
+              placeholder="Search Conversations"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="small"
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            {/* Conversations List */}
+            <ConversationList
+              groupedConversations={filteredGroupedConversations}
+              isLoading={isLoading}
+              onConversationClick={handleConversationClick}
+              theme={theme}
+            />
           </Box>
-        </Box>
-      </TabPanel>
+        </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
-        {/* Chats/Conversations */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* Search Bar */}
-          <TextField
-            variant="outlined"
-            placeholder="Search Conversations"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            size="small"
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {/* Conversations List */}
-          <ConversationList
-            groupedConversations={filteredGroupedConversations}
-            isLoading={isLoading}
-            onConversationClick={handleConversationClick}
-            theme={theme}
-          />
-        </Box>
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={2}>
-        {/* Generated Images */}
-        <GeneratedImagesList />
-      </TabPanel>
-    </Box>
+        <TabPanel value={tabValue} index={2}>
+          {/* Generated Images */}
+          <GeneratedImagesList />
+        </TabPanel>
+      </Box>
+    </>
   );
 };
 
