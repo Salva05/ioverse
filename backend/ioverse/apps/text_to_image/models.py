@@ -210,7 +210,6 @@ class ImageGeneration(models.Model):
             raise ValidationError({'model_used': "Invalid model selected."})
 
     def delete(self, *args, **kwargs):
-        print("Deleted")
         # If the image file exists, delete it
         if self.image_file and os.path.isfile(self.image_file.path):
             os.remove(self.image_file.path)

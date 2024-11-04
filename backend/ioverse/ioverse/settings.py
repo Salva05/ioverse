@@ -13,6 +13,7 @@ import os
 import environ
 from datetime import timedelta
 from pathlib import Path
+from celery.schedules import crontab
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -87,6 +88,26 @@ SIMPLE_JWT = {
     'SIGNING_KEY': PRIVATE_KEY,
     'VERIFYING_KEY': PUBLIC_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+CELERY_BEAT_SCHEDULE = {
+    # Task to unshare expired images every 5 minutes
+    'unshare-expired-images-every-5-minutes': {
+        'task': 'apps.text_to_image.tasks.unshare_expired_images',
+        'schedule': crontab(minute='*/5'),
+    },
+    
+    # Task to clean up expired URL images every 5 minutes
+    'cleanup-expired-url-images-every-5-minutes': {
+        'task': 'apps.text_to_image.tasks.cleanup_expired_url_images',
+        'schedule': crontab(minute='*/5'),
+    },
+    
+    # Task to unshare expired conversations every 5 minutes
+    'unshare-expired-conversations-every-5-minutes': {
+        'task': 'apps.chatbot.tasks.unshare_expired_conversations',
+        'schedule': crontab(minute='*/5'),
+    },
 }
 
 CACHES = {
@@ -183,6 +204,10 @@ LOGGING = {
             'format': '[{asctime}] {levelname} {name} {message}',
             'style': '{',
         },
+        'celery': {
+            'format': '[Celery] [{asctime}] {levelname} {name} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'console': {
@@ -211,6 +236,12 @@ LOGGING = {
             'filename': 'text_to_image.log',
             'formatter': 'text_to_image',
         },
+        # Handler for Celery logs
+        'celery_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'celery.log',
+            'formatter': 'celery',
+        },
     },
     'loggers': {
         # Loggers for chatbot app
@@ -232,6 +263,12 @@ LOGGING = {
         },
         'text_to_image_log': {
             'handlers': ['text_to_image_image_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Logger for Celery
+        'celery': {
+            'handlers': ['celery_file', 'console'],
             'level': 'INFO',
             'propagate': False,
         },

@@ -21,6 +21,7 @@ from .serializers import (
 )
 from .services.image_creation_service import ImageCreationService
 from .services.image_generation_service import ImageGenerationService
+from .services.cleanup_service import trigger_clean
 
 import logging
 
@@ -43,7 +44,11 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
         """
         Retrieve ImageGeneration objects for the authenticated user,
         excluding expired 'url' images.
+        Also triggers a background cleanup of expired images.
         """
+        # Trigger the cleanup asynchronously
+        trigger_clean()
+        
         user = self.request.user
         now = timezone.now()
         expiration_threshold = now - timezone.timedelta(minutes=60)
