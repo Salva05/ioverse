@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 from .operations import AssistantClient
-from .parameters import AssistantParams
+from .parameters import AssistantParams, AssistantListParam
 from assistant_modules.common.models import Assistant
 from pydantic import ValidationError
 
@@ -16,7 +16,11 @@ class AssistantService:
         try:
             assistant_data = params.model_dump(exclude_unset=False)
             response = self.client.create_assistant(**assistant_data)
-            assistant = Assistant.model_validate(response)
+        
+            # Convert OpenAI Assistant instance to dict
+            response_dict = response.model_dump()
+            
+            assistant = Assistant.model_validate(response_dict)
             logger.info(f"Assistant created: {assistant.id}")
             return assistant
         except ValidationError as ve:
@@ -29,7 +33,11 @@ class AssistantService:
     def retrieve_assistant(self, assistant_id: str) -> Assistant:
         try:
             response = self.client.retrieve_assistant(assistant_id)
-            assistant = Assistant.model_validate(response)
+            
+            # Convert OpenAI Assistant instance to dict
+            response_dict = response.model_dump()
+            
+            assistant = Assistant.model_validate(response_dict)
             logger.info(f"Assistant retrieved: {assistant.id}")
             return assistant
         except ValidationError as ve:
@@ -39,11 +47,35 @@ class AssistantService:
             logger.error(f"Error retrieving assistant: {str(e)}")
             raise
 
+    def list_assistants(self, params: AssistantListParam) -> list[Assistant]:
+        try:
+            list_params = params.model_dump(exclude_unset=False)
+            response = self.client.list_assistants(**list_params)
+            
+            # # Convert OpenAI Assistant List instance to dict 
+            response_dict = response.model_dump()
+            
+            # Map each item to the Assistant model
+            assistants = [Assistant.model_validate(item) for item in response_dict['data']]
+            
+            logger.info(f"{len(assistants)} assistants retrieved successfully.")
+            return assistants
+        except ValidationError as ve:
+            logger.error(f"Validation error listing assistants: {ve}")
+            raise
+        except Exception as e:
+            logger.error(f"Error listing assistants: {str(e)}")
+            raise
+        
     def update_assistant(self, assistant_id: str, params: AssistantParams) -> Assistant:
         try:
             assistant_data = params.model_dump(exclude_unset=True)
             response = self.client.update_assistant(assistant_id, **assistant_data)
-            assistant = Assistant.model_validate(response)
+            
+            # Convert OpenAI Assistant instance to dict
+            response_dict = response.model_dump()
+            
+            assistant = Assistant.model_validate(response_dict)
             logger.info(f"Assistant updated: {assistant.id}")
             return assistant
         except ValidationError as ve:

@@ -62,3 +62,29 @@ class AssistantParams(BaseModel):
                 "response_format must be 'auto' or a valid response format object."
             )
         return v
+
+class AssistantListParam(BaseModel):
+    limit: Optional[int] = Field(
+        default=20,
+        ge=1,
+        le=100,
+        description="A limit on the number of objects to be returned. Limit can range between 1 and 100. Default is 20.",
+    )
+    order: Optional[str] = Field(
+        default="desc",
+        description="Sort order by the created_at timestamp of the objects. 'asc' for ascending order and 'desc' for descending order.",
+    )
+    after: Optional[str] = Field(
+        default=None,
+        description="A cursor for pagination. after is an object ID defining your place in the list. Use to fetch the next page.",
+    )
+    before: Optional[str] = Field(
+        default=None,
+        description="A cursor for pagination. before is an object ID defining your place in the list. Use to fetch the previous page.",
+    )
+
+    @field_validator('order')
+    def validate_order(cls, v):
+        if v not in {"asc", "desc"}:
+            raise ValueError("order must be 'asc' or 'desc'.")
+        return v

@@ -58,7 +58,9 @@ INSTALLED_APPS = [
     
     'apps.chatbot',
     'apps.text_to_image',
+    'apps.assistant',
     'rest_framework',
+    'django_json_widget',
     'corsheaders',
 ]
 

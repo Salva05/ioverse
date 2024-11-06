@@ -1,5 +1,3 @@
-# core/client.py
-
 import openai
 from ioverse.assistant_modules.assistant.settings import AssistantSettings
 

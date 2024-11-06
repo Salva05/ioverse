@@ -9,6 +9,9 @@ class AssistantClient:
 
     def retrieve_assistant(self, assistant_id):
         return self.client.beta.assistants.retrieve(assistant_id)
+    
+    def list_assistants(self, **kwargs):
+        return self.client.beta.assistants.list(**kwargs)
 
     def update_assistant(self, assistant_id, **kwargs):
         return self.client.beta.assistants.update(assistant_id, **kwargs)

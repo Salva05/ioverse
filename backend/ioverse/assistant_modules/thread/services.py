@@ -16,7 +16,11 @@ class ThreadService:
         try:
             thread_data = params.model_dump(exclude_unset=True)
             response = self.client.create_thread(**thread_data)
-            thread = ThreadObject.model_validate(response)
+            
+            # Convert OpenAI Thread instance to dict
+            response_dict = response.model_dump()
+            
+            thread = ThreadObject.model_validate(response_dict)
             logger.info(f"Thread created: {thread.id}")
             return thread
         except ValidationError as ve:
