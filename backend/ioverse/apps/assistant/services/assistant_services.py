@@ -38,7 +38,7 @@ class AssistantIntegrationService:
                 model=assistant_pydantic.model,
                 instructions=assistant_pydantic.instructions,
                 tools=assistant_pydantic.tools,
-                tool_resources=assistant_pydantic.tool_resources.dict() if assistant_pydantic.tool_resources else None,
+                tool_resources=assistant_pydantic.tool_resources.model_dump() if assistant_pydantic.tool_resources else None,
                 temperature=assistant_pydantic.temperature,
                 top_p=assistant_pydantic.top_p,
                 response_format=assistant_pydantic.response_format,

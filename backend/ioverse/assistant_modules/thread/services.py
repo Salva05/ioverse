@@ -16,7 +16,7 @@ class ThreadService:
         try:
             thread_data = params.model_dump(exclude_unset=True)
             response = self.client.create_thread(**thread_data)
-            
+            print(response)
             # Convert OpenAI Thread instance to dict
             response_dict = response.model_dump()
             
@@ -33,7 +33,11 @@ class ThreadService:
     def retrieve_thread(self, thread_id: str) -> ThreadObject:
         try:
             response = self.client.retrieve_thread(thread_id)
-            thread = ThreadObject.model_validate(response)
+            
+            # Convert OpenAI Thread instance to dict
+            response_dict = response.model_dump()
+            
+            thread = ThreadObject.model_validate(response_dict)
             logger.info(f"Thread retrieved: {thread.id}")
             return thread
         except ValidationError as ve:
@@ -47,7 +51,11 @@ class ThreadService:
         try:
             thread_data = params.model_dump(exclude_unset=True)
             response = self.client.update_thread(thread_id, **thread_data)
-            thread = ThreadObject.model_validate(response)
+            
+            # Convert OpenAI Thread instance to dict
+            response_dict = response.model_dump()
+            
+            thread = ThreadObject.model_validate(response_dict)
             logger.info(f"Thread updated: {thread.id}")
             return thread
         except ValidationError as ve:

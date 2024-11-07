@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from apps.assistant.models import Assistant as DjangoAssistant
+from apps.assistant.models import Thread
 
 class AssistantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,4 +22,14 @@ class AssistantSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'object', 'created_at']
 
-# Validation applied by pydantic / django models
+class ThreadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Thread
+        fields = [
+            'id',
+            'object',
+            'created_at',
+            'tool_resources',
+            'metadata',
+        ]
+        read_only_fields = ['id', 'object', 'created_at']

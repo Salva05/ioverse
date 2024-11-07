@@ -46,9 +46,6 @@ class ThreadAdmin(admin.ModelAdmin):
         }),
     )
 
-    # Make certain fields read-only
-    readonly_fields = ('id', 'object', 'created_at')
-
     # Add help texts and descriptions
     def get_field_help_texts(self, request, obj=None):
         return {
