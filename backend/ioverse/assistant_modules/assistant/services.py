@@ -52,7 +52,7 @@ class AssistantService:
             list_params = params.model_dump(exclude_unset=False)
             response = self.client.list_assistants(**list_params)
             
-            # # Convert OpenAI Assistant List instance to dict 
+            # Convert OpenAI Assistant List instance to dict 
             response_dict = response.model_dump()
             
             # Map each item to the Assistant model

@@ -33,21 +33,18 @@ class MessageAdmin(admin.ModelAdmin):
     form = MessageAdminForm
 
     # Display key fields in the list view
-    list_display = ('id', 'thread_id', 'owner', 'role', 'status', 'created_at_display', 'metadata_snippet')
+    list_display = ('id', 'thread_id', 'owner', 'role', 'created_at_display', 'metadata_snippet')
 
     # Enable search functionality
     search_fields = ('id', 'thread_id', 'role', 'owner__username')
 
     # Enable filtering by status, role, and creation date
-    list_filter = ('status', 'role', 'created_at', 'owner')
+    list_filter = ('role', 'created_at', 'owner')
 
     # Organize fields into logical sections
     fieldsets = (
         ('Basic Information', {
             'fields': ('id', 'object', 'created_at', 'owner', 'thread_id', 'assistant_id', 'run_id')
-        }),
-        ('Status', {
-            'fields': ('status', 'incomplete_details', 'incomplete_at')
         }),
         ('Content', {
             'fields': ('role', 'content')
@@ -68,7 +65,6 @@ class MessageAdmin(admin.ModelAdmin):
             'created_at': "Unix timestamp (in seconds) for when the message was created.",
             'owner': "The owner of this message.",
             'thread_id': "The thread ID that this message belongs to.",
-            'status': "The status of the message, which can be either in_progress, incomplete, or completed.",
             'incomplete_details': "Details about why the message is incomplete.",
             'incomplete_at': "The Unix timestamp (in seconds) for when the message was marked as incomplete.",
             'role': "The entity that produced the message. One of user or assistant.",

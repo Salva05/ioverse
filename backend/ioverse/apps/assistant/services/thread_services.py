@@ -4,6 +4,7 @@ from typing import Any, Dict
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
+from ..helpers import serialize_pydantic_list, serialize_pydantic_model
 from assistant_modules.thread.services import ThreadService
 from assistant_modules.thread.parameters import ThreadCreateParams, ThreadUpdateParams
 from apps.assistant.models import Thread as DjangoThread
@@ -27,12 +28,15 @@ class ThreadIntegrationService:
             # Use assistant_modules to create Thread in OpenAI
             thread_pydantic = self.thread_service.create_thread(params)
             
+            # Serialize tool_resources correctly using the new helper
+            serialized_tool_resources = serialize_pydantic_model(thread_pydantic.tool_resources)
+            
             # Map Pydantic model to Django model
             django_thread = DjangoThread.objects.create(
                 id=thread_pydantic.id,
                 object=thread_pydantic.object,
                 created_at=thread_pydantic.created_at,
-                tool_resources=thread_pydantic.tool_resources.model_dump() if thread_pydantic.tool_resources else None,
+                tool_resources=serialized_tool_resources,
                 metadata=thread_pydantic.metadata,
                 owner=user
             )
@@ -57,11 +61,14 @@ class ThreadIntegrationService:
             # Retrieve Django model instance
             django_thread = DjangoThread.objects.get(id=thread_id, owner=user)
             
+            # Serialize tool_resources correctly using the new helper
+            serialized_tool_resources = serialize_pydantic_model(thread_pydantic.tool_resources)
+            
             # Update Django model fields
             django_thread.id=thread_pydantic.id
             django_thread.object=thread_pydantic.object
             django_thread.created_at=thread_pydantic.created_at
-            django_thread.tool_resources=thread_pydantic.tool_resources.model_dump() if thread_pydantic.tool_resources else None
+            django_thread.tool_resources=serialized_tool_resources
             django_thread.metadata=thread_pydantic.metadata
             django_thread.save()
             
@@ -87,10 +94,14 @@ class ThreadIntegrationService:
             params = ThreadUpdateParams(**data)
             thread_pydantic = self.thread_service.update_thread(thread_id, params)
             django_thread = DjangoThread.objects.get(id=thread_id, owner=user)
+            
+            # Serialize tool_resources correctly using the new helper
+            serialized_tool_resources = serialize_pydantic_model(thread_pydantic.tool_resources)
+            
             django_thread.id=thread_pydantic.id
             django_thread.object=thread_pydantic.object
             django_thread.created_at=thread_pydantic.created_at
-            django_thread.tool_resources=thread_pydantic.tool_resources.model_dump() if thread_pydantic.tool_resources else None
+            django_thread.tool_resources=serialized_tool_resources
             django_thread.metadata=thread_pydantic.metadata
             django_thread.save()
             logger.info(f"Thread updated in Django DB: {django_thread.id}")

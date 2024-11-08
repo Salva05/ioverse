@@ -13,6 +13,13 @@ from .views.thread import (
     ThreadUpdateView,
     ThreadDeleteView
 )
+from .views.message import (
+    MessageCreateView,
+    MessageListView,
+    MessageRetrieveView,
+    MessageUpdateView,
+    MessageDeleteView
+)
 
 urlpatterns = [
     # Assistant
@@ -26,4 +33,10 @@ urlpatterns = [
     path('thread/<str:thread_id>/retrieve/', ThreadRetrieveView.as_view(), name='thread-retrieve'),
     path('thread/<str:thread_id>/update/', ThreadUpdateView.as_view(), name='thread-update'),
     path('thread/<str:thread_id>/delete/', ThreadDeleteView.as_view(), name='thread-delete'),
+    # Message
+    path('message/<str:thread_id>/create/', MessageCreateView.as_view(), name='message-create'),
+    path('message/<str:thread_id>/list/', MessageListView.as_view(), name='message-list'),
+    path('message/<str:thread_id>/<str:message_id>/retrieve/', MessageRetrieveView.as_view(), name='message-retrieve'),
+    path('message/<str:thread_id>/<str:message_id>/update/', MessageUpdateView.as_view(), name='message-update'),
+    path('message/<str:thread_id>/<str:message_id>/delete/', MessageDeleteView.as_view(), name='message-delete'),
 ]

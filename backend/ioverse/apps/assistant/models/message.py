@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from .base import BaseModel
 from ..validators import (
     validate_metadata,
-    validate_status,
     validate_role,
     validate_content,
     validate_attachments
@@ -30,16 +29,7 @@ class Message(BaseModel):
         max_length=100,
         help_text="The thread ID that this message belongs to."
     )
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ('in_progress', 'In Progress'),
-            ('incomplete', 'Incomplete'),
-            ('completed', 'Completed'),
-        ],
-        help_text="The status of the message, which can be either in_progress, incomplete, or completed.",
-        validators=[validate_status]
-    )
+
     incomplete_details = models.JSONField(
         null=True,
         blank=True,
@@ -51,7 +41,7 @@ class Message(BaseModel):
         blank=True,
         help_text="The Unix timestamp (in seconds) for when the message was marked as incomplete."
     )
-    complete_at = models.IntegerField(
+    completed_at = models.IntegerField(
         null=True,
         blank=True,
         help_text="The Unix timestamp (in seconds) for when the message was marked as complete."

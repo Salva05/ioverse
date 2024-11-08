@@ -15,8 +15,13 @@ class MessageService:
     def create_message(self, thread_id: str, params: MessageCreateParams) -> MessageObject:
         try:
             message_data = params.model_dump(exclude_unset=True)
+            print(message_data)
             response = self.client.create_message(thread_id, **message_data)
-            message = MessageObject.model_validate(response)
+            
+            # Convert OpenAI Message instance to dict
+            response_dict = response.model_dump()
+            
+            message = MessageObject.model_validate(response_dict)
             logger.info(f"Message created: {message.id}")
             return message
         except ValidationError as ve:
@@ -29,7 +34,11 @@ class MessageService:
     def retrieve_message(self, thread_id: str, message_id: str) -> MessageObject:
         try:
             response = self.client.retrieve_message(thread_id, message_id)
-            message = MessageObject.model_validate(response)
+            
+            # Convert OpenAI Message instance to dict
+            response_dict = response.model_dump()
+            
+            message = MessageObject.model_validate(response_dict)
             logger.info(f"Message retrieved: {message.id}")
             return message
         except ValidationError as ve:
@@ -43,7 +52,11 @@ class MessageService:
         try:
             update_data = params.model_dump(exclude_unset=True)
             response = self.client.update_message(thread_id, message_id, **update_data)
-            message = MessageObject.model_validate(response)
+            
+            # Convert OpenAI Message instance to dict
+            response_dict = response.model_dump()
+            
+            message = MessageObject.model_validate(response_dict)
             logger.info(f"Message updated: {message.id}")
             return message
         except ValidationError as ve:
@@ -82,7 +95,11 @@ class MessageService:
             # Remove None values
             params = {k: v for k, v in params.items() if v is not None}
             response = self.client.list_messages(thread_id, **params)
-            messages = [MessageObject.model_validate(msg) for msg in response.get('data', [])]
+            
+            # Convert OpenAI Message instance to dict
+            response_dict = response.model_dump()
+            
+            messages = [MessageObject.model_validate(msg) for msg in response_dict.get('data', [])]
             logger.info(f"Messages listed for thread: {thread_id}")
             return messages
         except ValidationError as ve:

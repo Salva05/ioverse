@@ -219,13 +219,13 @@ ContentPartType = Union[TextContentPart, ImageFileContentPart, ImageURLContentPa
 class Tool(BaseModel):
     type: str
 
-class CodeInterpreterTool(Tool):
+class CodeInterpreterAttachmentTool(Tool):
     type: Literal['code_interpreter']
 
-class FileSearchTool(Tool):
+class FileSearchAttachmentTool(Tool):
     type: Literal['file_search']
 
-AttachmentToolType = Union[CodeInterpreterTool, FileSearchTool]
+AttachmentToolType = Union[CodeInterpreterAttachmentTool, FileSearchAttachmentTool]
 
 # Attachment
 class Attachment(BaseModel):
@@ -350,7 +350,6 @@ class MessageObject(Message):
     assistant_id: Optional[str] = None
     thread_id: str
     run_id: Optional[str] = None
-    status: Optional[str] = None
     incomplete_details: Optional[Dict[str, Any]] = None
     completed_at: Optional[int] = None
     incomplete_at: Optional[int] = None

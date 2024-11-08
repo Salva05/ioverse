@@ -54,32 +54,11 @@ def validate_tools(tools):
         
         # Delegate to specific tool validators
         if tool_type == 'code_interpreter':
-            validate_code_interpreter(tool)
+            pass # no further validations for it
         elif tool_type == 'file_search':
             validate_file_search(tool)
         elif tool_type == 'function':
             validate_function(tool)
-
-def validate_code_interpreter(tool):
-    """
-    Validates the 'code_interpreter' tool configuration.
-    - Must contain 'file_ids' as a list with a maximum of 20 items.
-    """
-    code_interpreter = tool.get('code_interpreter')
-    if code_interpreter is None:
-        raise ValidationError("Missing 'code_interpreter' configuration.")
-    if not isinstance(code_interpreter, dict):
-        raise ValidationError("'code_interpreter' must be a dictionary.")
-    
-    file_ids = code_interpreter.get('file_ids')
-    if file_ids is not None:
-        if not isinstance(file_ids, list):
-            raise ValidationError("'file_ids' must be a list.")
-        if len(file_ids) > 20:
-            raise ValidationError("A maximum of 20 file_ids are allowed in code_interpreter.")
-        for file_id in file_ids:
-            if not isinstance(file_id, str):
-                raise ValidationError("Each file_id must be a string.")
 
 def validate_file_search(tool):
     """
@@ -254,23 +233,6 @@ def validate_top_p(v):
             raise ValidationError('Top_p must be between 0 and 1.')
         
 # =========================
-# Status Validator
-# =========================
-
-def validate_status(value):
-    """
-    Validates that the status is one of the allowed choices.
-    
-    - Allowed statuses: 'in_progress', 'incomplete', 'completed'.
-    """
-    allowed_statuses = ['in_progress', 'incomplete', 'completed']
-    if value not in allowed_statuses:
-        raise ValidationError(
-            f"Invalid status: '{value}'. Allowed statuses are {allowed_statuses}."
-        )
-
-
-# =========================
 # Role Validator
 # =========================
 
@@ -298,27 +260,25 @@ def validate_content(content):
     - Each item must be a dictionary with a valid 'type'.
     - Supported types: 'image_file', 'image_url', 'text', 'refusal'.
     """
-    if not isinstance(content, list):
-        raise ValidationError("Content must be a list.")
-    
-    for index, item in enumerate(content):
-        if not isinstance(item, dict):
-            raise ValidationError(f"Each content item must be a dictionary. Error at index {index}.")
-        
-        content_type = item.get('type')
-        if content_type == 'image_file':
-            validate_image_file(item, index)
-        elif content_type == 'image_url':
-            validate_image_url(item, index)
-        elif content_type == 'text':
-            validate_text_content(item, index)
-        elif content_type == 'refusal':
-            validate_refusal(item, index)
-        else:
-            raise ValidationError(
-                f"Invalid content type: '{content_type}' at index {index}. "
-                "Allowed types are 'image_file', 'image_url', 'text', 'refusal'."
-            )
+    if isinstance(content, list):
+        for index, item in enumerate(content):
+            if not isinstance(item, dict):
+                raise ValidationError(f"Each content item must be a dictionary. Error at index {index}.")
+            
+            content_type = item.get('type')
+            if content_type == 'image_file':
+                validate_image_file(item, index)
+            elif content_type == 'image_url':
+                validate_image_url(item, index)
+            elif content_type == 'text':
+                validate_text_content(item, index)
+            elif content_type == 'refusal':
+                validate_refusal(item, index)
+            else:
+                raise ValidationError(
+                    f"Invalid content type: '{content_type}' at index {index}. "
+                    "Allowed types are 'image_file', 'image_url', 'text', 'refusal'."
+                )
 
 
 # =========================

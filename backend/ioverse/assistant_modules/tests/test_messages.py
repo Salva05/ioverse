@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
-from assistant_modules.messages.services import MessageService
-from assistant_modules.messages.parameters import MessageCreateParams
+from assistant_modules.message.services import MessageService
+from assistant_modules.message.parameters import MessageCreateParams
 from assistant_modules.common.models import TextContentPart, TextContent, MessageObject
 
 class TestMessageService(unittest.TestCase):

@@ -4,6 +4,7 @@ from typing import Any, Dict
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
+from ..helpers import serialize_response_format, serialize_pydantic_list, serialize_pydantic_model
 from assistant_modules.assistant.parameters import AssistantParams, AssistantListParam
 from assistant_modules.assistant.services import AssistantService
 from apps.assistant.models import Assistant as DjangoAssistant
@@ -27,6 +28,15 @@ class AssistantIntegrationService:
             # Use assistant_modules to create Assistant in OpenAI
             assistant_pydantic = self.assistant_service.create_assistant(params)
             
+            # Serialize the pydantic lists if it's not empty
+            serialized_tools = serialize_pydantic_list(assistant_pydantic.tools)
+            
+            # Serialize tool_resources correctly using the new helper
+            serialized_tool_resources = serialize_pydantic_model(assistant_pydantic.tool_resources)
+            
+            # Serialize response_format appropriately
+            serialized_response_format = serialize_response_format(assistant_pydantic.response_format)
+        
             # Map Pydantic model to Django model
             django_assistant = DjangoAssistant.objects.create(
                 id=assistant_pydantic.id,
@@ -37,11 +47,11 @@ class AssistantIntegrationService:
                 description=assistant_pydantic.description,
                 model=assistant_pydantic.model,
                 instructions=assistant_pydantic.instructions,
-                tools=assistant_pydantic.tools,
-                tool_resources=assistant_pydantic.tool_resources.model_dump() if assistant_pydantic.tool_resources else None,
+                tools=serialized_tools,
+                tool_resources=serialized_tool_resources,
                 temperature=assistant_pydantic.temperature,
                 top_p=assistant_pydantic.top_p,
-                response_format=assistant_pydantic.response_format,
+                response_format=serialized_response_format,
                 metadata=assistant_pydantic.metadata
             )
             logger.info(f"Assistant created in Django DB: {django_assistant.id}")
@@ -65,6 +75,15 @@ class AssistantIntegrationService:
             # Retrieve Django model instance
             django_assistant = DjangoAssistant.objects.get(id=assistant_id, owner=user)
             
+            # Serialize the pydantic lists if it's not empty
+            serialized_tools = serialize_pydantic_list(assistant_pydantic.tools)
+            
+            # Serialize tool_resources correctly using the new helper
+            serialized_tool_resources = serialize_pydantic_model(assistant_pydantic.tool_resources)
+            
+            # Serialize response_format appropriately
+            serialized_response_format = serialize_response_format(assistant_pydantic.response_format)
+            
             # Update Django model fields
             django_assistant.object = assistant_pydantic.object
             django_assistant.created_at = assistant_pydantic.created_at
@@ -72,11 +91,11 @@ class AssistantIntegrationService:
             django_assistant.description = assistant_pydantic.description
             django_assistant.model = assistant_pydantic.model
             django_assistant.instructions = assistant_pydantic.instructions
-            django_assistant.tools = assistant_pydantic.tools
-            django_assistant.tool_resources = assistant_pydantic.tool_resources.dict() if assistant_pydantic.tool_resources else None
+            django_assistant.tools = serialized_tools
+            django_assistant.tool_resources = serialized_tool_resources
             django_assistant.temperature = assistant_pydantic.temperature
             django_assistant.top_p = assistant_pydantic.top_p
-            django_assistant.response_format = assistant_pydantic.response_format
+            django_assistant.response_format = serialized_response_format
             django_assistant.metadata = assistant_pydantic.metadata
             django_assistant.save()
             
@@ -101,16 +120,26 @@ class AssistantIntegrationService:
         try:
             params = AssistantParams(**data)
             assistant_pydantic = self.assistant_service.update_assistant(assistant_id, params)
+            
+            # Serialize the pydantic lists if it's not empty
+            serialized_tools = serialize_pydantic_list(assistant_pydantic.tools)
+            
+            # Serialize tool_resources correctly using the new helper
+            serialized_tool_resources = serialize_pydantic_model(assistant_pydantic.tool_resources)
+            
+            # Serialize response_format appropriately
+            serialized_response_format = serialize_response_format(assistant_pydantic.response_format)
+            
             django_assistant = DjangoAssistant.objects.get(id=assistant_id, owner=user)
             django_assistant.name = assistant_pydantic.name
             django_assistant.description = assistant_pydantic.description
             django_assistant.model = assistant_pydantic.model
             django_assistant.instructions = assistant_pydantic.instructions
-            django_assistant.tools = assistant_pydantic.tools
-            django_assistant.tool_resources = assistant_pydantic.tool_resources.dict() if assistant_pydantic.tool_resources else None
+            django_assistant.tools = serialized_tools
+            django_assistant.tool_resources = serialized_tool_resources
             django_assistant.temperature = assistant_pydantic.temperature
             django_assistant.top_p = assistant_pydantic.top_p
-            django_assistant.response_format = assistant_pydantic.response_format
+            django_assistant.response_format = serialized_response_format
             django_assistant.metadata = assistant_pydantic.metadata
             django_assistant.save()
             logger.info(f"Assistant updated in Django DB: {django_assistant.id}")
@@ -156,11 +185,22 @@ class AssistantIntegrationService:
             django_assistants = []
             
             for assistant_pydantic in assistants_pydantic:
+                
+                # Serialize the pydantic lists if it's not empty
+                serialized_tools = serialize_pydantic_list(assistant_pydantic.tools)
+                
+                # Serialize tool_resources correctly using the new helper
+                serialized_tool_resources = serialize_pydantic_model(assistant_pydantic.tool_resources)
+                
+                # Serialize response_format appropriately
+                serialized_response_format = serialize_response_format(assistant_pydantic.response_format)
+            
                 # Try to get an existing Assistant from the Django database
                 django_assistant, created = DjangoAssistant.objects.update_or_create(
                     id=assistant_pydantic.id,
                     owner=user,
                     defaults={
+                        'id': assistant_pydantic.id,
                         'object': assistant_pydantic.object,
                         'created_at': assistant_pydantic.created_at,
                         'owner': user,
@@ -168,11 +208,11 @@ class AssistantIntegrationService:
                         'description': assistant_pydantic.description,
                         'model': assistant_pydantic.model,
                         'instructions': assistant_pydantic.instructions,
-                        'tools': assistant_pydantic.tools,
-                        'tool_resources': assistant_pydantic.tool_resources.model_dump() if assistant_pydantic.tool_resources else None,
+                        'tools': serialized_tools,
+                        'tool_resources': serialized_tool_resources,
                         'temperature': assistant_pydantic.temperature,
                         'top_p': assistant_pydantic.top_p,
-                        'response_format': assistant_pydantic.response_format,
+                        'response_format': serialized_response_format,
                         'metadata': assistant_pydantic.metadata,
                     }
                 )
