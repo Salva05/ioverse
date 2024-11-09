@@ -205,7 +205,10 @@ class MessageIntegrationService:
             
             # Iterate through messages and update/create Django models
             django_messages = []
+            ids = []    # Stores the ids of API models for later batch deletion of Django's one
+            
             for msg_pydantic in messages_pydantic:
+                ids.append(msg_pydantic.id)
                 # Serialize content parts
                 serialized_content = serialize_pydantic_list(msg_pydantic.content)
             
@@ -232,6 +235,9 @@ class MessageIntegrationService:
                     }
                 )
                 django_messages.append(django_message)
+            
+            # Delete any Message entries for this user not in the API's returned IDs
+            DjangoMessage.objects.filter(owner=user).exclude(id__in=ids).delete()
             
             logger.info(f"Listed {len(django_messages)} messages for thread: {thread_id}")
             return django_messages

@@ -69,7 +69,7 @@ class ThreadService:
         try:
             result = self.client.delete_thread(thread_id)
             logger.info(f"Thread deleted: {thread_id}")
-            return result
+            return result.model_dump()
         except Exception as e:
             logger.error(f"Error deleting thread: {str(e)}")
             raise

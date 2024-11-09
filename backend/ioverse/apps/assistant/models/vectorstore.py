@@ -23,6 +23,8 @@ class VectorStore(BaseModel):
     # created_at (IntegerField)
 
     name = models.CharField(
+        null=True,
+        blank=True,
         max_length=255,
         help_text="The name of the vector store."
     )
@@ -44,8 +46,18 @@ class VectorStore(BaseModel):
         validators=[validate_vector_store_status]
     )
     expires_after = models.JSONField(
+        null=True,
+        blank=True,
         help_text="The expiration policy for the vector store.",
         validators=[validate_expires_after]
+    )
+    expires_at = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="The Unix timestamp (in seconds) for when the vector store will expire."
+    )
+    last_active_at = models.IntegerField(
+        help_text="The Unix timestamp (in seconds) for when the vector store was last active."
     )
     metadata = models.JSONField(
         default=default_metadata,

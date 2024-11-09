@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
-from assistant_modules.vector_stores.services import VectorStoreService
-from assistant_modules.vector_stores.parameters import (
+from assistant_modules.vector_store.services import VectorStoreService
+from assistant_modules.vector_store.parameters import (
     VectorStoreCreateParams,
     VectorStoreUpdateParams,
     VectorStoreFileCreateParams,

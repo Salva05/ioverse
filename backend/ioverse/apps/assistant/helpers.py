@@ -1,6 +1,9 @@
 from assistant_modules.common.models import ResponseFormatType
+
 from typing import Optional, List, Dict, Any, Union
 from pydantic import BaseModel
+
+from django.db import transaction
 
 def serialize_pydantic_list(pydantic_list: Optional[List[BaseModel]]) -> Optional[List[Dict[str, Any]]]:
     """

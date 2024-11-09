@@ -89,7 +89,7 @@ class AssistantService:
         try:
             result = self.client.delete_assistant(assistant_id)
             logger.info(f"Assistant deleted: {assistant_id}")
-            return result
+            return result.model_dump()
         except Exception as e:
             logger.error(f"Error deleting assistant: {str(e)}")
             raise

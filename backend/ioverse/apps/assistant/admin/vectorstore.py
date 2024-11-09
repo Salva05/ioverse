@@ -29,7 +29,7 @@ class VectorStoreAdmin(admin.ModelAdmin):
     form = VectorStoreAdminForm
 
     # Display key fields in the list view
-    list_display = ('id', 'name', 'owner', 'status', 'usage_bytes', 'created_at_display', 'metadata_snippet')
+    list_display = ('id', 'name', 'owner', 'status', 'usage_bytes', 'created_at_display', 'expires_at')
 
     # Enable search functionality
     search_fields = ('id', 'name', 'status', 'owner__username')
@@ -43,10 +43,10 @@ class VectorStoreAdmin(admin.ModelAdmin):
             'fields': ('id', 'object', 'created_at', 'owner', 'name', 'usage_bytes')
         }),
         ('Status', {
-            'fields': ('status', 'file_counts')
+            'fields': ('status', 'file_counts', 'last_active_at')
         }),
         ('Expiration Policy', {
-            'fields': ('expires_after',)
+            'fields': ('expires_after', 'expires_at')
         }),
         ('Metadata', {
             'fields': ('metadata',)
@@ -65,6 +65,8 @@ class VectorStoreAdmin(admin.ModelAdmin):
             'status': "The status of the vector store, which can be either expired, in_progress, or completed.",
             'file_counts': "Counts of files in various statuses within the vector store.",
             'expires_after': "The expiration policy for the vector store.",
+            'expires_at': "Unix timestamp (in seconds) for when the vector store will expire.",
+            'last_active_at': "The Unix timestamp (in seconds) for when the vector store was last active.",
             'metadata': "Set of 16 key-value pairs that can be attached to an object.",
         }
 
@@ -89,3 +91,13 @@ class VectorStoreAdmin(admin.ModelAdmin):
             return mark_safe(f"<pre>{snippet[:50]}{'...' if len(snippet) > 50 else ''}</pre>")
         return "-"
     metadata_snippet.short_description = 'Metadata Snippet'
+    
+    # Display expiration date in a human-readable format
+    def expires_at_display(self, obj):
+        return datetime.fromtimestamp(obj.expires_at).strftime('%Y-%m-%d %H:%M:%S') if obj.expires_at else "-"
+    expires_at_display.short_description = 'Expires At'
+    
+    # Display last usage date in a human-readable format
+    def last_active_at_display(self, obj):
+        return datetime.fromtimestamp(obj.last_active_at).strftime('%Y-%m-%d %H:%M:%S') if obj.last_active_at else "-"
+    last_active_at_display.short_description = 'Last Used At'

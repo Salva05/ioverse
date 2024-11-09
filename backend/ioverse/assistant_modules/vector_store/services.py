@@ -25,7 +25,11 @@ class VectorStoreService:
         try:
             vector_store_data = params.model_dump(exclude_unset=True)
             response = self.client.create_vector_store(**vector_store_data)
-            vector_store = VectorStore.model_validate(response)
+            
+            # Convert OpenAI Vector Store instance to dict
+            response_dict = response.model_dump()
+            
+            vector_store = VectorStore.model_validate(response_dict)
             logger.info(f"Vector store created: {vector_store.id}")
             return vector_store
         except (ValidationError, Exception) as e:
@@ -42,7 +46,11 @@ class VectorStoreService:
             }
             params = {k: v for k, v in params.items() if v is not None}
             response = self.client.list_vector_stores(**params)
-            vector_stores = [VectorStore.model_validate(item) for item in response.get('data', [])]
+            
+            # Convert OpenAI Vector Store instance to dict
+            response_dict = response.model_dump()
+            
+            vector_stores = [VectorStore.model_validate(item) for item in response_dict.get('data', [])]
             logger.info("Vector stores listed.")
             return vector_stores
         except (ValidationError, Exception) as e:
@@ -52,7 +60,11 @@ class VectorStoreService:
     def retrieve_vector_store(self, vector_store_id: str) -> VectorStore:
         try:
             response = self.client.retrieve_vector_store(vector_store_id)
-            vector_store = VectorStore.model_validate(response)
+            
+            # Convert OpenAI Vector Store instance to dict
+            response_dict = response.model_dump()
+            
+            vector_store = VectorStore.model_validate(response_dict)
             logger.info(f"Vector store retrieved: {vector_store.id}")
             return vector_store
         except (ValidationError, Exception) as e:
@@ -63,7 +75,11 @@ class VectorStoreService:
         try:
             update_data = params.model_dump(exclude_unset=True)
             response = self.client.update_vector_store(vector_store_id, **update_data)
-            vector_store = VectorStore.model_validate(response)
+            
+            # Convert OpenAI Vector Store instance to dict
+            response_dict = response.model_dump()
+            
+            vector_store = VectorStore.model_validate(response_dict)
             logger.info(f"Vector store updated: {vector_store.id}")
             return vector_store
         except (ValidationError, Exception) as e:
@@ -74,7 +90,7 @@ class VectorStoreService:
         try:
             response = self.client.delete_vector_store(vector_store_id)
             logger.info(f"Vector store deleted: {vector_store_id}")
-            return response
+            return response.model_dump()
         except Exception as e:
             logger.error(f"Error deleting vector store: {str(e)}")
             raise
@@ -123,7 +139,7 @@ class VectorStoreService:
         try:
             response = self.client.delete_vector_store_file(vector_store_id, file_id)
             logger.info(f"Vector store file deleted: {file_id}")
-            return response 
+            return response
         except Exception as e:
             logger.error(f"Error deleting vector store file: {str(e)}")
             raise

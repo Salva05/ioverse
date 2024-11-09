@@ -70,7 +70,7 @@ class MessageService:
         try:
             result = self.client.delete_message(thread_id, message_id)
             logger.info(f"Message deleted: {message_id}")
-            return result
+            return result.model_dump()
         except Exception as e:
             logger.error(f"Error deleting message: {str(e)}")
             raise

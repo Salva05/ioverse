@@ -184,8 +184,13 @@ class AssistantIntegrationService:
             assistants_pydantic = self.assistant_service.list_assistants(params)
             django_assistants = []
             
+            # Holds a list of API response model's IDs for later comparison
+            # with local model, and eventually deletion
+            ids = []
+            
             for assistant_pydantic in assistants_pydantic:
-                
+                ids.append(assistant_pydantic.id)
+                    
                 # Serialize the pydantic lists if it's not empty
                 serialized_tools = serialize_pydantic_list(assistant_pydantic.tools)
                 
@@ -225,6 +230,9 @@ class AssistantIntegrationService:
                 
                 # Add to the list of Django assistant instances
                 django_assistants.append(django_assistant)
+            
+            # Delete any DjangoAssistant entries for this user not in the API's returned IDs
+            DjangoAssistant.objects.filter(owner=user).exclude(id__in=ids).delete()
             
             return django_assistants
 
