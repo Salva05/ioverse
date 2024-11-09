@@ -5,7 +5,7 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from ..helpers import serialize_response_format, serialize_pydantic_list, serialize_pydantic_model
-from assistant_modules.assistant.parameters import AssistantParams, AssistantListParam
+from assistant_modules.assistant.parameters import AssistantParams, AssistantListParam, AssistantParamsUpdate
 from assistant_modules.assistant.services import AssistantService
 from apps.assistant.models import Assistant as DjangoAssistant
 from pydantic import ValidationError
@@ -118,7 +118,7 @@ class AssistantIntegrationService:
         Updates an existing Assistant in OpenAI and Django database.
         """
         try:
-            params = AssistantParams(**data)
+            params = AssistantParamsUpdate(**data)
             assistant_pydantic = self.assistant_service.update_assistant(assistant_id, params)
             
             # Serialize the pydantic lists if it's not empty

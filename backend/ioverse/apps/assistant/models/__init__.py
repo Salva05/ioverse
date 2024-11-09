@@ -5,5 +5,6 @@ from .thread import Thread
 from .message import Message
 from .vectorstore import VectorStore
 from .vectorstorefile import VectorStoreFile
+from .file import File
 
-__all__ = ['Assistant', 'Thread', 'Message', 'VectorStore', 'VectorStoreFile']
+__all__ = ['Assistant', 'Thread', 'Message', 'VectorStore', 'VectorStoreFile', 'File']

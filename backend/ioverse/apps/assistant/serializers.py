@@ -1,10 +1,21 @@
 from rest_framework import serializers
-from apps.assistant.models import Assistant as DjangoAssistant, Message, VectorStore
-from apps.assistant.models import Thread
+from .validators import validate_purpose
+from apps.assistant.models import (
+    Assistant,
+    Thread,
+    Message,
+    VectorStore,
+    VectorStoreFile,
+    File
+)
+
+# ======================
+# Assistant
+# ======================
 
 class AssistantSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DjangoAssistant
+        model = Assistant
         fields = [
             'id',
             'object',
@@ -22,6 +33,10 @@ class AssistantSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'object', 'created_at']
 
+# ======================
+# Thread
+# ======================
+
 class ThreadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Thread
@@ -33,6 +48,10 @@ class ThreadSerializer(serializers.ModelSerializer):
             'metadata',
         ]
         read_only_fields = ['id', 'object', 'created_at']
+
+# ======================
+# Message
+# ======================
 
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,6 +73,10 @@ class MessageSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'object', 'created_at']
 
+# ======================
+# Vector Store
+# ======================
+
 class VectorStoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = VectorStore
@@ -71,7 +94,11 @@ class VectorStoreSerializer(serializers.ModelSerializer):
             'metadata',
         ]
         read_only_fields = ['id', 'object', 'created_at']
-       
+
+# ======================
+# Vector Store Expiration
+# ======================
+
 class ExpiresAfterSerializer(serializers.Serializer):
     anchor = serializers.CharField(
         required=True,
@@ -81,6 +108,10 @@ class ExpiresAfterSerializer(serializers.Serializer):
         required=True,
         help_text="The number of days after the anchor time that the vector store will expire."
     ) 
+
+# ======================
+# Vector Store Chunking Strategy
+# ======================
 
 class AutoChunkingStrategySerializer(serializers.Serializer):
     type = serializers.CharField(
@@ -107,7 +138,11 @@ class StaticChunkingStrategySerializer(serializers.Serializer):
         required=True,
         help_text="The number of tokens that overlap between chunks. Must not exceed half of max_chunk_size_tokens."
     )
-    
+
+# ======================
+# Vector Store Creation
+# ======================
+
 class VectorStoreCreateSerializer(serializers.Serializer):
     file_ids = serializers.ListField(
         child=serializers.CharField(),
@@ -147,6 +182,10 @@ class VectorStoreCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid chunking strategy type. Must be 'auto' or 'static'.")
         return value
 
+# ======================
+# Vector Store Update
+# ======================
+
 class VectorStoreUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(
         required=False,
@@ -163,3 +202,135 @@ class VectorStoreUpdateSerializer(serializers.Serializer):
         allow_empty=True,
         help_text="Metadata with a maximum of 16 key-value pairs for the vector store."
     )
+
+# ======================
+# Vector Store File Creation
+# ======================
+
+class VectorStoreFileCreateSerializer(serializers.Serializer):
+    vector_store_id = serializers.CharField(
+        required=True,
+        help_text="The ID of the vector store for which to create a File."
+    )
+    file_id = serializers.CharField(
+        required=True,
+        help_text="A File ID that the vector store should use. Useful for tools like file_search that can access files."
+    )
+    chunking_strategy = serializers.DictField(
+        child=serializers.CharField(),
+        required=False,
+        help_text="The chunking strategy used to chunk the file(s). If not set, will use the auto strategy."
+    )
+    
+# ======================
+# Vector Store File
+# ======================
+
+class VectorStoreFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VectorStoreFile
+        fields = [
+            'id',
+            'object',
+            'created_at',
+            'usage_bytes',
+            'last_error',
+            'chunking_strategy',
+            'metadata',
+        ]
+        read_only_fields = ['id', 'object', 'created_at']
+        
+# ======================
+# File Creation
+# ======================
+
+class FileCreateSerializer(serializers.Serializer):
+    """
+    Serializer for creating a File object.
+    Allows only specific fields needed for file creation.
+    """
+    file = serializers.FileField(
+        allow_empty_file=False,
+        required=True,
+        help_text="The File object (not file name) to be uploaded."
+    )
+    purpose = serializers.CharField(
+        required=True,
+        help_text="The intended purpose of the uploaded file."
+    )
+
+    def validate_purpose(self, value):
+        return validate_purpose(value)
+
+# ======================
+# File List 
+# ======================
+
+class FileListSerializer(serializers.Serializer):
+    """
+    Serializer for listing File objects with optional filtering and pagination.
+    """
+
+    purpose = serializers.CharField(
+        required=False,
+        help_text="Optional. Only return files with the given purpose."
+    )
+    limit = serializers.IntegerField(
+        required=False,
+        default=10000,
+        min_value=1,
+        max_value=10000,
+        help_text="Optional. A limit on the number of objects to be returned. Defaults to 10,000."
+    )
+    order = serializers.ChoiceField(
+        choices=['asc', 'desc'],
+        required=False,
+        default='desc',
+        help_text="Optional. Sort order by the created_at timestamp of the objects. Defaults to 'desc'."
+    )
+    after = serializers.CharField(
+        required=False,
+        help_text="Optional. A cursor for pagination. Defines the starting point for the next page of results."
+    )
+
+    def validate_purpose(self, value):
+        """
+        Validate purpose using the standalone purpose validator function.
+        """
+        return validate_purpose(value)
+    
+# ======================
+# File Retrieve
+# ======================
+
+class FileRetrieveDeleteSerializer(serializers.Serializer):
+    """
+    Serializer for retrieving or deleting File objects.
+    """
+    file_id = serializers.CharField(
+        required=True,
+        help_text="The ID of the file to use for this request."
+    )
+    
+# ======================
+# File
+# ======================
+
+class FileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for representing a File object.
+    Includes all fields specified by the OpenAI API for file objects.
+    """
+    class Meta:
+        model = File
+        fields = [
+            'id',
+            'bytes',
+            'created_at',
+            'filename',
+            'object',
+            'purpose',
+        ]
+        read_only_fields = ['id', 'created_at', 'object']
+    def validate_purpose(self, value):
+        return validate_purpose(value)

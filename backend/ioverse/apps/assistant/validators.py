@@ -69,7 +69,7 @@ def validate_file_search(tool):
     """
     file_search = tool.get('file_search')
     if file_search is None:
-        raise ValidationError("Missing 'file_search' configuration.")
+        return
     if not isinstance(file_search, dict):
         raise ValidationError("'file_search' must be a dictionary.")
     
@@ -706,3 +706,13 @@ def validate_static_chunking_strategy(chunking_strategy, index):
         raise ValidationError(
             f"'chunk_overlap_tokens' ({chunk_overlap_tokens}) must not exceed half of 'max_chunk_size_tokens' ({max_chunk_size_tokens})."
         )
+
+# =========================
+# File Purpose Validator
+# =========================
+
+def validate_purpose(value):
+    purposes = ['assistants', 'vision', 'batch', 'fine-tune']
+    if value not in purposes:
+        raise ValidationError(f"'purpose' must be one of the valid options: {purposes}.")
+    return value

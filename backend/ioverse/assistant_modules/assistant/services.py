@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 from .operations import AssistantClient
-from .parameters import AssistantParams, AssistantListParam
+from .parameters import AssistantParams, AssistantListParam, AssistantParamsUpdate
 from assistant_modules.common.models import Assistant
 from pydantic import ValidationError
 
@@ -67,7 +67,7 @@ class AssistantService:
             logger.error(f"Error listing assistants: {str(e)}")
             raise
         
-    def update_assistant(self, assistant_id: str, params: AssistantParams) -> Assistant:
+    def update_assistant(self, assistant_id: str, params: AssistantParamsUpdate) -> Assistant:
         try:
             assistant_data = params.model_dump(exclude_unset=True)
             response = self.client.update_assistant(assistant_id, **assistant_data)

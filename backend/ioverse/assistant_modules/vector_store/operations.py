@@ -21,8 +21,8 @@ class VectorStoreClient:
         return self.client.beta.vector_stores.delete(vector_store_id)
     
     # Vector Store Files
-    def create_vector_store_file(self, vector_store_id, **kwargs):
-        return self.client.beta.vector_stores.files.create(vector_store_id, **kwargs)
+    def create_vector_store_file(self, **kwargs):
+        return self.client.beta.vector_stores.files.create(**kwargs)
     
     def list_vector_store_files(self, vector_store_id, **params):
         return self.client.beta.vector_stores.files.list(vector_store_id, **params)

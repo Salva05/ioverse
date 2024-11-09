@@ -189,6 +189,7 @@ class VectorStoreIntegrationService:
                         id=vs_pydantic.id,
                         owner=user,
                         defaults={
+                            'id': vs_pydantic.id,
                             'object': vs_pydantic.object,
                             'created_at': vs_pydantic.created_at,
                             'name': vs_pydantic.name,

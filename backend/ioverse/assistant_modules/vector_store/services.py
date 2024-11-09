@@ -27,9 +27,9 @@ class VectorStoreService:
             response = self.client.create_vector_store(**vector_store_data)
             
             # Convert OpenAI Vector Store instance to dict
-            response_dict = response.model_dump()
+            response = response.model_dump()
             
-            vector_store = VectorStore.model_validate(response_dict)
+            vector_store = VectorStore.model_validate(response)
             logger.info(f"Vector store created: {vector_store.id}")
             return vector_store
         except (ValidationError, Exception) as e:
@@ -48,9 +48,9 @@ class VectorStoreService:
             response = self.client.list_vector_stores(**params)
             
             # Convert OpenAI Vector Store instance to dict
-            response_dict = response.model_dump()
+            response = response.model_dump()
             
-            vector_stores = [VectorStore.model_validate(item) for item in response_dict.get('data', [])]
+            vector_stores = [VectorStore.model_validate(item) for item in response.get('data', [])]
             logger.info("Vector stores listed.")
             return vector_stores
         except (ValidationError, Exception) as e:
@@ -62,9 +62,9 @@ class VectorStoreService:
             response = self.client.retrieve_vector_store(vector_store_id)
             
             # Convert OpenAI Vector Store instance to dict
-            response_dict = response.model_dump()
+            response = response.model_dump()
             
-            vector_store = VectorStore.model_validate(response_dict)
+            vector_store = VectorStore.model_validate(response)
             logger.info(f"Vector store retrieved: {vector_store.id}")
             return vector_store
         except (ValidationError, Exception) as e:
@@ -77,9 +77,9 @@ class VectorStoreService:
             response = self.client.update_vector_store(vector_store_id, **update_data)
             
             # Convert OpenAI Vector Store instance to dict
-            response_dict = response.model_dump()
+            response = response.model_dump()
             
-            vector_store = VectorStore.model_validate(response_dict)
+            vector_store = VectorStore.model_validate(response)
             logger.info(f"Vector store updated: {vector_store.id}")
             return vector_store
         except (ValidationError, Exception) as e:
@@ -96,10 +96,11 @@ class VectorStoreService:
             raise
     
     # Vector Store Files
-    def create_vector_store_file(self, vector_store_id: str, params: VectorStoreFileCreateParams) -> VectorStoreFile:
+    def create_vector_store_file(self, params: VectorStoreFileCreateParams) -> VectorStoreFile:
         try:
             file_data = params.model_dump(exclude_unset=True)
-            response = self.client.create_vector_store_file(vector_store_id, **file_data)
+            response = self.client.create_vector_store_file(**file_data)
+            response = response.model_dump()
             vector_store_file = VectorStoreFile.model_validate(response)
             logger.info(f"Vector store file created: {vector_store_file.id}")
             return vector_store_file
@@ -118,6 +119,7 @@ class VectorStoreService:
             }
             params = {k: v for k, v in params.items() if v is not None}
             response = self.client.list_vector_store_files(vector_store_id, **params)
+            response = response.model_dump()
             vector_store_files = [VectorStoreFile.model_validate(item) for item in response.get('data', [])]
             logger.info(f"Vector store files listed for vector store: {vector_store_id}")
             return vector_store_files
@@ -149,6 +151,7 @@ class VectorStoreService:
         try:
             batch_data = params.model_dump(exclude_unset=True)
             response = self.client.create_vector_store_file_batch(vector_store_id, **batch_data)
+            response.model_dump()
             batch = VectorStoreFileBatch.model_validate(response)
             logger.info(f"Vector store file batch created: {batch.id}")
             return batch

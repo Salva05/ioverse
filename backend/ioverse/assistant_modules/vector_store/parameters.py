@@ -53,6 +53,10 @@ class VectorStoreUpdateParams(BaseModel):
         return validate_metadata(v)
 
 class VectorStoreFileCreateParams(BaseModel):
+    vector_store_id: str = Field(
+        ...,
+        description="The ID of the vector store for which to create a File."
+    )
     file_id: str = Field(
         ...,
         description="A File ID that the vector store should use."

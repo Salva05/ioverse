@@ -27,7 +27,18 @@ from .views.vectorstore import (
     VectorStoreUpdateView,
     VectorStoreDeleteView
 )
-
+from .views.vectorstorefile import (
+    VectorStoreFileCreateView,
+    VectorStoreFileListView,
+    VectorStoreFileRetrieveView,
+    VectorStoreFileDeleteView
+)
+from .views.file import (
+    FileCreateView,
+    FileListView,
+    FileRetrieveView,
+    FileDeleteView
+)
 urlpatterns = [
     # Assistant
     path('create/', AssistantCreateView.as_view(), name='assistant-create'),
@@ -52,4 +63,14 @@ urlpatterns = [
     path('vector_store/<str:vector_store_id>/retrieve/', VectorStoreRetrieveView.as_view(), name='vector_store-retrieve'),
     path('vector_store/<str:vector_store_id>/update/', VectorStoreUpdateView.as_view(), name='vector_store-update'),
     path('vector_store/<str:vector_store_id>/delete/', VectorStoreDeleteView.as_view(), name='vector_store-delete'),
+    # Vector Store File
+    path('vector_store_file/create/', VectorStoreFileCreateView.as_view(), name='vector_store_file-create'),
+    path('vector_store_file/<str:vector_store_id>/list/', VectorStoreFileListView.as_view(), name='vector_store_file-list'),
+    path('vector_store_file/<str:vector_store_file_id>/retrieve/', VectorStoreFileRetrieveView.as_view(), name='vector_store_file-retrieve'),
+    path('vector_store_file/<str:vector_store_file_id>/delete/', VectorStoreFileDeleteView.as_view(), name='vector_store_file-delete'),
+    # File
+    path('file/create/', FileCreateView.as_view(), name='file-create'),
+    path('file/list/', FileListView.as_view(), name='file-list'),
+    path('file/<str:file_id>/retrieve/', FileRetrieveView.as_view(), name='file-retrieve'),
+    path('file/<str:file_id>/delete/', FileDeleteView.as_view(), name='file-delete'),
 ]
