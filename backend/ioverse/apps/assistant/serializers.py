@@ -379,3 +379,10 @@ class FileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'object']
     def validate_purpose(self, value):
         return validate_purpose(value)
+    
+# ======================
+# Generic JSON (Run and Run Step)
+# ======================
+
+class GenericJSONSerializer(serializers.Serializer):
+    data = serializers.JSONField()

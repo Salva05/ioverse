@@ -33,6 +33,9 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
+# OpenAI API Key
+OPENAI_API_KEY = env('OPENAI_API_KEY')
+
 # Path to keys
 PRIVATE_KEY_PATH = BASE_DIR / 'keys/private.pem'
 PUBLIC_KEY_PATH = BASE_DIR / 'keys/public.pem'

@@ -1,5 +1,5 @@
 from openai import OpenAI
-from helpers import handle_errors, clean
+from .helpers import handle_errors, clean
 
 class Run:
     """
@@ -35,7 +35,7 @@ class Run:
             thread_id=thread_id,
             assistant_id=assistant_id,
             **kwargs
-        )
+        ).model_dump()
 
     @handle_errors
     def create_thread_and_run(self, **kwargs):
@@ -52,7 +52,7 @@ class Run:
         return self.client.beta.threads.create_and_run(
             assistant_id=assistant_id,
             **kwargs
-        )
+        ).model_dump()
     
     @handle_errors
     def list(self, **kwargs):
@@ -69,7 +69,7 @@ class Run:
         return self.client.beta.threads.runs.list(
             thread_id=thread_id,
             **kwargs
-        )
+        ).model_dump()
         
     @handle_errors
     def retrieve(self, **kwargs):
@@ -87,7 +87,7 @@ class Run:
         return self.client.beta.threads.runs.retrieve(
             thread_id=thread_id,
             run_id=run_id
-        )
+        ).model_dump()
         
     @handle_errors
     def update(self, **kwargs):
@@ -108,7 +108,7 @@ class Run:
             thread_id=thread_id,
             run_id=run_id,
             **kwargs
-        )
+        ).model_dump()
     
     @handle_errors
     def submit_tool_outputs(self, **kwargs):
@@ -133,7 +133,7 @@ class Run:
             run_id=run_id,
             tool_outputs=tool_outputs
             **kwargs
-        )
+        ).model_dump()
     
     @handle_errors
     def cancel(self, **kwargs):
@@ -151,7 +151,7 @@ class Run:
         return self.client.beta.threads.runs.cancel(
             thread_id=thread_id,
             run_id=run_id
-        )
+        ).model_dump()
         
     @handle_errors
     def create_and_poll(self, **kwargs):
@@ -173,4 +173,4 @@ class Run:
             thread_id=thread_id,
             assistant_id=assistant_id,
             **kwargs
-        )
+        ).model_dump()

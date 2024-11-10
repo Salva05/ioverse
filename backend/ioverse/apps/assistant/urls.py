@@ -39,6 +39,8 @@ from .views.file import (
     FileRetrieveView,
     FileDeleteView
 )
+from .views.run import RunAPIView , RunStepAPIView
+
 urlpatterns = [
     # Assistant
     path('create/', AssistantCreateView.as_view(), name='assistant-create'),
@@ -73,4 +75,8 @@ urlpatterns = [
     path('file/list/', FileListView.as_view(), name='file-list'),
     path('file/<str:file_id>/retrieve/', FileRetrieveView.as_view(), name='file-retrieve'),
     path('file/<str:file_id>/delete/', FileDeleteView.as_view(), name='file-delete'),
+    # Runs
+    path('run/<str:action>/', RunAPIView.as_view(), name='run-actions'),
+    # RunSteps
+    path('run_steps/<str:action>/', RunStepAPIView.as_view(), name='runstep-actions'),
 ]

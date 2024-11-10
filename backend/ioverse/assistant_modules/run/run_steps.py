@@ -1,5 +1,5 @@
 from openai import OpenAI
-from helpers import handle_errors, clean
+from .helpers import handle_errors, clean
 
 class RunStep:
     """
@@ -34,7 +34,7 @@ class RunStep:
             thread_id=thread_id,
             run_id=run_id,
             **kwargs,
-        )
+        ).model_dump()
         
     @handle_errors
     def retrieve(self, **kwargs):
@@ -59,4 +59,4 @@ class RunStep:
             run_id=run_id,
             step_id=step_id,
             **kwargs,
-        )
+        ).model_dump()
