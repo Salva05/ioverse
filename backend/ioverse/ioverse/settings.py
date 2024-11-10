@@ -187,6 +187,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Create logs directory if it doesn't exist
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -219,29 +223,29 @@ LOGGING = {
         # Handlers for chatbot app
         'chatbot_file': {
             'class': 'logging.FileHandler',
-            'filename': 'chatbot_project.log',
+            'filename': str(LOG_DIR / 'chatbot_project.log'),
             'formatter': 'json',
         },
         'chat_file': {
             'class': 'logging.FileHandler',
-            'filename': 'chat.log',
+            'filename': str(LOG_DIR / 'chat.log'),
             'formatter': 'chat',
         },
         # Handlers for text_to_image app
         'text_to_image_file': {
             'class': 'logging.FileHandler',
-            'filename': 'text_to_image_project.log',
+            'filename': str(LOG_DIR / 'text_to_image_project.log'),
             'formatter': 'json',
         },
         'text_to_image_image_file': {
             'class': 'logging.FileHandler',
-            'filename': 'text_to_image.log',
+            'filename': str(LOG_DIR / 'text_to_image.log'),
             'formatter': 'text_to_image',
         },
         # Handler for Celery logs
         'celery_file': {
             'class': 'logging.FileHandler',
-            'filename': 'celery.log',
+            'filename': str(LOG_DIR / 'celery.log'),
             'formatter': 'celery',
         },
     },

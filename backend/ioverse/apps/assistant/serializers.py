@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .validators import validate_purpose
+from .validators import (
+    validate_purpose,
+    validate_metadata,
+    validate_content,
+    validate_attachments
+)
 from apps.assistant.models import (
     Assistant,
     Thread,
@@ -60,19 +65,59 @@ class MessageSerializer(serializers.ModelSerializer):
             'id',
             'object',
             'created_at',
+            'assistant_id',
             'thread_id',
+            'run_id',
             'role',
             'content',
             'attachments',
             'metadata',
-            'assistant_id',
-            'run_id',
-            'incomplete_details',
-            'completed_at',
-            'incomplete_at'
         ]
         read_only_fields = ['id', 'object', 'created_at']
+    
+# ======================
+# Message Creation
+# ======================
 
+class MessageCreationSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(
+        choices=["user", "assistant"],
+        required=True,
+        help_text="The role of the entity that is creating the message."
+    )
+    content = serializers.JSONField(
+        help_text="Content of the message, either a direct text string or an array of structured content parts.",
+        validators=[validate_content]
+    )
+    attachments = serializers.ListField(
+        child=serializers.DictField(
+            child=serializers.JSONField(),
+            help_text="Each attachment can have 'file_id' and 'tools' fields."
+        ),
+        required=False,
+        allow_null=True,
+        help_text="Optional array of file attachments with tool specifications.",
+        validators=[validate_attachments]
+    )
+    metadata = serializers.DictField(
+        child=serializers.CharField(),
+        required=False,
+        help_text="Optional set of 16 key-value pairs for additional object information. Keys max 64 chars, values max 512 chars.",
+        validators=[validate_metadata]
+    )
+
+# ======================
+# Message Update
+# ======================
+
+class MessageUpdateSerializer(serializers.Serializer):
+    metadata = serializers.DictField(
+        child=serializers.CharField(),
+        required=False,
+        help_text="Optional set of 16 key-value pairs for additional object information. Keys max 64 chars, values max 512 chars.",
+        validators=[validate_metadata]
+    )
+    
 # ======================
 # Vector Store
 # ======================

@@ -29,23 +29,6 @@ class Message(BaseModel):
         max_length=100,
         help_text="The thread ID that this message belongs to."
     )
-
-    incomplete_details = models.JSONField(
-        null=True,
-        blank=True,
-        help_text="Details about why the message is incomplete.",
-        validators=[]  # Specific validators will be handled within validate_content or separate functions
-    )
-    incomplete_at = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text="The Unix timestamp (in seconds) for when the message was marked as incomplete."
-    )
-    completed_at = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text="The Unix timestamp (in seconds) for when the message was marked as complete."
-    )
     role = models.CharField(
         max_length=20,
         choices=[

@@ -33,7 +33,7 @@ class MessageAdmin(admin.ModelAdmin):
     form = MessageAdminForm
 
     # Display key fields in the list view
-    list_display = ('id', 'thread_id', 'owner', 'role', 'created_at_display', 'metadata_snippet')
+    list_display = ('id', 'thread_id', 'owner', 'role', 'created_at_display')
 
     # Enable search functionality
     search_fields = ('id', 'thread_id', 'role', 'owner__username')
@@ -65,8 +65,6 @@ class MessageAdmin(admin.ModelAdmin):
             'created_at': "Unix timestamp (in seconds) for when the message was created.",
             'owner': "The owner of this message.",
             'thread_id': "The thread ID that this message belongs to.",
-            'incomplete_details': "Details about why the message is incomplete.",
-            'incomplete_at': "The Unix timestamp (in seconds) for when the message was marked as incomplete.",
             'role': "The entity that produced the message. One of user or assistant.",
             'content': "The content of the message in array of text and/or images.",
             'assistant_id': "If applicable, the ID of the assistant that authored this message.",
@@ -74,7 +72,13 @@ class MessageAdmin(admin.ModelAdmin):
             'attachments': "A list of files attached to the message, and the tools they were added to.",
             'metadata': "Set of 16 key-value pairs that can be attached to an object.",
         }
-
+    
+    # Make fields read only in edit mode
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # If editing an existing object
+            return [field.name for field in self.model._meta.fields if field.name not in ['attachments', 'metadata', 'content']]  # Make all fields read-only
+        return []  # All fields are editable during creation
+    
     # Override formfield_for_dbfield to add help texts dynamically
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)

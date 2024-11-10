@@ -4,7 +4,7 @@ from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from apps.assistant.serializers import MessageSerializer
+from apps.assistant.serializers import MessageSerializer, MessageCreationSerializer, MessageUpdateSerializer
 from apps.assistant.services.message_services import MessageIntegrationService
 from pydantic import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
@@ -15,19 +15,20 @@ class MessageCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request, thread_id):
-        serializer = MessageSerializer(data=request.data)
-        if serializer.is_valid():
+        input_serializer = MessageCreationSerializer(data=request.data)
+        if input_serializer.is_valid():
             service = MessageIntegrationService()
             try:
-                django_message = service.create_message(thread_id, serializer.validated_data, request.user)
-                return Response(MessageSerializer(django_message).data, status=status.HTTP_201_CREATED)
+                django_message = service.create_message(thread_id, input_serializer.validated_data, request.user)
+                output_serializer = MessageSerializer(django_message)
+                return Response(output_serializer.data, status=status.HTTP_201_CREATED)
             except ValidationError as ve:
                 logger.error(f"Validation error: {ve}")
                 return Response({"errors": ve.errors()}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 logger.error(f"Error creating message: {e}")
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MessageRetrieveView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -53,12 +54,13 @@ class MessageUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, thread_id, message_id):
-        serializer = MessageSerializer(data=request.data, partial=True)
-        if serializer.is_valid():
+        input_serializer = MessageUpdateSerializer(data=request.data, partial=True)
+        if input_serializer.is_valid():
             service = MessageIntegrationService()
             try:
-                django_message = service.update_message(thread_id, message_id, serializer.validated_data, request.user)
-                return Response(MessageSerializer(django_message).data, status=status.HTTP_200_OK)
+                django_message = service.update_message(thread_id, message_id, input_serializer.validated_data, request.user)
+                output_serializer = MessageSerializer(django_message)
+                return Response(output_serializer.data, status=status.HTTP_200_OK)
             except ObjectDoesNotExist:
                 logger.error(f"Message with ID {message_id} does not exist in Django DB.")
                 return Response({"error": "Message not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -68,7 +70,7 @@ class MessageUpdateView(APIView):
             except Exception as e:
                 logger.error(f"Error updating message: {e}")
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MessageDeleteView(APIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -25,7 +25,7 @@ class ThreadAdmin(admin.ModelAdmin):
     form = ThreadAdminForm
 
     # Display key fields in the list view
-    list_display = ('id', 'object', 'owner', 'created_at_display', 'metadata_snippet')
+    list_display = ('id', 'object', 'owner', 'created_at_display')
 
     # Enable search functionality
     search_fields = ('id', 'owner__username')
@@ -59,7 +59,7 @@ class ThreadAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  # If editing an existing object
-            return [field.name for field in self.model._meta.fields]  # Make all fields read-only
+            return [field.name for field in self.model._meta.fields if field.name not in ['tool_resources', 'metadata']]  # Make all fields read-only
         return []  # All fields are editable during creation
     
     # Override formfield_for_dbfield to add help texts dynamically

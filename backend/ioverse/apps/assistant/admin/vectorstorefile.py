@@ -29,7 +29,7 @@ class VectorStoreFileAdmin(admin.ModelAdmin):
     form = VectorStoreFileAdminForm
 
     # Display key fields in the list view
-    list_display = ('id', 'vector_store_id', 'owner', 'status', 'usage_bytes', 'created_at_display', 'metadata_snippet')
+    list_display = ('id', 'owner', 'usage_bytes', 'created_at_display')
 
     # Enable search functionality
     search_fields = ('id', 'vector_store_id', 'status', 'owner__username')
@@ -62,11 +62,17 @@ class VectorStoreFileAdmin(admin.ModelAdmin):
             'owner': "The owner of this vector store file.",
             'vector_store_id': "The ID of the vector store that the File is attached to.",
             'usage_bytes': "The total vector store usage in bytes. Note that this may be different from the original file size.",
-            'status': "The status of the vector store file, which can be either in_progress, completed, cancelled, or failed. The status completed indicates that the vector store file is ready for use.",
+            'status': "The status of the vector store file. It can be outdated.",
             'last_error': "The last error associated with this vector store file. Will be null if there are no errors.",
             'chunking_strategy': "The strategy used to chunk the file.",
             'metadata': "Set of 16 key-value pairs that can be attached to an object.",
         }
+
+    # Make fields read only in edit mode
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # If editing an existing object
+            return [field.name for field in self.model._meta.fields if field.name not in ['chunking_strategy', 'metadata']]  # Make all fields read-only
+        return []  # All fields are editable during creation
 
     # Override formfield_for_dbfield to add help texts dynamically
     def get_form(self, request, obj=None, **kwargs):

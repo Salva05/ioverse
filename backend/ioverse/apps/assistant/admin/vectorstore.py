@@ -23,13 +23,13 @@ class VectorStoreAdminForm(forms.ModelForm):
                 'modes': ['code', 'tree', 'form'],
             }),
         }
-
+            
 @admin.register(VectorStore)
 class VectorStoreAdmin(admin.ModelAdmin):
     form = VectorStoreAdminForm
 
     # Display key fields in the list view
-    list_display = ('id', 'name', 'owner', 'status', 'usage_bytes', 'created_at_display', 'expires_at')
+    list_display = ('id', 'name', 'owner', 'usage_bytes', 'created_at_display', 'expires_at')
 
     # Enable search functionality
     search_fields = ('id', 'name', 'status', 'owner__username')
@@ -52,7 +52,7 @@ class VectorStoreAdmin(admin.ModelAdmin):
             'fields': ('metadata',)
         }),
     )
-
+            
     # Add help texts and descriptions
     def get_field_help_texts(self, request, obj=None):
         return {
@@ -62,7 +62,7 @@ class VectorStoreAdmin(admin.ModelAdmin):
             'owner': "The owner of this vector store.",
             'name': "The name of the vector store.",
             'usage_bytes': "The total number of bytes used by the files in the vector store.",
-            'status': "The status of the vector store, which can be either expired, in_progress, or completed.",
+            'status': "The status of the vector store. It can be outdated.",
             'file_counts': "Counts of files in various statuses within the vector store.",
             'expires_after': "The expiration policy for the vector store.",
             'expires_at': "Unix timestamp (in seconds) for when the vector store will expire.",

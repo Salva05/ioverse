@@ -70,8 +70,13 @@ class AssistantAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         # If an instance exists, make all fields read-only
         # To ensure consistency with OpenAI objects
+        exc_fields = ['tools', 'tool_resources']
         if obj:
-            return [field.name for field in self.model._meta.fields]
+             # If `response_format` is 'auto' remove read_only property to preserve json formatting
+            response_format = getattr(obj, 'response_format', 'auto')
+            if response_format != 'auto':
+                exc_fields.append('response_format')
+            return [field.name for field in self.model._meta.fields if field.name not in exc_fields]
         return []  # No fields are read-only during creation
 
     # Override formfield_for_dbfield to add help texts dynamically
