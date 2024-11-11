@@ -40,7 +40,7 @@ export default function ChatOptionsMenu() {
           onClick={handleMenuOpen}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <SettingsSharpIcon sx={{ color: "#fff" }} />
+          <SettingsSharpIcon sx={{color: 'white' }}/>
         </IconButton>
       </Tooltip>
       <Menu
@@ -49,7 +49,6 @@ export default function ChatOptionsMenu() {
         onClose={handleMenuClose}
         sx={{
           "& .MuiPaper-root": {
-            backgroundColor: "#404040",
             borderRadius: "15px",
             border: "0.4px solid rgba(255, 255, 255, 0.19)",
           },
@@ -72,10 +71,6 @@ export default function ChatOptionsMenu() {
                 padding: "4px 8px",
                 borderRadius: "8px",
                 minWidth: "100px",
-                "&:hover": {
-                  backgroundColor: "#555555",
-                },
-                color: "white",
                 display: "flex",
                 alignItems: "center",
               }}

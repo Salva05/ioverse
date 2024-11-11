@@ -14,6 +14,9 @@ import ChatOptionsMenu from "../chat/ChatOptionsMenu";
 import { AuthContext } from "../../contexts/AuthContext";
 import LogoutButton from "../LogoutButton";
 import PersonIcon from "@mui/icons-material/Person";
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { useDarkMode } from "../../contexts/DarkModeContext";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -30,6 +33,8 @@ const StyledAppBar = styled(MuiAppBar, {
 }));
 
 export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
+  const { darkMode, toggleDarkMode } = useDarkMode();
+
   const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,7 +61,13 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
             edge="start"
             id="menu-button"
           >
-            <MenuIcon />
+            <MenuIcon fontSize="small"/>
+          </IconButton>
+          <IconButton
+            onClick={toggleDarkMode}
+            color="inherit"
+          >
+            {darkMode ? <LightModeIcon fontSize="small"/> : <DarkModeIcon fontSize="small"/>}
           </IconButton>
           {shouldShowChatOptions && (
             <>

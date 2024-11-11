@@ -14,31 +14,13 @@ import {
 import { styled } from "@mui/system";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Fade {...props} ref={ref} timeout={800} />;
+  return <Fade {...props} ref={ref} timeout={600} />;
 });
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
-    borderRadius: theme.shape.borderRadius * 2,
     padding: theme.spacing(2),
-    backgroundColor: "#2d2d2d",
     boxShadow: theme.shadows[5],
-  },
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  color: "#ffffff",
-  backgroundColor: theme.palette.primary.main,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-  },
-}));
-
-const StyledCancelButton = styled(Button)(({ theme }) => ({
-  color: "#ffffff",
-  borderColor: "#ffffff",
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
   },
 }));
 
@@ -75,13 +57,13 @@ export default function ShareDialog({ open, onShare, setOpenState }) {
       onClick={(e) => e.stopPropagation()}
     >
       <DialogTitle
-        sx={{ textAlign: "center", fontWeight: "bold", color: "#ffffff" }}
+        sx={{ textAlign: "center", fontWeight: "bold" }}
       >
         Share Link Duration
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom sx={{ color: "#e0e0e0" }}>
+          <Typography variant="body1" gutterBottom >
             Select the duration (in hours)
           </Typography>
         </Box>
@@ -100,12 +82,7 @@ export default function ShareDialog({ open, onShare, setOpenState }) {
               { value: 72, label: "72h" },
             ]}
             sx={{
-              mb: 2,
-              color: "#ffffff",
-              ".MuiSlider-markLabel": {
-                color: "#e0e0e0",
-              },
-            }}
+              mb: 2}}
           />
           <TextField
             label="Duration (hours)"
@@ -116,16 +93,6 @@ export default function ShareDialog({ open, onShare, setOpenState }) {
             size="small"
             sx={{
               mb: 1,
-              input: { color: "#ffffff" },
-              label: { color: "#e0e0e0" },
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#e0e0e0",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#ffffff",
-                },
-              },
             }}
             inputProps={{
               min: 1,
@@ -137,12 +104,12 @@ export default function ShareDialog({ open, onShare, setOpenState }) {
       <DialogActions
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
-        <StyledCancelButton onClick={handleCancel} variant="outlined">
+        <Button onClick={handleCancel} variant="contained" color="secondary" size="small">
           Cancel
-        </StyledCancelButton>
-        <StyledButton onClick={handleConfirm} variant="contained">
+        </Button>
+        <Button onClick={handleConfirm} variant="contained" color="primary" size="small">
           Share
-        </StyledButton>
+        </Button>
       </DialogActions>
     </StyledDialog>
   );

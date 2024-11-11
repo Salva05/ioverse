@@ -6,10 +6,12 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { useMediaQuery, SpeedDial } from "@mui/material";
 import { DrawerContext } from "../../contexts/DrawerContext";
 import { ConversationContext } from "../../contexts/ConversationContext";
+import { useDarkMode } from "../../contexts/DarkModeContext";
 
 export default function ChatDial() {
-  const { setActiveConversationId } =
-    useContext(ConversationContext);
+  const { darkMode } = useDarkMode();
+
+  const { setActiveConversationId } = useContext(ConversationContext);
   const theme = useTheme();
   const { open: drawerOpen } = useContext(DrawerContext);
 
@@ -48,21 +50,6 @@ export default function ChatDial() {
         icon={<SpeedDialIcon />}
         direction="down"
         FabProps={{
-          sx: (theme) => ({
-            backgroundColor: dialOpen ? "#fff" : "#2d2d2d",
-            color: dialOpen ? "black" : "white",
-            transition: theme.transitions.create(
-              ["background-color", "color"],
-              {
-                duration: theme.transitions.duration.shortest,
-                easing: theme.transitions.easing.easeInOut,
-              }
-            ),
-            "&:hover": {
-              backgroundColor: dialOpen ? "#fff" : "#2d2d2d",
-              color: "black",
-            },
-          }),
           size: "medium",
         }}
         onClose={handleClose}
@@ -86,6 +73,12 @@ export default function ChatDial() {
             icon={action.icon}
             tooltipTitle={action.name}
             onClick={action.handleAction}
+            sx={{
+              backgroundColor: darkMode ? theme.palette.grey[800] : "default",
+              "&:hover": {
+                backgroundColor: darkMode ? theme.palette.grey[700] : "default",
+              },
+            }}
           />
         ))}
       </SpeedDial>

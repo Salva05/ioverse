@@ -119,15 +119,13 @@ const ImageDetailModal = ({ open, handleClose, image }) => {
       <DialogTitle
         id="image-detail-dialog-title"
         sx={{
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.primary.contrastText,
           textAlign: "center",
           fontWeight: 600,
         }}
       >
         Image Details
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ paddingBottom: 15 }}>
         <Box
           sx={{
             display: "flex",
@@ -171,8 +169,6 @@ const ImageDetailModal = ({ open, handleClose, image }) => {
               flexDirection: "column",
               gap: 2,
               maxHeight: fullScreen ? "60vh" : "auto",
-              overflowY: "auto",
-              paddingRight: 1,
             }}
           >
             {infoItems.map((item, index) => (
@@ -215,9 +211,8 @@ const ImageDetailModal = ({ open, handleClose, image }) => {
       </DialogContent>
       <DialogActions
         sx={{
-          padding: 3,
+          padding: 2,
           justifyContent: "center",
-          backgroundColor: theme.palette.background.paper,
         }}
       >
         <Button
@@ -225,10 +220,9 @@ const ImageDetailModal = ({ open, handleClose, image }) => {
           variant="contained"
           color="primary"
           sx={{
-            textTransform: "none",
-            borderRadius: "8px",
+            borderRadius: "5px",
             paddingX: 4,
-            paddingY: 1.5,
+            paddingY: 1.2,
             fontSize: "1rem",
           }}
         >

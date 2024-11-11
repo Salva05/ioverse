@@ -16,26 +16,8 @@ import { styled } from "@mui/system";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
-    borderRadius: theme.shape.borderRadius * 2,
     padding: theme.spacing(2),
-    backgroundColor: "#2d2d2d",
     boxShadow: theme.shadows[5],
-  },
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  color: "#ffffff",
-  backgroundColor: theme.palette.primary.main,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-  },
-}));
-
-const StyledCancelButton = styled(Button)(({ theme }) => ({
-  color: "#ffffff",
-  borderColor: "#ffffff",
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
   },
 }));
 
@@ -80,22 +62,15 @@ export default function ShareLinkDialog({
       fullWidth
       onClick={(e) => e.stopPropagation()}
     >
-      <Backdrop
-        open={isSharing}
-        sx={{ position: "absolute", zIndex: 1301, color: "#fff" }}
-      >
+      <Backdrop open={isSharing} sx={{ position: "absolute", zIndex: 1301 }}>
         <CircularProgress color="inherit" />
       </Backdrop>
-      <DialogTitle
-        sx={{ textAlign: "center", fontWeight: "bold", color: "#ffffff" }}
-      >
+      <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
         Share Link Duration
       </DialogTitle>
-      <DialogContent
-        onClick={(e) => e.stopPropagation()}
-      >
+      <DialogContent onClick={(e) => e.stopPropagation()}>
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom sx={{ color: "#e0e0e0" }}>
+          <Typography variant="body1" gutterBottom>
             Select the duration (in hours)
           </Typography>
         </Box>
@@ -115,10 +90,6 @@ export default function ShareLinkDialog({
             ]}
             sx={{
               mb: 2,
-              color: "#ffffff",
-              ".MuiSlider-markLabel": {
-                color: "#e0e0e0",
-              },
             }}
           />
           <TextField
@@ -130,16 +101,6 @@ export default function ShareLinkDialog({
             size="small"
             sx={{
               mb: 1,
-              input: { color: "#ffffff" },
-              label: { color: "#e0e0e0" },
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#e0e0e0",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#ffffff",
-                },
-              },
             }}
             inputProps={{
               min: 1,
@@ -151,20 +112,24 @@ export default function ShareLinkDialog({
       <DialogActions
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
-        <StyledCancelButton
+        <Button
           onClick={handleCancel}
-          variant="outlined"
+          variant="contained"
+          color="secondary"
           disabled={isSharing}
+          size="small"
         >
           Cancel
-        </StyledCancelButton>
-        <StyledButton
+        </Button>
+        <Button
           onClick={handleConfirm}
           variant="contained"
+          color="primary"
           disabled={isSharing}
+          size="small"
         >
           Share
-        </StyledButton>
+        </Button>
       </DialogActions>
     </StyledDialog>
   );

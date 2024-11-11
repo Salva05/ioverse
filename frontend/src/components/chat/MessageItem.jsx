@@ -9,6 +9,12 @@ const MessageItem = ({ sender, message, isOptimistic }) => {
   const isUser = sender === "user";
   const theme = useTheme();
 
+  const backgroundColorUser = theme.palette.mode === "dark" 
+        ? theme.palette.grey[800] : theme.palette.grey[200];
+
+  const backgroundColorAi = theme.palette.mode === "dark" 
+  ? theme.palette.grey[800] : theme.palette.grey[200];
+
   return (
     <ListItem
       sx={{
@@ -24,7 +30,11 @@ const MessageItem = ({ sender, message, isOptimistic }) => {
           marginY: "8px",
           padding: { xs: "8px 12px", sm: "10px 15px", md: "12px 18px" },
           backgroundColor: isUser
-            ? theme.palette.primary.main
+          ? theme.palette.mode === "dark"
+            ? theme.palette.grey[300]
+            : theme.palette.primary.main
+          : theme.palette.mode === "dark"
+            ? theme.palette.grey[800]
             : theme.palette.grey[300],
           color: isUser
             ? theme.palette.primary.contrastText

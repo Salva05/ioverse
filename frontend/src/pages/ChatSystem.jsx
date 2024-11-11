@@ -246,7 +246,7 @@ export default function ChatSystem() {
           sx={{
             padding: isMobile ? "8px 12px" : "10px 16px",
             borderTop: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
+            backgroundColor: theme.palette.background.default,
             position: "fixed",
             bottom: 0,
             width: `calc(100% - ${

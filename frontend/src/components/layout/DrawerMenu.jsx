@@ -24,7 +24,7 @@ import { toast } from "react-toastify";
 import SearchBar from "../chat/SearchBar";
 import { AuthContext } from "../../contexts/AuthContext";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import AssistantOutlinedIcon from '@mui/icons-material/AssistantOutlined';
+import AssistantOutlinedIcon from "@mui/icons-material/AssistantOutlined";
 import { Tooltip, Typography } from "@mui/material";
 import sortedConversation from "../../utils/sortedConversation";
 import "../../styles/scrollbar.css";
@@ -45,21 +45,21 @@ const pages = [
     id: 1,
     display: "Chat",
     path: "/chat",
-    icon: <ChatOutlinedIcon sx={{ color: "#fff" }} />,
+    icon: <ChatOutlinedIcon />,
     protected: true,
   },
   {
     id: 2,
     display: "Text To Image",
     path: "/text-to-image",
-    icon: <MmsOutlinedIcon sx={{ color: "#fff" }} />,
+    icon: <MmsOutlinedIcon />,
     protected: true,
   },
   {
     id: 3,
     display: "Assistant",
     path: "/assistant",
-    icon: <AssistantOutlinedIcon sx={{ color: "#fff" }} />,
+    icon: <AssistantOutlinedIcon />,
     protected: false,
   },
 ];
@@ -166,7 +166,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
     activateConversation(id);
     handleDrawerClose();
   };
-  
+
   // Handle Navigation Item Click
   const handlePageClick = (page) => {
     if (page.path === "/chat") {
@@ -179,7 +179,10 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
 
   // to scroll to the active conversatio
   useEffect(() => {
-    if (activeConversationId && conversationRefs.current[activeConversationId]) {
+    if (
+      activeConversationId &&
+      conversationRefs.current[activeConversationId]
+    ) {
       conversationRefs.current[activeConversationId].scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -195,8 +198,6 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
         "& .MuiDrawer-paper": {
           width: isSmallScreen ? smallScreenDrawerWidth : drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: "#2d2d2d",
-          color: "#fff",
         },
       }}
       variant={isSmallScreen ? "temporary" : "persistent"}
@@ -208,13 +209,13 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
       <DrawerHeader>
         <IconButton onClick={handleDrawerClose}>
           {theme.direction === "ltr" ? (
-            <ChevronLeftIcon sx={{ color: "#fff" }} />
+            <ChevronLeftIcon />
           ) : (
-            <ChevronRightIcon sx={{ color: "#fff" }} />
+            <ChevronRightIcon />
           )}
         </IconButton>
       </DrawerHeader>
-      <Divider sx={{ backgroundColor: "#444" }} />
+      <Divider />
       <List>
         {pages.map((page) => {
           // Determine if the current page's path matches the location's pathname
@@ -225,24 +226,13 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
               <ListItemButton
                 selected={isSelected}
                 onClick={() => handlePageClick(page)}
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: theme.palette.action.selected,
-                    "&:hover": {
-                      backgroundColor: theme.palette.action.hover,
-                    },
-                  },
-                }}
               >
                 <ListItemIcon>{page.icon}</ListItemIcon>
                 <ListItemText primary={page.display} />
                 {!isAuthenticated && page.protected && (
                   <Tooltip title="Login required">
                     <IconButton>
-                      <VpnKeyIcon
-                        fontSize="small"
-                        sx={{ color: "rgba(227, 227, 227, 0.79)" }}
-                      />
+                      <VpnKeyIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 )}
@@ -251,7 +241,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
           );
         })}
       </List>
-      <Divider sx={{ backgroundColor: "#444" }} />
+      <Divider />
       {location.pathname === "/chat" && (
         <List>
           <Fade in={true} timeout={1500}>
@@ -263,7 +253,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
           {isLoading ? (
             <ListItem>
               <ListItemText>
-                <LinearProgress color="secondary" />
+                <LinearProgress />
               </ListItemText>
             </ListItem>
           ) : (
@@ -271,7 +261,7 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
               // Backend should also sort
               .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
               .map((conversation) => (
-                <Fade in={true} timeout={1500} key={conversation.id}>
+                <Fade in={true} timeout={1300} key={conversation.id}>
                   <ListItem key={conversation.id} disablePadding>
                     <ListItemButton
                       ref={(el) =>
@@ -279,26 +269,6 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                       }
                       selected={activeConversationId === conversation.id}
                       onClick={() => handleConversationClick(conversation.id)}
-                      sx={{
-                        "&.Mui-selected": {
-                          backgroundColor: theme.palette.action.selected,
-                          "&:hover": {
-                            backgroundColor: theme.palette.action.hover,
-                          },
-                        },
-                        "&:not(.Mui-selected)": {
-                          backgroundColor: "#2d2d2d",
-                          "&:hover": {
-                            backgroundColor: theme.palette.action.hover,
-                          },
-                        },
-                        "&.Mui-focused, &.Mui-focusVisible": {
-                          backgroundColor:
-                            activeConversationId === conversation.id
-                              ? theme.palette.action.selected
-                              : "#2d2d2d",
-                        },
-                      }}
                     >
                       <ListItemText
                         primary={
@@ -313,9 +283,6 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                               size="small"
                               variant="outlined"
                               fullWidth
-                              InputProps={{
-                                style: { color: "#fff" },
-                              }}
                               name="conversationTitle"
                               onFocus={(e) => e.stopPropagation()}
                             />
@@ -323,7 +290,6 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                             <Typography
                               variant="body1"
                               sx={{
-                                color: "#fff",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -337,12 +303,6 @@ export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           flexGrow: 1,
-                          ...(editingConversationId !== conversation.id && {
-                            maskImage:
-                              "linear-gradient(to right, black 85%, transparent)",
-                            WebkitMaskImage:
-                              "linear-gradient(to right, black 85%, transparent)", // For Safari
-                          }),
                         }}
                       />
                       <OptionsMenu

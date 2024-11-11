@@ -1,4 +1,5 @@
 .typing-indicator {
+  --circle-color: #000;
   width: 60px;
   height: 30px;
   position: relative;
@@ -10,7 +11,7 @@
   height: 8px;
   position: absolute;
   border-radius: 50%;
-  background-color: #000;
+  background-color:  var(--circle-color);
   left: 15%;
   transform-origin: 50%;
   animation: typing-circle7124 0.5s alternate infinite ease;

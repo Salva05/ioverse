@@ -24,6 +24,7 @@ import UserInfo from "../components/account/UserInfo";
 import ConversationList from "../components/account/ConversationList";
 import { getGroupLabel } from "../utils/getGroupLabel";
 import GeneratedImagesList from "../components/account/GeneratedImagesList";
+import textToImage from "../api/textToImage";
 
 const a11yProps = (index) => {
   return {
@@ -70,8 +71,7 @@ const Account = () => {
     isLoading: isImagesLoading,
   } = useQuery({
     queryKey: ["generatedImages"],
-    queryFn: async () =>
-      await axios.get("/api/image-generation/").then((res) => res.data),
+    queryFn: async () => await textToImage.getImages(),
     enabled: isAuthenticated && tabValue === 2, // Fetch only when authenticated and on Generated Images tab
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -178,7 +178,7 @@ const Account = () => {
     // Optionally show a spinner or loading message
     return <Typography>Loading account information...</Typography>;
   }
-  
+
   return (
     <>
       <CssBaseline />
@@ -186,8 +186,6 @@ const Account = () => {
       <Box
         sx={{
           padding: isSmallScreen ? 2 : 4,
-          backgroundColor: "white",
-          minHeight: "100vh",
         }}
       >
         {/* Title Section */}
@@ -206,7 +204,7 @@ const Account = () => {
         />
 
         {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Box sx={{ borderBottom: 1 }}>
           <Tabs
             value={tabValue}
             onChange={handleChange}

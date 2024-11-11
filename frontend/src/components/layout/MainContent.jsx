@@ -1,4 +1,3 @@
-// MainContent.jsx
 import React from "react";
 import { styled } from "@mui/material/styles";
 
@@ -9,9 +8,10 @@ const Main = styled("main", {
   shouldForwardProp: (prop) => prop !== "open" && prop !== "isSmallScreen",
 })(({ theme, open, isSmallScreen }) => ({
   flexGrow: 1,
-  padding: theme.spacing(0.5),
   display: "flex",
   flexDirection: "column",
+  height: "100%",
+  minHeight: 0,
   transition: theme.transitions.create(["margin", "width"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -31,7 +31,6 @@ const Main = styled("main", {
       marginLeft: 0,
       width: `calc(100% - ${drawerWidth}px)`,
     }),
-  paddingTop: theme.spacing(2),
 }));
 
 export default function MainContent({ open, isSmallScreen, children }) {

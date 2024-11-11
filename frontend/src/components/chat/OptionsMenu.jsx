@@ -31,9 +31,10 @@ import unshareConversation from "../../utils/unshareConversation";
 import { toast } from "react-toastify";
 import { ConversationContext } from "../../contexts/ConversationContext";
 import sortedConversation from "../../utils/sortedConversation";
+import { useTheme } from "@emotion/react";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Fade {...props} ref={ref} timeout={800} />;
+  return <Fade {...props} ref={ref} timeout={500} />;
 });
 
 // Helper function to calculate remaining hours
@@ -55,6 +56,7 @@ const handleError = (msg, genericMsg, error) => {
 };
 
 export default function OptionsMenu({ conversationId, onRename }) {
+  const theme = useTheme();
   const { activeConversationId, activateConversation } =
     useContext(ConversationContext);
   const [isOptionMenuOpen, setOptionMenuOpen] = useState(false);
@@ -144,8 +146,8 @@ export default function OptionsMenu({ conversationId, onRename }) {
       await queryClient.invalidateQueries(["conversations"]);
 
       // Get cached conversations data
-      const conversationsData = queryClient.getQueryData(["conversations"]); 
-      
+      const conversationsData = queryClient.getQueryData(["conversations"]);
+
       // Update the active conversation
       if (conversationId == activeConversationId && conversationsData) {
         const latestConversation = sortedConversation(conversationsData);
@@ -280,14 +282,13 @@ export default function OptionsMenu({ conversationId, onRename }) {
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <MoreVert fontSize="small" sx={{ color: "#a6a6a6" }} />
+                <MoreVert fontSize="small" />
               </IconButton>
             </Tooltip>
             <Menu
               {...bindMenu(popupState)}
               sx={{
                 "& .MuiPaper-root": {
-                  backgroundColor: "#404040",
                   borderRadius: "15px",
                   border: "0.4px solid rgba(255, 255, 255, 0.19)",
                 },
@@ -319,9 +320,9 @@ export default function OptionsMenu({ conversationId, onRename }) {
                         backgroundColor:
                           action.name === "Delete"
                             ? "rgba(255, 0, 0, 0.15)"
-                            : "#555555",
+                            : theme.palette.action.hover,
                       },
-                      color: action.name === "Delete" ? "red" : "white",
+                      color: action.name === "Delete" ? "red" : "inherit",
                       display: "flex",
                       alignItems: "center",
                     }}

@@ -5,13 +5,27 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import { List, ListItem, ListItemText, Container, Alert, useTheme, useMediaQuery } from "@mui/material";
+import {
+  List,
+  ListItem,
+  ListItemText,
+  Container,
+  Alert,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+  createTheme,
+  ThemeProvider,
+} from "@mui/material";
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import chat from "../api/chat";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import he from "he";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
 const drawerWidth = 240;
 
@@ -30,8 +44,9 @@ const StyledAppBar = styled(MuiAppBar, {
 }));
 
 const MessageItem = ({ sender, message }) => {
-  const isUser = sender.toLowerCase() === "you" || sender.toLowerCase() === "user";
   const theme = useTheme();
+  const isUser =
+    sender.toLowerCase() === "you" || sender.toLowerCase() === "user";
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
@@ -49,7 +64,11 @@ const MessageItem = ({ sender, message }) => {
           marginY: "8px",
           padding: { xs: "8px 12px", sm: "10px 15px", md: "12px 18px" },
           backgroundColor: isUser
-            ? theme.palette.primary.main
+            ? theme.palette.mode === "dark"
+              ? theme.palette.grey[300]
+              : theme.palette.primary.main
+            : theme.palette.mode === "dark"
+            ? theme.palette.grey[800]
             : theme.palette.grey[300],
           color: isUser
             ? theme.palette.primary.contrastText
@@ -87,7 +106,9 @@ export default function SharedConversation() {
   const [error, setError] = useState(null);
   const { share_token } = useParams();
   const messagesEndRef = useRef(null);
+  
   const theme = useTheme();
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   useEffect(() => {
     const fetchConversation = async () => {
@@ -98,7 +119,10 @@ export default function SharedConversation() {
         scrollToBottom();
       } catch (error) {
         setError("Conversation not found.");
-        console.error("An error occurred while fetching the conversation:", error);
+        console.error(
+          "An error occurred while fetching the conversation:",
+          error
+        );
       }
     };
 
@@ -117,10 +141,22 @@ export default function SharedConversation() {
   }, [conversation]);
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <StyledAppBar position="fixed" open={false}>
-        <Toolbar sx={{ display: "flex", justifyContent: "center" }}>
-          <Typography variant="h6" noWrap component="div">
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <IconButton
+            onClick={toggleDarkMode}
+            color="inherit"
+            edge="start"
+          >
+            {darkMode ? <LightModeIcon fontSize="small"/> : <DarkModeIcon fontSize="small"/>}
+          </IconButton>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ flexGrow: 1, textAlign: "center" }}
+          >
             IOverse
           </Typography>
         </Toolbar>
@@ -191,6 +227,6 @@ export default function SharedConversation() {
           )}
         </Container>
       </Box>
-    </>
+    </ThemeProvider>
   );
 }

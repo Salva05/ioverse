@@ -4,7 +4,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConversationProvider } from "./contexts/ConversationContext";
-import theme from "./themes/theme";
 import { ThemeProvider } from "@mui/material";
 import SignUp from "./pages/Register";
 import Login from "./pages/Login";
@@ -16,6 +15,7 @@ import "./styles/general.css";
 import TextToImage from "./pages/TextToImage";
 import Account from "./pages/Account";
 import Assistant from "./pages/Assistant";
+import { DarkModeProvider } from "./contexts/DarkModeContext";
 
 const queryClient = new QueryClient();
 
@@ -50,9 +50,7 @@ const router = createBrowserRouter([
       },
       {
         path: "assistant",
-        element: (
-            <Assistant />
-        ),
+        element: <Assistant />,
       },
       {
         path: "login",
@@ -78,9 +76,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ConversationProvider>
-        <ThemeProvider theme={theme}>
+        <DarkModeProvider>
           <RouterProvider router={router} />
-        </ThemeProvider>
+        </DarkModeProvider>
       </ConversationProvider>
     </QueryClientProvider>
   </StrictMode>

@@ -5,15 +5,44 @@ import AppBar from "./AppBar";
 import DrawerMenu from "./DrawerMenu";
 import MainContent from "./MainContent";
 import { Outlet } from "react-router-dom";
-import { useMediaQuery, useTheme } from "@mui/material";
+import { useMediaQuery, ThemeProvider, createTheme } from "@mui/material";
 import { AuthProvider } from "../../contexts/AuthContext";
-
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DrawerContext } from "../../contexts/DrawerContext";
+import { useDarkMode } from "../../contexts/DarkModeContext";
 
 export default function Layout() {
-  const theme = useTheme();
+  const { darkMode, toggleDarkMode } = useDarkMode();
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? "dark" : "light",
+      ...(darkMode
+        ? {
+          background: {
+            default: "#1e1e1e",
+            paper: "#2c2c2c",
+          }
+        }
+        : {
+          background: {
+            default: "#f5f5f5",
+            paper: "#f9f9f9"
+          }
+        }
+      )
+    },
+  });
+
+  // Changes the custom scrollbar's palette
+  React.useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [open, setOpen] = React.useState(false); // Initialize based on screen size
 
@@ -29,7 +58,8 @@ export default function Layout() {
   return (
     <AuthProvider>
       <DrawerContext.Provider value={{ open, isSmallScreen }}>
-        <Box sx={{ display: "flex", width: "100%" }}>
+      <ThemeProvider theme={theme}>
+        <Box sx={{ display: "flex", width: "100%", height: '100vh' }}>
           <CssBaseline />
           <AppBar
             open={open}
@@ -57,6 +87,7 @@ export default function Layout() {
             theme="colored"
           />
         </Box>
+        </ThemeProvider>
       </DrawerContext.Provider>
     </AuthProvider>
   );

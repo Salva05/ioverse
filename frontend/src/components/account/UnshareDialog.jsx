@@ -18,56 +18,13 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Fade {...props} ref={ref} timeout={800} />;
+  return <Fade {...props} ref={ref} timeout={600} />;
 });
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
-    borderRadius: theme.shape.borderRadius * 2,
     padding: theme.spacing(2),
-    backgroundColor: "#2d2d2d",
     boxShadow: theme.shadows[5],
-  },
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  color: "#ffffff",
-  backgroundColor: theme.palette.error.main,
-  "&:hover": {
-    backgroundColor: theme.palette.error.dark,
-  },
-}));
-
-const StyledCancelButton = styled(Button)(({ theme }) => ({
-  color: "#ffffff",
-  borderColor: "#ffffff",
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
-
-const StyledLinkField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    color: "#ffffff",
-    borderRadius: theme.shape.borderRadius,
-  },
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#ffffff",
-  },
-  "& .MuiInputBase-input": {
-    color: "#ffffff",
-  },
-}));
-
-const StyledOutlinedIconButton = styled(IconButton)(({ theme }) => ({
-  borderColor: "#ffffff",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderRadius: theme.shape.borderRadius,
-  height: "100%",
-  color: "#ffffff",
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
   },
 }));
 
@@ -114,20 +71,19 @@ export default function UnshareDialog({
       onClick={(e) => e.stopPropagation()}
     >
       <DialogTitle
-        sx={{ textAlign: "center", fontWeight: "bold", color: "#ffffff" }}
+        sx={{ textAlign: "center", fontWeight: "bold" }}
       >
         Sharing Details
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom sx={{ color: "#e0e0e0" }}>
+          <Typography variant="body1" gutterBottom>
             This image will be available for the next{" "}
             <Typography
               component="span"
               variant="body1"
               sx={{
                 fontWeight: "bold",
-                color: "yellow",
                 fontSize: "1.2rem",
               }}
             >
@@ -135,7 +91,7 @@ export default function UnshareDialog({
             </Typography>
             .
           </Typography>
-          <Typography variant="body2" sx={{ color: "#e0e0e0", mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 2 }}>
             You can view and share this link:
           </Typography>
           <Box
@@ -145,7 +101,7 @@ export default function UnshareDialog({
               justifyContent: "space-between",
             }}
           >
-            <StyledLinkField
+            <TextField
               value={shareUrl}
               fullWidth
               InputProps={{
@@ -162,13 +118,13 @@ export default function UnshareDialog({
               }}
             >
               <Tooltip title={copySuccess ? "Copied!" : "Copy to clipboard"}>
-                <StyledOutlinedIconButton sx={{ ml: 1 }}>
+                <Button sx={{ ml: 1 }}>
                   {copySuccess ? (
                     <ContentCopyTwoToneIcon />
                   ) : (
                     <ContentCopyIcon />
                   )}
-                </StyledOutlinedIconButton>
+                </Button>
               </Tooltip>
             </CopyToClipboard>
           </Box>
@@ -177,12 +133,12 @@ export default function UnshareDialog({
       <DialogActions
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
-        <StyledCancelButton onClick={handleClose} variant="outlined">
+        <Button onClick={handleClose} variant="contained" color="primary" size="small">
           Close
-        </StyledCancelButton>
-        <StyledButton onClick={handleConfirm} variant="contained">
+        </Button>
+        <Button onClick={handleConfirm} variant="contained" color="error" size="small">
           Stop Sharing
-        </StyledButton>
+        </Button>
       </DialogActions>
     </StyledDialog>
   );

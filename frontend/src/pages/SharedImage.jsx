@@ -2,11 +2,20 @@ import React, { useEffect, useState } from "react";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { Container, Alert, useTheme } from "@mui/material";
+import {
+  Container,
+  Alert,
+  useTheme,
+  ThemeProvider,
+  IconButton,
+} from "@mui/material";
 import textToImage from "../api/textToImage";
 import { useParams } from "react-router-dom";
 import { styled } from "@mui/system";
 import MuiAppBar from "@mui/material/AppBar";
+import { useDarkMode } from "../contexts/DarkModeContext";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -23,6 +32,7 @@ export default function SharedImage() {
   const [error, setError] = useState(null);
   const { share_token } = useParams();
   const theme = useTheme();
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -40,81 +50,96 @@ export default function SharedImage() {
 
   return (
     <>
-      <StyledAppBar position="fixed" open={false}>
-        <Toolbar sx={{ display: "flex", justifyContent: "center" }}>
-          <Typography variant="h6" noWrap component="div">
-            IOverse
-          </Typography>
-        </Toolbar>
-      </StyledAppBar>
-
-      {error && (
-        <Container
-          sx={{
-            width: "100%",
-            padding: { xs: "8px", sm: "16px" },
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Box sx={{ textAlign: "center", marginTop: "20px" }}>
-            <Alert
-              severity="warning"
-              variant="filled"
-              sx={{ marginBottom: "20px" }}
+      <ThemeProvider theme={theme}>
+        <StyledAppBar position="fixed" open={false}>
+          <Toolbar sx={{ display: "flex", justifyContent: "center" }}>
+            <IconButton onClick={toggleDarkMode} color="inherit" edge="start">
+              {darkMode ? (
+                <LightModeIcon fontSize="small" />
+              ) : (
+                <DarkModeIcon fontSize="small" />
+              )}
+            </IconButton>
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ flexGrow: 1, textAlign: "center" }}
             >
-              {error}
-            </Alert>
-            <Typography variant="h6" color="textSecondary">
-              It looks like the shared image you're looking for is either
-              expired or does not exist.
+              IOverse
             </Typography>
-          </Box>
-        </Container>
-      )}
-      {/* Outer Container with Full Page Scroll */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "100%",
-          height: "calc(100vh - 64px)",
-          backgroundColor: theme.palette.background.default,
-        }}
-      >
-        <Container
+          </Toolbar>
+        </StyledAppBar>
+        <Toolbar />
+        {error && (
+          <Container
+            maxWidth="md"
+            sx={{
+              width: "100%",
+              padding: { xs: "8px", sm: "16px" },
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+              <Alert
+                severity="warning"
+                variant="filled"
+                sx={{ marginBottom: "20px" }}
+              >
+                {error}
+              </Alert>
+              <Typography variant="h6" color="textSecondary">
+                It looks like the shared image you're looking for is either
+                expired or does not exist.
+              </Typography>
+            </Box>
+          </Container>
+        )}
+        {/* Outer Container with Full Page Scroll */}
+        <Box
           sx={{
-            width: "100%",
-            padding: { xs: "8px", sm: "16px" },
             display: "flex",
-            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "calc(100vh - 64px)",
+            backgroundColor: theme.palette.background.default,
           }}
         >
-          {image && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                maxWidth: "100%",
-                maxHeight: "100%",
-              }}
-            >
+          <Container
+            sx={{
+              width: "100%",
+              padding: { xs: "8px", sm: "16px" },
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {image && (
               <Box
-                component="img"
-                src={image}
-                alt="Shared"
                 sx={{
-                  width: "auto",
-                  height: "auto",
-                  maxWidth: "100vw",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
                 }}
-              />
-            </Box>
-          )}
-        </Container>
-      </Box>
+              >
+                <Box
+                  component="img"
+                  src={image}
+                  alt="Shared"
+                  sx={{
+                    width: "auto",
+                    height: "auto",
+                    maxWidth: "100vw",
+                  }}
+                />
+              </Box>
+            )}
+          </Container>
+        </Box>
+      </ThemeProvider>
     </>
   );
 }

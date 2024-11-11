@@ -37,18 +37,6 @@ const TextToImage = () => {
   // Generated images data
   const [payload, setPayload] = useState(null);
 
-  const menuItemStyles = {
-    "&:hover": {
-      backgroundColor: "#f2f2f2",
-    },
-    "&.Mui-selected": {
-      backgroundColor: "#ebf4ff",
-    },
-    "&.Mui-selected:hover": {
-      backgroundColor: "#ebf4ff",
-    },
-  };
-
   // Options
   const modelOptions = [
     { value: "dall-e-2", label: "DALL-E 2" },
@@ -192,7 +180,6 @@ const TextToImage = () => {
           align="center"
           sx={{
             fontWeight: "700",
-            color: "black",
             fontFamily: "Arial, sans-serif",
             letterSpacing: "0.05em",
           }}
@@ -242,7 +229,6 @@ const TextToImage = () => {
                 <MenuItem
                   key={option.value}
                   value={option.value}
-                  sx={menuItemStyles}
                 >
                   {option.label}
                 </MenuItem>
@@ -292,7 +278,6 @@ const TextToImage = () => {
                     <MenuItem
                       key={option.value}
                       value={option.value}
-                      sx={menuItemStyles}
                     >
                       {option.label}
                     </MenuItem>
@@ -315,7 +300,6 @@ const TextToImage = () => {
                     <MenuItem
                       key={option.value}
                       value={option.value}
-                      sx={menuItemStyles}
                     >
                       {option.label}
                     </MenuItem>
@@ -340,7 +324,7 @@ const TextToImage = () => {
                 ? sizeOptionsDalle2
                 : sizeOptionsDalle3
               ).map((option) => (
-                <MenuItem key={option} value={option} sx={menuItemStyles}>
+                <MenuItem key={option} value={option}>
                   {option}
                 </MenuItem>
               ))}
@@ -363,7 +347,6 @@ const TextToImage = () => {
                 <MenuItem
                   key={option.value}
                   value={option.value}
-                  sx={menuItemStyles}
                 >
                   {option.label}
                 </MenuItem>
@@ -393,7 +376,6 @@ const TextToImage = () => {
           <Box sx={{ mt: 4 }} ref={imagesContainerRef}>
             <Divider
               sx={{
-                borderColor: "black",
                 mb: 4,
               }}
             >
@@ -403,7 +385,6 @@ const TextToImage = () => {
                 align="center"
                 sx={{
                   fontWeight: "700",
-                  color: "black",
                   fontFamily: "Arial, sans-serif",
                   letterSpacing: "0.05em",
                 }}
