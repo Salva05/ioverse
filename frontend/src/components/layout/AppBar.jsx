@@ -14,9 +14,10 @@ import ChatOptionsMenu from "../chat/ChatOptionsMenu";
 import { AuthContext } from "../../contexts/AuthContext";
 import LogoutButton from "../LogoutButton";
 import PersonIcon from "@mui/icons-material/Person";
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useDarkMode } from "../../contexts/DarkModeContext";
+import { SiCircuitverse } from "react-icons/si";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -61,13 +62,14 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
             edge="start"
             id="menu-button"
           >
-            <MenuIcon fontSize="small"/>
+            <MenuIcon fontSize="small" />
           </IconButton>
-          <IconButton
-            onClick={toggleDarkMode}
-            color="inherit"
-          >
-            {darkMode ? <LightModeIcon fontSize="small"/> : <DarkModeIcon fontSize="small"/>}
+          <IconButton onClick={toggleDarkMode} color="inherit">
+            {darkMode ? (
+              <LightModeIcon fontSize="small" />
+            ) : (
+              <DarkModeIcon fontSize="small" />
+            )}
           </IconButton>
           {shouldShowChatOptions && (
             <>
@@ -82,7 +84,12 @@ export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
           )}
         </Box>
         <Typography variant="h6" noWrap component="div">
-          IOverse
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <SiCircuitverse
+              style={{ marginRight: 10, position: "relative" }}
+            />
+            IOverse
+          </Box>
         </Typography>
         {isAuthenticated ? (
           <Box
