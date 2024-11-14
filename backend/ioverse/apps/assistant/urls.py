@@ -11,6 +11,7 @@ from .views.thread import (
     ThreadCreateView,
     ThreadRetrieveView,
     ThreadUpdateView,
+    ThreadListView,
     ThreadDeleteView
 )
 from .views.message import (
@@ -50,6 +51,7 @@ urlpatterns = [
     path('<str:assistant_id>/delete/', AssistantDeleteView.as_view(), name='assistant-delete'),
     # Thread
     path('thread/create/', ThreadCreateView.as_view(), name='thread-create'),
+    path('thread/list/', ThreadListView.as_view(), name='thread-list'),
     path('thread/<str:thread_id>/retrieve/', ThreadRetrieveView.as_view(), name='thread-retrieve'),
     path('thread/<str:thread_id>/update/', ThreadUpdateView.as_view(), name='thread-update'),
     path('thread/<str:thread_id>/delete/', ThreadDeleteView.as_view(), name='thread-delete'),

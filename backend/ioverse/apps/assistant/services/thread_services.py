@@ -4,9 +4,10 @@ from typing import Any, Dict
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
-from ..helpers import serialize_pydantic_list, serialize_pydantic_model
+from ..helpers import serialize_pydantic_model
 from assistant_modules.thread.services import ThreadService
 from assistant_modules.thread.parameters import ThreadCreateParams, ThreadUpdateParams
+from assistant_modules.thread.exceptions import ThreadNotFoundException
 from apps.assistant.models import Thread as DjangoThread
 from pydantic import ValidationError
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class ThreadIntegrationService:
     def __init__(self):
         self.thread_service = ThreadService()
-        
+
     @transaction.atomic
     def create_thread(self, data: Dict[str, Any], user) -> DjangoThread:
         """
@@ -84,6 +85,29 @@ class ThreadIntegrationService:
         except Exception as e:
             logger.error(f"Error retrieving thread: {e}")
             raise
+    
+    def list_threads(self, user):
+        """
+        Retrieves a list of Threads from the local database
+        and checks each against OpenAI.
+        """
+        threads = DjangoThread.objects.filter(owner=user)
+        threads_to_delete = []
+
+        for thread in threads:
+            try:
+                self.thread_service.check_thread_existence(thread.id)
+            except ThreadNotFoundException:
+                threads_to_delete.append(thread.id)
+                logger.info(f"Obsolete thread with id '{thread.id}' will be removed.")
+            except Exception as e:
+                logger.error(f"Error checking thread existence for {thread.id}: {str(e)}")
+
+        if threads_to_delete:
+            DjangoThread.objects.filter(id__in=threads_to_delete).delete()
+            threads = threads.exclude(id__in=threads_to_delete)
+
+        return threads
     
     @transaction.atomic
     def update_thread(self, thread_id: str, data: Dict[str, Any], user) -> DjangoThread:

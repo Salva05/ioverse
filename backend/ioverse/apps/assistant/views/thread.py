@@ -37,6 +37,19 @@ class ThreadRetrieveView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+class ThreadListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        service = ThreadIntegrationService()
+        try:
+            django_threads = service.list_threads(request.user)
+            return Response(ThreadSerializer(django_threads, many=True).data, status=status.HTTP_200_OK)
+        except ValidationError as ve:
+            return Response({"errors": ve.errors()}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 class ThreadUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

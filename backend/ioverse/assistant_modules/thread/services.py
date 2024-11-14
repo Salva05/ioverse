@@ -1,8 +1,10 @@
 import logging
-from typing import Optional, Dict, Any
+import openai
+from typing import Dict, Any
 
 from .operations import ThreadClient
 from .parameters import ThreadCreateParams, ThreadUpdateParams
+from .exceptions import ThreadNotFoundException
 from assistant_modules.common.models import ThreadObject
 from pydantic import ValidationError
 
@@ -11,7 +13,7 @@ logger = logging.getLogger('thread_service')
 class ThreadService:
     def __init__(self):
         self.client = ThreadClient()
-
+        
     def create_thread(self, params: ThreadCreateParams) -> ThreadObject:
         try:
             thread_data = params.model_dump(exclude_unset=True)
@@ -47,6 +49,16 @@ class ThreadService:
             logger.error(f"Error retrieving thread: {str(e)}")
             raise
 
+    def check_thread_existence(self, thread_id: str) -> None:
+        try:
+            response = self.client.retrieve_thread(thread_id=thread_id)
+        except openai.NotFoundError as e:
+            raise ThreadNotFoundException(f"Thread with ID {thread_id} not found") from e
+        except Exception as e:
+            logger.error(f"Error checking thread existence for {thread_id}: {str(e)}")
+            raise
+            
+    
     def update_thread(self, thread_id: str, params: ThreadUpdateParams) -> ThreadObject:
         try:
             thread_data = params.model_dump(exclude_unset=True)

@@ -27,3 +27,4 @@ def serialize_pydantic_model(pydantic_model: Optional[BaseModel]) -> Optional[Di
         serialized = pydantic_model.model_dump(exclude_none=True)
         return serialized if serialized else {}
     return {}
+
