@@ -1,9 +1,9 @@
 import React from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import ActiveItem from "./ActiveItem";
-import Tabs from "./Tabs";
-import SwitchEntityButton from "./SwitchEntityButton";
+import ActiveItem from "./main_bar/ActiveItem";
+import Tabs from "./main_bar/Tabs";
+import SwitchEntityButton from "./main_bar/SwitchEntityButton";
 import { Box } from "@mui/material";
 import { motion } from "framer-motion";
 

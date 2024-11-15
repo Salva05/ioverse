@@ -8,7 +8,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Divider from "@mui/material/Divider";
-import { useAssistantContext } from "../../../contexts/AssistantContext";
+import { useAssistantContext } from "../../../../contexts/AssistantContext";
 import { useMediaQuery } from "@mui/material";
 
 const entities = [

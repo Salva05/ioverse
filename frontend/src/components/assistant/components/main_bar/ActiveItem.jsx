@@ -14,9 +14,9 @@ import { FaRobot } from "react-icons/fa";
 import { LuContainer } from "react-icons/lu";
 import { HiOutlineSelector } from "react-icons/hi";
 import { IoMdAdd } from "react-icons/io";
-import { useAssistantContext } from "../../../contexts/AssistantContext";
-import { useAssistantsData } from "../../../hooks/assistant/useAssistantsData";
-import { useThreadsData } from "../../../hooks/assistant/useThreadsData";
+import { useAssistantContext } from "../../../../contexts/AssistantContext";
+import { useAssistantsData } from "../../../../hooks/assistant/useAssistantsData";
+import { useThreadsData } from "../../../../hooks/assistant/useThreadsData";
 import { motion } from "framer-motion";
 
 const ActiveItem = () => {

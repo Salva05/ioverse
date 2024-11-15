@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import { Box, Button, Menu, MenuItem, useTheme } from "@mui/material";
+import { Button, Menu, MenuItem, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import { useDarkMode } from "../../../contexts/DarkModeContext";
 import { MdDisplaySettings } from "react-icons/md";
@@ -10,11 +10,10 @@ import { IoIosHelpCircleOutline } from "react-icons/io";
 import { VscRunAll } from "react-icons/vsc";
 import { GiHabitatDome } from "react-icons/gi";
 import { useAssistantContext } from "../../../contexts/AssistantContext";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { SlSettings } from "react-icons/sl";
 
 const MobileTabs = () => {
-  const { selectedEntity } = useAssistantContext();
+  const { selectedEntity, setSelectedTab } = useAssistantContext();
   const { darkMode } = useDarkMode();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -55,10 +54,11 @@ const MobileTabs = () => {
     [selectedEntity]
   );
 
-  const [selectedTab, setSelectedTab] = useState(tabs[0]);
+  const [tabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
-    setSelectedTab(tabs[0]);
+    setTabIndex(0);
+    setSelectedTab(tabs[0].label);
   }, [tabs]);
 
   // Handle opening the menu
@@ -105,20 +105,21 @@ const MobileTabs = () => {
           <MenuItem
             key={item.label}
             onClick={() => {
-              setSelectedTab(item);
+              setSelectedTab(item.label);
+              setTabIndex(index);
               setTimeout(handleClose, 250);
             }}
-            selected={item === selectedTab}
+            selected={index === tabIndex}
             sx={{
               backgroundColor:
-                item === selectedTab
+              index === tabIndex
                   ? theme.palette.action.selected
                   : "transparent",
             }}
           >
             {item.icon}
             {` ${item.label}`}
-            {item === selectedTab ? (
+            {index === tabIndex ? (
               <motion.div
                 className="underline-mobile"
                 layoutId="underline-mobile"
