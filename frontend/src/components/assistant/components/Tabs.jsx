@@ -2,14 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { Box, Button, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
-import { useDarkMode } from "../../../../contexts/DarkModeContext";
+import { useDarkMode } from "../../../contexts/DarkModeContext";
 import { MdDisplaySettings } from "react-icons/md";
 import { GrChat } from "react-icons/gr";
 import { MdModelTraining } from "react-icons/md";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import { VscRunAll } from "react-icons/vsc";
 import { GiHabitatDome } from "react-icons/gi";
-import { useAssistantContext } from "../../../../contexts/AssistantContext";
+import { useAssistantContext } from "../../../contexts/AssistantContext";
 
 const Tabs = () => {
   const { selectedEntity } = useAssistantContext();

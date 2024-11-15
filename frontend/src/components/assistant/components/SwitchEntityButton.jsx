@@ -8,7 +8,8 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Divider from "@mui/material/Divider";
-import { useAssistantContext } from "../../../../contexts/AssistantContext";
+import { useAssistantContext } from "../../../contexts/AssistantContext";
+import { useMediaQuery } from "@mui/material";
 
 const entities = [
   {
@@ -24,6 +25,8 @@ const entities = [
 ];
 
 const SwitchEntityButton = () => {
+  const isMobile = useMediaQuery("(max-width:815px)");
+
   const { selectedEntity, setSelectedEntity } = useAssistantContext();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -56,8 +59,8 @@ const SwitchEntityButton = () => {
           onClick={handleClick}
           sx={{
             borderRadius: "50%",
-            width: "35px",
-            height: "35px",
+            width: isMobile ? "30px" : "35px",
+            height: isMobile ? "30px" : "35px",
             minWidth: 0,
             padding: 0,
           }}

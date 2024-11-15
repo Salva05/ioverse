@@ -6,3 +6,11 @@
   right: 0;
   height: 2px;
 }
+
+.underline-mobile {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
