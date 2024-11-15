@@ -17,7 +17,14 @@ const Content = () => {
         <Title />
       </Box>
       <Divider />
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          mt: 5,
+        }}
+      >
         <Settings />
       </Box>
     </>

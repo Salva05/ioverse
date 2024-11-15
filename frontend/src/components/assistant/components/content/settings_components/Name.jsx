@@ -40,6 +40,7 @@ const Name = () => {
         }}
       >
         <TextField
+          placeholder="Enter a user friendly name"
           id="outlined-basic"
           variant="outlined"
           defaultValue="John Doe"
@@ -62,17 +63,17 @@ const Name = () => {
             arrow
             placement="top"
             slotProps={{
-                popper: {
-                  modifiers: [
-                    {
-                      name: 'offset',
-                      options: {
-                        offset: [0, -12],
-                      },
+              popper: {
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: {
+                      offset: [0, -12],
                     },
-                  ],
-                },
-              }}
+                  },
+                ],
+              },
+            }}
           >
             <Typography
               variant="caption"

@@ -1,12 +1,19 @@
-import React from "react";
+import React, { useContext } from "react";
 import MainBar from "../components/MainBar";
 import { Box, useMediaQuery } from "@mui/material";
 import MobileMainBar from "../mobile_components/MobileMainBar";
 import Content from "../components/Content";
 import { Container as MUIContainer } from "@mui/material";
+import { DrawerContext } from "../../../contexts/DrawerContext";
+
+const drawerWidth = 240;
 
 const Container = () => {
-  const isMobile = useMediaQuery("(max-width:815px)");
+  const { open } = useContext(DrawerContext);
+  const isMobile = useMediaQuery(
+    `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
+
   return (
     <>
       <Box sx={{ mb: "10px" }}>

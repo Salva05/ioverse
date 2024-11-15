@@ -18,6 +18,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useDarkMode } from "../../contexts/DarkModeContext";
 import { SiCircuitverse } from "react-icons/si";
+import { DrawerContext } from "../../contexts/DrawerContext";
 
 const StyledAppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -33,7 +34,8 @@ const StyledAppBar = styled(MuiAppBar, {
   }),
 }));
 
-export default function AppBar({ open, isSmallScreen, handleDrawerOpen }) {
+export default function AppBar({ handleDrawerOpen }) {
+  const { open, isSmallScreen } = useContext(DrawerContext);
   const { darkMode, toggleDarkMode } = useDarkMode();
 
   const { isAuthenticated } = useContext(AuthContext);

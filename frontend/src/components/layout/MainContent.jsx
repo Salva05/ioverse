@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useContext } from "react";
 import { styled } from "@mui/material/styles";
+import { DrawerContext } from "../../contexts/DrawerContext";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -33,7 +34,8 @@ const Main = styled("main", {
     }),
 }));
 
-export default function MainContent({ open, isSmallScreen, children }) {
+export default function MainContent({ children }) {
+  const { open, isSmallScreen } = useContext(DrawerContext);
   return (
     <Main open={open} isSmallScreen={isSmallScreen}>
       {children}

@@ -62,16 +62,12 @@ export default function Layout() {
         <Box sx={{ display: "flex", width: "100%", height: '100vh' }}>
           <CssBaseline />
           <AppBar
-            open={open}
-            isSmallScreen={isSmallScreen}
             handleDrawerOpen={handleDrawerOpen}
           />
           <DrawerMenu
-            open={open}
-            isSmallScreen={isSmallScreen}
             handleDrawerClose={handleDrawerClose}
           />
-          <MainContent open={open} isSmallScreen={isSmallScreen}>
+          <MainContent>
             <Outlet />
           </MainContent>
           <ToastContainer

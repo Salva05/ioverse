@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import ActiveItem from "./main_bar/ActiveItem";
@@ -6,8 +6,23 @@ import Tabs from "./main_bar/Tabs";
 import SwitchEntityButton from "./main_bar/SwitchEntityButton";
 import { Box } from "@mui/material";
 import { motion } from "framer-motion";
+import { DrawerContext } from "../../../contexts/DrawerContext";
 
 const MainBar = () => {
+  const { open } = useContext(DrawerContext);
+  const [showTabs, setShowTabs] = useState(open);
+
+  // To prevent incorrect displaying in first milliseconds of render
+  // while darwer menu is still closing
+  useEffect(() => {
+    if (!open) {
+      const timeout = setTimeout(() => setShowTabs(true), 150);
+      return () => clearTimeout(timeout);
+    } else {
+      setShowTabs(false);
+    }
+  }, [open]);
+
   return (
     <AppBar
       position="static"
@@ -35,7 +50,7 @@ const MainBar = () => {
             minWidth: 0,
           }}
         >
-          <Tabs />
+          {showTabs && <Tabs />}
         </Box>
 
         {/* Right Section */}

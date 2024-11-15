@@ -28,6 +28,7 @@ import AssistantOutlinedIcon from "@mui/icons-material/AssistantOutlined";
 import { Tooltip, Typography } from "@mui/material";
 import sortedConversation from "../../utils/sortedConversation";
 import "../../styles/scrollbar.css";
+import { DrawerContext } from "../../contexts/DrawerContext";
 
 const drawerWidth = 240;
 const smallScreenDrawerWidth = 230;
@@ -64,7 +65,8 @@ const pages = [
   },
 ];
 
-export default function DrawerMenu({ open, isSmallScreen, handleDrawerClose }) {
+export default function DrawerMenu({ handleDrawerClose }) {
+  const { open, isSmallScreen } = useContext(DrawerContext);
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
