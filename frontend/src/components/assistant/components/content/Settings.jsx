@@ -3,8 +3,6 @@ import { Box } from "@mui/material";
 import MainSection from "./settings_sections/MainSection";
 import ToolsSection from "./settings_sections/ToolsSection";
 
-const drawerWidth = 240;
-
 const Settings = () => {
 
   return (

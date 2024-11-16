@@ -9,12 +9,16 @@ import Functions from "../settings_components/Functions";
 const drawerWidth = 240;
 
 const ToolsSection = () => {
-  const { open } = useContext(DrawerContext);
+  const { open, isSmallScreen } = useContext(DrawerContext);
   const isTablet = useMediaQuery(
-    `(max-width:${open ? 815 + drawerWidth : 815}px)`
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 815 + drawerWidth : 815}px)`
   );
   const isMobile = useMediaQuery(
-    `(max-width:${open ? 500 + drawerWidth : 500}px)`
+    isSmallScreen
+      ? `(max-width:500px)`
+      : `(max-width:${open ? 500 + drawerWidth : 500}px)`
   );
 
   // Styles for the section container
@@ -69,7 +73,6 @@ const ToolsSection = () => {
       {/* Content Wrapper */}
       <Box
         sx={{
-          flexGrow: 1,
           display: "flex",
         }}
       >

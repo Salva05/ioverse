@@ -1,4 +1,4 @@
-import React, { useState, forwardRef } from "react";
+import React, { useState, forwardRef, useContext } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -16,16 +16,28 @@ import {
 } from "@mui/material";
 import { BiExpandAlt } from "react-icons/bi";
 import { BsStars } from "react-icons/bs";
+import { DrawerContext } from "../../../../../contexts/DrawerContext";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const drawerWidth = 240;
+
 const SystemInstructions = () => {
   const theme = useTheme();
-  const [open, setOpen] = useState(false);
-  const isMobile = useMediaQuery("(max-width:500px)");
-  const isTablet = useMediaQuery("(max-width:815px)");
+  const [openAnchor, setOpen] = useState(false);
+  const { open, isSmallScreen } = useContext(DrawerContext);
+  const isTablet = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
+  const isMobile = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:500px)`
+      : `(max-width:${open ? 500 + drawerWidth : 500}px)`
+  );
   const fullScreen = useMediaQuery("(max-width:600px)");
 
   const handleClickOpen = () => {
@@ -137,7 +149,7 @@ const SystemInstructions = () => {
         </Box>
       </Box>
       <Dialog
-        open={open}
+        open={openAnchor}
         fullScreen={fullScreen}
         onClose={handleClose}
         aria-labelledby="edit-system-instructions-title"

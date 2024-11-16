@@ -1,11 +1,19 @@
 import { Box, Button, Divider, Typography, useMediaQuery } from "@mui/material";
-import React from "react";
+import React, { useContext } from "react";
 import Switch from "../../../../Switch";
 import { RiInformation2Line } from "react-icons/ri";
 import { GoPlus } from "react-icons/go";
+import { DrawerContext } from "../../../../../contexts/DrawerContext";
+
+const drawerWidth = 240;
 
 const CodeInterpreter = () => {
-  const isMobile = useMediaQuery("(max-width:815px)");
+  const { open, isSmallScreen } = useContext(DrawerContext);
+  const isMobile = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
 
   return (
       <Box

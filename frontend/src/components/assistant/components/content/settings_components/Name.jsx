@@ -1,16 +1,28 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Box, Typography, TextField } from "@mui/material";
 import { useMediaQuery } from "@mui/material";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Tooltip from "@mui/material/Tooltip";
 import Popover from "@mui/material/Popover";
 import { useTheme } from "@emotion/react";
+import { DrawerContext } from "../../../../../contexts/DrawerContext";
+
+const drawerWidth = 240;
 
 const Name = () => {
   const theme = useTheme();
   const [copied, setCopied] = useState(false);
-  const isMobile = useMediaQuery("(max-width:500px)");
-  const isTablet = useMediaQuery("(max-width:815px)");
+  const { open, isSmallScreen } = useContext(DrawerContext);
+  const isTablet = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
+  const isMobile = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:500px)`
+      : `(max-width:${open ? 500 + drawerWidth : 500}px)`
+  );
 
   // For Mobile -----
   const popoverRef = useRef(null);
@@ -29,7 +41,7 @@ const Name = () => {
     }
   };
 
-  const open = Boolean(anchorEl);
+  const openAnchor = Boolean(anchorEl);
 
   return (
     <Box
@@ -52,8 +64,6 @@ const Name = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-start",
-          width: "100%",
         }}
       >
         <TextField
@@ -124,7 +134,7 @@ const Name = () => {
               padding: "4px 8px",
             },
           }}
-          open={open}
+          open={openAnchor}
           anchorEl={anchorEl}
           anchorOrigin={{
             vertical: "top",

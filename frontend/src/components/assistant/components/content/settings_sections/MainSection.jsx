@@ -10,14 +10,17 @@ const drawerWidth = 240;
 
 const MainSection = () => {
   const { open } = useContext(DrawerContext);
-  const isMobile = useMediaQuery(
+  const isTablet = useMediaQuery(
     `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
+  const isMobile = useMediaQuery(
+    `(max-width:${open ? 500 + drawerWidth : 500}px)`
   );
 
   // Styles for the section container
   const sectionContainerStyles = {
     display: "flex",
-    flexDirection: isMobile ? "column" : "row",
+    flexDirection: isTablet ? "column" : "row",
     alignItems: "center",
     gap: 3,
     maxWidth: "700px",
@@ -32,13 +35,14 @@ const MainSection = () => {
     textOverflow: "ellipsis",
   };
 
-// Styles for the content container
-const contentContainerStyles = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 1,
-  mb: isMobile ? 0 : 1
-};
+  // Styles for the content container
+  const contentContainerStyles = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 1,
+    minWidth: isMobile ? "300px" : isTablet ? "375px" : "450px",
+    mb: isTablet ? 0 : 1,
+  };
 
   return (
     <Box sx={sectionContainerStyles}>
@@ -46,10 +50,10 @@ const contentContainerStyles = {
       <Box
         sx={{
           ...labelContainerStyles,
-          justifyContent: isMobile ? "flex-start" : "flex-end",
+          justifyContent: isTablet ? "flex-start" : "flex-end",
         }}
       >
-        {!isMobile && (
+        {!isTablet && (
           <Typography
             component="div"
             sx={{
@@ -61,20 +65,16 @@ const contentContainerStyles = {
         )}
       </Box>
 
-      {!isMobile && (
-        <Divider orientation="vertical" flexItem />
-      )}
+      {!isTablet && <Divider orientation="vertical" flexItem />}
 
       {/* Content Wrapper */}
       <Box
         sx={{
-          flexGrow: 1,
           display: "flex",
-          justifyContent: "center",
         }}
       >
         <Box sx={contentContainerStyles}>
-          {isMobile && (
+          {isTablet && (
             <Typography
               component="div"
               sx={{
@@ -84,7 +84,7 @@ const contentContainerStyles = {
               Main
             </Typography>
           )}
-          {isMobile && (
+          {isTablet && (
             <Divider
               sx={{
                 marginBottom: 2,

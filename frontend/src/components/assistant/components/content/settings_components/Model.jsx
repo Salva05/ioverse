@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Box,
   Typography,
@@ -8,6 +8,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@emotion/react";
+import { DrawerContext } from "../../../../../contexts/DrawerContext";
 
 const models = [
   {
@@ -38,11 +39,23 @@ const models = [
   },
 ];
 
+const drawerWidth = 240;
+
 const Model = () => {
   const theme = useTheme();
+  const { open, isSmallScreen } = useContext(DrawerContext);
+  const isTablet = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
+  const isMobile = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:500px)`
+      : `(max-width:${open ? 500 + drawerWidth : 500}px)`
+  );
+
   const [model, setModel] = useState(models[0].name);
-  const isMobile = useMediaQuery("(max-width:500px)");
-  const isTablet = useMediaQuery("(max-width:815px)");
 
   return (
     <Box
@@ -65,8 +78,6 @@ const Model = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-start",
-          width: "100%",
         }}
       >
         <Select
