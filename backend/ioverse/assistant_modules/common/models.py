@@ -172,8 +172,15 @@ class JsonSchemaResponseFormat(BaseModel):
 class JsonObjectResponseFormat(BaseModel):
     type: Literal['json_object']
 
+class TextResponseFormat(BaseModel):
+    type: Literal['text']
 
-ResponseFormatType = Union[Literal['auto'], JsonSchemaResponseFormat, JsonObjectResponseFormat]
+ResponseFormatType = Union[
+    Literal['auto'],
+    JsonSchemaResponseFormat,
+    JsonObjectResponseFormat,
+    TextResponseFormat
+]
 
 # Content Parts
 class ContentPart(BaseModel):
