@@ -65,7 +65,7 @@ const MainSection = () => {
         )}
       </Box>
 
-      {!isTablet && <Divider orientation="vertical" flexItem />}
+      {!isTablet && <Divider orientation="vertical" flexItem  sx={{ mr: 5 }}/>}
 
       {/* Content Wrapper */}
       <Box

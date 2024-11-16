@@ -22,7 +22,7 @@ const CodeInterpreter = () => {
           alignItems: "center",
           flexDirection: "row",
           gap: 1,
-          ml: isMobile ? -1 : 2,
+          ml: isMobile ? -1 : 0
         }}
       >
         <Switch />

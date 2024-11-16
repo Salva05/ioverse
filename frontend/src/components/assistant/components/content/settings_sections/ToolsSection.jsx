@@ -68,7 +68,7 @@ const ToolsSection = () => {
         )}
       </Box>
 
-      {!isTablet && <Divider orientation="vertical" flexItem />}
+      {!isTablet && <Divider orientation="vertical" flexItem sx={{ mr: 4 }}/>}
 
       {/* Content Wrapper */}
       <Box

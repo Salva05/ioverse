@@ -21,7 +21,7 @@ const Functions = () => {
         alignItems: "center",
         flexDirection: "row",
         gap: 1,
-        ml: isMobile ? 0.4 : 3.3,
+        ml: isMobile ? 0.4 : 1.2,
         mt: 1
       }}
     >
