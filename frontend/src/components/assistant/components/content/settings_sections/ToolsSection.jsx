@@ -3,6 +3,7 @@ import { useMediaQuery } from "@mui/material";
 import { Box, Typography, Divider } from "@mui/material";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import FileSearchTool from "../settings_components/FileSearchTool";
+import CodeInterpreter from "../settings_components/CodeInterpreter";
 
 const drawerWidth = 240;
 
@@ -92,6 +93,9 @@ const ToolsSection = () => {
           )}
           <Box>
             <FileSearchTool />
+          </Box>
+          <Box>
+            <CodeInterpreter />
           </Box>
         </Box>
       </Box>
