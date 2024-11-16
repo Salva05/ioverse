@@ -56,7 +56,7 @@ const contentContainerStyles = {
               fontFamily: "'Montserrat', serif",
             }}
           >
-            Main
+            MAIN
           </Typography>
         )}
       </Box>

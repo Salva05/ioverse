@@ -4,6 +4,7 @@ import { Box, Typography, Divider } from "@mui/material";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import FileSearchTool from "../settings_components/FileSearchTool";
 import CodeInterpreter from "../settings_components/CodeInterpreter";
+import Functions from "../settings_components/Functions";
 
 const drawerWidth = 240;
 
@@ -58,7 +59,7 @@ const ToolsSection = () => {
               fontFamily: "'Montserrat', serif",
             }}
           >
-            Tools
+            TOOLS
           </Typography>
         )}
       </Box>
@@ -96,6 +97,9 @@ const ToolsSection = () => {
           </Box>
           <Box>
             <CodeInterpreter />
+          </Box>
+          <Box>
+            <Functions />
           </Box>
         </Box>
       </Box>
