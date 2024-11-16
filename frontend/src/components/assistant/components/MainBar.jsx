@@ -4,13 +4,18 @@ import Toolbar from "@mui/material/Toolbar";
 import ActiveItem from "./main_bar/ActiveItem";
 import Tabs from "./main_bar/Tabs";
 import SwitchEntityButton from "./main_bar/SwitchEntityButton";
-import { Box } from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 import { motion } from "framer-motion";
 import { DrawerContext } from "../../../contexts/DrawerContext";
+
+const drawerWidth = 240;
 
 const MainBar = () => {
   const { open } = useContext(DrawerContext);
   const [showTabs, setShowTabs] = useState(open);
+  const isMobile = useMediaQuery(
+    `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
 
   // To prevent incorrect displaying in first milliseconds of render
   // while darwer menu is still closing
@@ -19,7 +24,7 @@ const MainBar = () => {
       const timeout = setTimeout(() => setShowTabs(true), 150);
       return () => clearTimeout(timeout);
     } else {
-      setShowTabs(false);
+      if (isMobile) setShowTabs(false);
     }
   }, [open]);
 

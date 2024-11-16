@@ -1,17 +1,28 @@
 import React from "react";
-import { Box, useMediaQuery } from "@mui/material";
-import Name from "./settings_components/Name";
-import SystemInstructions from "./settings_components/SystemInstructions";
+import { Box } from "@mui/material";
+import MainSection from "./settings_sections/MainSection";
+import ToolsSection from "./settings_sections/ToolsSection";
+
+const drawerWidth = 240;
 
 const Settings = () => {
-  const isMobile = useMediaQuery("(max-width:815px)");
+
   return (
-    <>
-      <Box sx={{ mb: 5 }}>
-        <Name />
-      </Box>
-      <SystemInstructions />
-    </>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 5,
+        pb: 5,
+        width: "100%",
+      }}
+    >
+      {/* First Section: Main */}
+      <MainSection />
+
+      {/* Second Section: Tools */}
+      <ToolsSection />
+    </Box>
   );
 };
 
