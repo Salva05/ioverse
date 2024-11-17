@@ -225,7 +225,7 @@ const SystemInstructions = () => {
           <Button
             onClick={handleClose}
             variant="outlined"
-            color="inherit" // Use a neutral color for Cancel
+            color="inherit"
             size="small"
             sx={{
               color:

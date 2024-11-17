@@ -85,41 +85,45 @@ const Name = () => {
           text={"asst_UAoDUk63bOUe35Lhc7KeYvZP"}
           onCopy={handleCopy}
         >
-          <Tooltip
-            title={isTablet ? "" : copied ? "Copied!" : "Click to copy"}
-            arrow
-            placement="top"
-            slotProps={{
-              popper: {
-                modifiers: [
-                  {
-                    name: "offset",
-                    options: {
-                      offset: [0, -12],
+          <Box>
+            {" "}
+            {/* To make the popover be centered to the text and not to the parent container */}
+            <Tooltip
+              title={isTablet ? "" : copied ? "Copied!" : "Click to copy"}
+              arrow
+              placement="top"
+              slotProps={{
+                popper: {
+                  modifiers: [
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, -12],
+                      },
                     },
-                  },
-                ],
-              },
-            }}
-          >
-            <Typography
-              variant="caption"
-              ref={popoverRef}
-              sx={{
-                marginTop: 0.5,
-                marginLeft: 1,
-                color: "gray",
-                fontFamily: "'Montserrat', serif",
-                fontWeight: "bold",
-                cursor: "pointer",
-                "&:hover": {
-                  color: (theme) => theme.palette.text.primary,
+                  ],
                 },
               }}
             >
-              asst_UAoDUk63bOUe35Lhc7KeYvZP
-            </Typography>
-          </Tooltip>
+              <Typography
+                variant="caption"
+                ref={popoverRef}
+                sx={{
+                  marginTop: 0.5,
+                  marginLeft: 1,
+                  color: "gray",
+                  fontFamily: "'Montserrat', serif",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  "&:hover": {
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                }}
+              >
+                asst_UAoDUk63bOUe35Lhc7KeYvZP
+              </Typography>
+            </Tooltip>
+          </Box>
         </CopyToClipboard>
       </Box>
       {isTablet && (
@@ -128,7 +132,8 @@ const Name = () => {
           sx={{
             pointerEvents: "none",
             "& .MuiPaper-root": {
-              backgroundColor: theme.palette.mode === "light" ? "black" : "white",
+              backgroundColor:
+                theme.palette.mode === "light" ? "black" : "white",
               color: theme.palette.mode === "light" ? "white" : "black",
               borderRadius: "8px",
               padding: "4px 8px",

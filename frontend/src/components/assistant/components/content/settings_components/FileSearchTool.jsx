@@ -1,20 +1,67 @@
-import { Box, Button, Typography, useMediaQuery } from "@mui/material";
-import React, { useContext } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import Switch from "../../../../Switch";
 import { RiInformation2Line } from "react-icons/ri";
 import { GoPlus } from "react-icons/go";
 import { IoSettingsOutline } from "react-icons/io5";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
+import FileSearchPopover from "./FileSearchPopover";
+import FileSearchInfoPopover from "./FileSearchInfoPopover";
+import FileSearchAddDialog from "./FileSearchAddDialog";
 
 const drawerWidth = 240;
 
 const FileSearchTool = () => {
+  const theme = useTheme();
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isMobile = useMediaQuery(
     isSmallScreen
       ? `(max-width:815px)`
       : `(max-width:${open ? 815 + drawerWidth : 815}px)`
   );
+
+  // Info Popover State
+  const infoPopoverAnchor = useRef(null);
+  const [infoOpenedPopover, setOpenedInfoPopover] = useState(false);
+
+  // Settings popover
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState(null);
+  const settingsOpen = Boolean(settingsAnchorEl);
+
+  // Add Files Dialog
+  const [addFilesOpen, setAddFilesOpen] = useState(false);
+
+  // Add Files states
+  const addFilesDialogOpen = () => {
+    setAddFilesOpen(true);
+  };
+
+  const addFilesDialogClose = () => {
+    setAddFilesOpen(false);
+  };
+
+  // Settings popover states
+  const settingsPopoverClick = (event) => {
+    setSettingsAnchorEl(event.currentTarget);
+  };
+
+  const settingsPopoverClose = () => {
+    setSettingsAnchorEl(null);
+  };
+
+  // Info popover states
+  const infoPopoverEnter = () => {
+    setOpenedInfoPopover(true);
+  };
+  const infoPopoverLeave = () => {
+    setOpenedInfoPopover(false);
+  };
 
   return (
     <Box
@@ -35,10 +82,21 @@ const FileSearchTool = () => {
       >
         File Search
       </Typography>
-      <RiInformation2Line />
+      <Box
+        component="span"
+        ref={infoPopoverAnchor}
+        aria-owns={infoOpenedPopover ? "info-popover" : undefined}
+        aria-haspopup="true"
+        onMouseEnter={infoPopoverEnter}
+        onMouseLeave={infoPopoverLeave}
+        sx={{ display: "inline-flex" }}
+      >
+        <RiInformation2Line />
+      </Box>
       <Box sx={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
-      <Button
+        <Button
           color="inherit"
+          onClick={settingsPopoverClick}
           sx={{
             textTransform: "none",
             borderRadius: 2.3,
@@ -52,12 +110,13 @@ const FileSearchTool = () => {
             },
           }}
         >
-          <IoSettingsOutline size="1rem"  />
+          <IoSettingsOutline size="1rem" />
         </Button>
 
         <Button
           size="small"
           color="inherit"
+          onClick={addFilesDialogOpen}
           sx={{
             textTransform: "none",
             borderRadius: 2.3,
@@ -82,6 +141,24 @@ const FileSearchTool = () => {
           </Typography>
         </Button>
       </Box>
+
+      {/* Info Popover */}
+      <FileSearchInfoPopover
+        infoOpenedPopover={infoOpenedPopover}
+        infoPopoverAnchor={infoPopoverAnchor}
+        infoPopoverEnter={infoPopoverEnter}
+        infoPopoverLeave={infoPopoverLeave}
+      />
+
+      {/* Settings Popover */}
+      <FileSearchPopover
+        settingsAnchorEl={settingsAnchorEl}
+        settingsPopoverClose={settingsPopoverClose}
+        settingsOpen={settingsOpen}
+      />
+
+      {/* Add Files Dialog */}
+      <FileSearchAddDialog openDialog={addFilesOpen} handleClose={addFilesDialogClose} />
     </Box>
   );
 };
