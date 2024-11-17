@@ -19,7 +19,11 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const FileSearchAddDialog = ({ openDialog, handleClose }) => {
+const FileSearchAddDialog = ({
+  openDialog,
+  handleClose,
+  vectorStoreButton,
+}) => {
   const theme = useTheme();
   // No need for accounting drawer here
   // Since it can't be opened while the dialg is on
@@ -112,22 +116,22 @@ const FileSearchAddDialog = ({ openDialog, handleClose }) => {
           >
             Information in attached files will be available to this assistant.
           </Typography>
-            <Link
-              href="https://platform.openai.com/docs/assistants/tools/file-search"
-              target="_blank"
-              rel="noopener"
-              sx={{
-                fontSize: "0.8rem",
-                fontFamily: "'Montserrat', serif",
-                textDecoration: "none",
-                color: theme.palette.primary.main,
-                "&:hover": {
-                  textDecoration: "underline",
-                },
-              }}
-            >
-              Learn more.
-            </Link>
+          <Link
+            href="https://platform.openai.com/docs/assistants/tools/file-search"
+            target="_blank"
+            rel="noopener"
+            sx={{
+              fontSize: "0.8rem",
+              fontFamily: "'Montserrat', serif",
+              textDecoration: "none",
+              color: theme.palette.primary.main,
+              "&:hover": {
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Learn more.
+          </Link>
         </Box>
       </DialogContent>
       <Divider sx={{ mx: theme.spacing(3) }} />
@@ -140,34 +144,36 @@ const FileSearchAddDialog = ({ openDialog, handleClose }) => {
         }}
       >
         {/* Left Side Button */}
-        <Button
-          onClick={() => {
-            console.log("Select Vector Store clicked");
-          }}
-          variant="contained"
-          size="small"
-          sx={{
-            color:
-              theme.palette.mode === "dark"
-                ? theme.palette.grey[400]
-                : theme.palette.text.primary,
-            borderColor:
-              theme.palette.mode === "dark"
-                ? theme.palette.grey[700]
-                : theme.palette.grey[300],
-            backgroundColor:
-              theme.palette.mode === "dark"
-                ? theme.palette.grey[700]
-                : theme.palette.grey[300],
-            "&:hover": {
-              borderColor: theme.palette.grey[500],
-              backgroundColor: theme.palette.action.hover,
-            },
-            textTransform: "none",
-          }}
-        >
-          {shouldDisplayText && "Select "}Vector Store
-        </Button>
+        {vectorStoreButton && (
+          <Button
+            onClick={() => {
+              console.log("Select Vector Store clicked");
+            }}
+            variant="contained"
+            size="small"
+            sx={{
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[400]
+                  : theme.palette.text.primary,
+              borderColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[700]
+                  : theme.palette.grey[300],
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[700]
+                  : theme.palette.grey[300],
+              "&:hover": {
+                borderColor: theme.palette.grey[500],
+                backgroundColor: theme.palette.action.hover,
+              },
+              textTransform: "none",
+            }}
+          >
+            {shouldDisplayText && "Select "}Vector Store
+          </Button>
+        )}
         <Box sx={{ flexGrow: 1 }} />
         {/* Right Side Buttons */}
         <Box
@@ -207,7 +213,7 @@ const FileSearchAddDialog = ({ openDialog, handleClose }) => {
             onClick={handleClose}
             autoFocus
             variant="contained"
-            disabled  // Mock for now
+            disabled // Mock for now
             size="small"
             color="success"
             sx={{

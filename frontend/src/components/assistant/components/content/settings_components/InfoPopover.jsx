@@ -6,6 +6,8 @@ const FileSearchInfoPopover = ({
   infoPopoverAnchor,
   infoPopoverEnter,
   infoPopoverLeave,
+  text,
+  link
 }) => {
   return (
     <Popover
@@ -42,13 +44,12 @@ const FileSearchInfoPopover = ({
           fontSize: "0.77rem",
           wordWrap: "break-word",
           whiteSpace: "normal",
+          fontFamily: "'Montserrat', serif",
         }}
       >
-        File search enables the assistant with knowledge from files that you or
-        your users upload. Once a file is uploaded, the assistant automatically
-        decides when to retrieve content based on user requests.{" "}
+        {text}{" "}
         <Link
-          href="https://platform.openai.com/docs/assistants/overview"
+          href={link}
           target="_blank"
           rel="noopener"
           sx={{

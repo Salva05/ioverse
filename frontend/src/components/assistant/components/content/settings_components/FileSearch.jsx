@@ -12,12 +12,12 @@ import { GoPlus } from "react-icons/go";
 import { IoSettingsOutline } from "react-icons/io5";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import FileSearchPopover from "./FileSearchPopover";
-import FileSearchInfoPopover from "./FileSearchInfoPopover";
+import InfoPopover from "./InfoPopover";
 import FileSearchAddDialog from "./FileSearchAddDialog";
 
 const drawerWidth = 240;
 
-const FileSearchTool = () => {
+const FileSearch = () => {
   const theme = useTheme();
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isMobile = useMediaQuery(
@@ -143,11 +143,15 @@ const FileSearchTool = () => {
       </Box>
 
       {/* Info Popover */}
-      <FileSearchInfoPopover
+      <InfoPopover
         infoOpenedPopover={infoOpenedPopover}
         infoPopoverAnchor={infoPopoverAnchor}
         infoPopoverEnter={infoPopoverEnter}
         infoPopoverLeave={infoPopoverLeave}
+        text="File search enables the assistant with knowledge from files that you or
+        your users upload. Once a file is uploaded, the assistant automatically
+        decides when to retrieve content based on user requests."
+        link="https://platform.openai.com/docs/assistants/overview"
       />
 
       {/* Settings Popover */}
@@ -158,9 +162,9 @@ const FileSearchTool = () => {
       />
 
       {/* Add Files Dialog */}
-      <FileSearchAddDialog openDialog={addFilesOpen} handleClose={addFilesDialogClose} />
+      <FileSearchAddDialog openDialog={addFilesOpen} handleClose={addFilesDialogClose} vectorStoreButton={true} />
     </Box>
   );
 };
 
-export default FileSearchTool;
+export default FileSearch;

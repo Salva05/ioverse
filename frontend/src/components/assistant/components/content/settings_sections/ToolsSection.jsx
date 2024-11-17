@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Box, Typography, Divider } from "@mui/material";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
-import FileSearchTool from "../settings_components/FileSearchTool";
+import FileSearch from "../settings_components/FileSearch";
 import CodeInterpreter from "../settings_components/CodeInterpreter";
 import Functions from "../settings_components/Functions";
 
@@ -96,7 +96,7 @@ const ToolsSection = () => {
             />
           )}
           <Box>
-            <FileSearchTool />
+            <FileSearch />
           </Box>
           <Box>
             <CodeInterpreter />
