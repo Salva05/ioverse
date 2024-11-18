@@ -8,9 +8,9 @@ const Slider = ({ value, onChange, ...props }) => {
     <MUISlider
       value={value}
       onChange={onChange}
-      min={1}
-      max={50}
-      step={1}
+      min={props.min}
+      max={props.max}
+      step={props.step}
       sx={{
         height: 4,
         cursor: "grab",

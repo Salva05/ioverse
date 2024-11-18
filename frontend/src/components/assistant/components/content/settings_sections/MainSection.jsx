@@ -81,7 +81,7 @@ const MainSection = () => {
                 fontFamily: "'Montserrat', serif",
               }}
             >
-              Main
+              MAIN
             </Typography>
           )}
           {isTablet && (

@@ -2,9 +2,10 @@ import React from "react";
 import { Box } from "@mui/material";
 import MainSection from "./settings_sections/MainSection";
 import ToolsSection from "./settings_sections/ToolsSection";
+import ConfigurationSection from "./settings_sections/ConfigurationSection";
+import ManageSection from "./settings_sections/ManageSection";
 
 const Settings = () => {
-
   return (
     <Box
       sx={{
@@ -20,6 +21,12 @@ const Settings = () => {
 
       {/* Second Section: Tools */}
       <ToolsSection />
+
+      {/* Third Section: Configuration */}
+      <ConfigurationSection />
+
+      {/* Fourth Section: Manage */}
+      <ManageSection />
     </Box>
   );
 };

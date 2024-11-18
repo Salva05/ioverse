@@ -362,7 +362,7 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
                 fontSize: "0.875rem",
                 backgroundColor: "inherit",
                 color: "inherit",
-                minHeight: "26em",
+                minHeight: "27em",
                 overflow: "auto",
                 whiteSpace: "pre",
               }}

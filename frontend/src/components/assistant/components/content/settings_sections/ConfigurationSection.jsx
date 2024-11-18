@@ -2,13 +2,13 @@ import React, { useContext } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Box, Typography, Divider } from "@mui/material";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
-import FileSearch from "../settings_components/FileSearch";
-import CodeInterpreter from "../settings_components/CodeInterpreter";
-import Functions from "../settings_components/Functions";
+import ResponseFormat from "../settings_components/ResponseFormat";
+import Temperature from "../settings_components/Temperature";
+import TopP from "../settings_components/TopP";
 
 const drawerWidth = 240;
 
-const ToolsSection = () => {
+const ConfigurationSection = () => {
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isTablet = useMediaQuery(
     isSmallScreen
@@ -63,12 +63,12 @@ const ToolsSection = () => {
               fontFamily: "'Montserrat', serif",
             }}
           >
-            TOOLS
+            CONFIGURATION
           </Typography>
         )}
       </Box>
 
-      {!isTablet && <Divider orientation="vertical" flexItem sx={{ mr: 4 }}/>}
+      {!isTablet && <Divider orientation="vertical" flexItem sx={{ mr: 4 }} />}
 
       {/* Content Wrapper */}
       <Box
@@ -84,7 +84,7 @@ const ToolsSection = () => {
                 fontFamily: "'Montserrat', serif",
               }}
             >
-              TOOLS
+              CONFIGURATION
             </Typography>
           )}
           {isTablet && (
@@ -96,13 +96,13 @@ const ToolsSection = () => {
             />
           )}
           <Box sx={{ mb: 2 }}>
-            <FileSearch />
+            <ResponseFormat />
           </Box>
           <Box sx={{ mb: 2 }}>
-            <CodeInterpreter />
+           <Temperature />
           </Box>
           <Box sx={{ mb: 2 }}>
-            <Functions />
+            <TopP />
           </Box>
         </Box>
       </Box>
@@ -110,4 +110,4 @@ const ToolsSection = () => {
   );
 };
 
-export default ToolsSection;
+export default ConfigurationSection;

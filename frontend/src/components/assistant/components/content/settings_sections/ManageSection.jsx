@@ -2,13 +2,12 @@ import React, { useContext } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Box, Typography, Divider } from "@mui/material";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
-import FileSearch from "../settings_components/FileSearch";
-import CodeInterpreter from "../settings_components/CodeInterpreter";
-import Functions from "../settings_components/Functions";
+import Delete from "../settings_components/Delete";
+import Clone from "../settings_components/Clone";
 
 const drawerWidth = 240;
 
-const ToolsSection = () => {
+const ManageSection = () => {
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isTablet = useMediaQuery(
     isSmallScreen
@@ -63,12 +62,12 @@ const ToolsSection = () => {
               fontFamily: "'Montserrat', serif",
             }}
           >
-            TOOLS
+            MANAGE
           </Typography>
         )}
       </Box>
 
-      {!isTablet && <Divider orientation="vertical" flexItem sx={{ mr: 4 }}/>}
+      {!isTablet && <Divider orientation="vertical" flexItem sx={{ mr: 4 }} />}
 
       {/* Content Wrapper */}
       <Box
@@ -84,7 +83,7 @@ const ToolsSection = () => {
                 fontFamily: "'Montserrat', serif",
               }}
             >
-              TOOLS
+              MANAGE
             </Typography>
           )}
           {isTablet && (
@@ -96,13 +95,10 @@ const ToolsSection = () => {
             />
           )}
           <Box sx={{ mb: 2 }}>
-            <FileSearch />
+            <Clone />
           </Box>
           <Box sx={{ mb: 2 }}>
-            <CodeInterpreter />
-          </Box>
-          <Box sx={{ mb: 2 }}>
-            <Functions />
+            <Delete />
           </Box>
         </Box>
       </Box>
@@ -110,4 +106,4 @@ const ToolsSection = () => {
   );
 };
 
-export default ToolsSection;
+export default ManageSection;

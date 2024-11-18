@@ -166,8 +166,8 @@ const FileSearchPopover = ({
                 "& fieldset": {
                   border: showBorders
                     ? `1px solid ${theme.palette.grey[500]}`
-                    : "none",
-                  transition: "border 0.2s",
+                    : "1px solid transparent",
+                  transition: "border-color 0.4s ease, border-width 0.2s ease",
                 },
                 "&:hover fieldset": {
                   border: `1px solid ${theme.palette.grey[500]}`,
