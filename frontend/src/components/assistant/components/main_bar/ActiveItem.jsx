@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -20,35 +20,52 @@ import { useThreadsData } from "../../../../hooks/assistant/useThreadsData";
 import { motion } from "framer-motion";
 
 const ActiveItem = () => {
-  const { selectedItem, selectedEntity, setSelectedItem } =
+  const { selectedEntity, assistant, setAssistant, thread, setThread } =
     useAssistantContext();
+
   const { data: assistantsData } = useAssistantsData();
   const { data: threadsData } = useThreadsData();
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const items = selectedEntity === "Assistant" ? assistantsData : threadsData;
 
+  // Find the selected item based on ID
+  const selectedItem = useMemo(() => {
+    if (!items || items.length === 0) return null;
+    const currentItem = selectedEntity === "Assistant" ? assistant : thread;
+    return items.find((item) => item.id === currentItem?.id) || items[0];
+  }, [items, assistant, thread, selectedEntity]);
+
   // Derived list with the selected item as the first item
   const orderedItems = useMemo(() => {
     if (!items || items.length === 0) return [];
     return [
-      items[selectedItem],
-      ...items.filter((_, index) => index !== selectedItem),
+      selectedItem,
+      ...items.filter((item) => item.id !== selectedItem.id),
     ];
   }, [items, selectedItem]);
 
-  // Handle opening the menu
+  // Update the entity object in the context
+  useEffect(() => {
+    if (selectedItem) {
+      if (selectedEntity === "Assistant") {
+        setAssistant(selectedItem);
+      } else {
+        setThread(selectedItem);
+      }
+    }
+  }, [selectedItem, selectedEntity, setAssistant, setThread]);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Handle element creation
   const handleCreate = () => {
     // will be defined later
   };
 
-  // Handle closing the menu
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -116,8 +133,11 @@ const ActiveItem = () => {
             key={item.id}
             selected={index === 0}
             onClick={() => {
-              const selectedIndex = items.findIndex((a) => a.id === item.id);
-              setSelectedItem(selectedIndex);
+              if (selectedEntity === "Assistant") {
+                setAssistant(item);
+              } else {
+                setThread(item);
+              }
               handleClose();
             }}
             sx={{

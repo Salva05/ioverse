@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Box, Typography, TextField } from "@mui/material";
 import { useMediaQuery } from "@mui/material";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -6,12 +6,26 @@ import Tooltip from "@mui/material/Tooltip";
 import Popover from "@mui/material/Popover";
 import { useTheme } from "@emotion/react";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { toast } from "react-toastify";
 
 const drawerWidth = 240;
 
 const Name = () => {
+  const { mutate, isLoading } = useUpdateAssistant();
+  const { assistant, setAssistant } = useAssistantContext();
+
+  // Local state for the input value
+  const [nameInput, setNameInput] = useState(assistant?.name || "");
+  useEffect(() => {
+    setNameInput(assistant?.name || "");
+  }, [assistant]);
+
   const theme = useTheme();
   const [copied, setCopied] = useState(false);
+
+  // Responsiveness
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isTablet = useMediaQuery(
     isSmallScreen
@@ -43,6 +57,35 @@ const Name = () => {
 
   const openAnchor = Boolean(anchorEl);
 
+  const handleNameChange = (e) => {
+    setNameInput(e.target.value);
+  };
+
+  const validate = () => {
+    if (nameInput.trim() !== "" && !/^[a-zA-Z0-9\s]+$/.test(nameInput)) {
+      return false;
+    }
+    return true;
+  };
+
+  const shouldUpdate = () => {
+    if (nameInput === assistant?.name) return false;
+    if (nameInput === "") return false;
+    return true;
+  };
+
+  const handleMutate = () => {
+    if (!validate()) {
+      setNameInput(assistant?.name || "");
+      toast.error("Invalid name. Please check your input and try again.");
+      return;
+    }
+    if (!shouldUpdate()) return;
+
+    const updatedAssistant = { ...assistant, name: nameInput };
+    mutate({ id: assistant.id, assistantData: updatedAssistant });
+  };
+
   return (
     <Box
       sx={{
@@ -70,7 +113,9 @@ const Name = () => {
           placeholder="Enter a user friendly name"
           id="outlined-basic"
           variant="outlined"
-          defaultValue="John Doe"
+          value={nameInput}
+          onChange={handleNameChange}
+          onBlur={handleMutate}
           sx={{
             minWidth: isMobile ? "300px" : isTablet ? "375px" : "450px",
             "& .MuiOutlinedInput-root": {
@@ -81,10 +126,7 @@ const Name = () => {
             },
           }}
         />
-        <CopyToClipboard
-          text={"asst_UAoDUk63bOUe35Lhc7KeYvZP"}
-          onCopy={handleCopy}
-        >
+        <CopyToClipboard text={assistant?.id} onCopy={handleCopy}>
           <Box>
             {" "}
             {/* To make the popover be centered to the text and not to the parent container */}
@@ -120,7 +162,7 @@ const Name = () => {
                   },
                 }}
               >
-                asst_UAoDUk63bOUe35Lhc7KeYvZP
+                {assistant?.id || ""}
               </Typography>
             </Tooltip>
           </Box>

@@ -163,7 +163,7 @@ const TopP = () => {
             transform: "translateX(-50%)",
           }}
         >
-          Temperature
+          Top P
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
         <IconButton

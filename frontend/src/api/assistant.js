@@ -8,6 +8,13 @@ export const assistant = {
     );
     return response.data;
   },
+  update: async (id, assistant) => {
+    const response = await axiosInstance.put(
+      `/assistant/${id}/update/`,
+      assistant
+    );
+    return response.data;
+  }
 };
 
 // Service for Thread-related API calls

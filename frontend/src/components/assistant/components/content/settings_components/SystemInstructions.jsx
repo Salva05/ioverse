@@ -17,6 +17,7 @@ import {
 import { BiExpandAlt } from "react-icons/bi";
 import { BsStars } from "react-icons/bs";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -25,6 +26,8 @@ const Transition = forwardRef(function Transition(props, ref) {
 const drawerWidth = 240;
 
 const SystemInstructions = () => {
+  const { assistant } = useAssistantContext();
+
   const theme = useTheme();
   const [openAnchor, setOpen] = useState(false);
   const { open, isSmallScreen } = useContext(DrawerContext);
@@ -111,11 +114,11 @@ const SystemInstructions = () => {
         >
           <TextField
             id="outlined-basic"
+            value={assistant?.instructions || ""}
             placeholder="You are a helpful assistant..."
             variant="outlined"
             multiline
             rows={4}
-            defaultValue="John Doe is a helpful assistant.."
             slotProps={{
               htmlInput: { className: "drawer-scrollbar" },
             }}
@@ -204,7 +207,7 @@ const SystemInstructions = () => {
             minRows={6}
             maxRows={20}
             placeholder="You are a helpful assistant..."
-            value={"You are a helpful assistant..."}
+            value={assistant?.instructions || ""}
             variant="outlined"
             fullWidth
             slotProps={{
