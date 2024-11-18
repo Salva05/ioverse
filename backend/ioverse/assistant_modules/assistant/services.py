@@ -70,6 +70,7 @@ class AssistantService:
     def update_assistant(self, assistant_id: str, params: AssistantParamsUpdate) -> Assistant:
         try:
             assistant_data = params.model_dump(exclude_unset=True)
+            assistant_data = {k: v for k, v in assistant_data.items() if v is not None or v == ""}
             response = self.client.update_assistant(assistant_id, **assistant_data)
             
             # Convert OpenAI Assistant instance to dict

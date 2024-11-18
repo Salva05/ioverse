@@ -4,8 +4,16 @@ from typing import Any, Dict
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
-from ..helpers import serialize_response_format, serialize_pydantic_list, serialize_pydantic_model
-from assistant_modules.assistant.parameters import AssistantParams, AssistantListParam, AssistantParamsUpdate
+from ..helpers import (
+    serialize_response_format,
+    serialize_pydantic_list,
+    serialize_pydantic_model
+)
+from assistant_modules.assistant.parameters import (
+    AssistantParams,
+    AssistantListParam,
+    AssistantParamsUpdate
+)
 from assistant_modules.assistant.services import AssistantService
 from apps.assistant.models import Assistant as DjangoAssistant
 from pydantic import ValidationError
@@ -179,61 +187,72 @@ class AssistantIntegrationService:
         try:
             # Validate and transform data using Pydantic
             params = AssistantListParam(**data)
-            
+
             # Use AssistantService to list Assistants from OpenAI
             assistants_pydantic = self.assistant_service.list_assistants(params)
             django_assistants = []
-            
+
             # Holds a list of API response model's IDs for later comparison
-            # with local model, and eventually deletion
             ids = []
-            
+
             for assistant_pydantic in assistants_pydantic:
                 ids.append(assistant_pydantic.id)
-                    
-                # Serialize the pydantic lists if it's not empty
+
+                # Serialize pydantic lists and resources
                 serialized_tools = serialize_pydantic_list(assistant_pydantic.tools)
-                
-                # Serialize tool_resources correctly using the new helper
                 serialized_tool_resources = serialize_pydantic_model(assistant_pydantic.tool_resources)
-                
-                # Serialize response_format appropriately
                 serialized_response_format = serialize_response_format(assistant_pydantic.response_format)
-            
-                # Try to get an existing Assistant from the Django database
-                django_assistant, created = DjangoAssistant.objects.update_or_create(
-                    id=assistant_pydantic.id,
-                    owner=user,
-                    defaults={
-                        'id': assistant_pydantic.id,
-                        'object': assistant_pydantic.object,
-                        'created_at': assistant_pydantic.created_at,
-                        'owner': user,
-                        'name': assistant_pydantic.name,
-                        'description': assistant_pydantic.description,
-                        'model': assistant_pydantic.model,
-                        'instructions': assistant_pydantic.instructions,
-                        'tools': serialized_tools,
-                        'tool_resources': serialized_tool_resources,
-                        'temperature': assistant_pydantic.temperature,
-                        'top_p': assistant_pydantic.top_p,
-                        'response_format': serialized_response_format,
-                        'metadata': assistant_pydantic.metadata,
-                    }
-                )
-                
-                # Log creation or update
-                if created:
-                    logger.info(f"New assistant added to Django DB: {django_assistant.id}")
-                else:
+
+                # Try to find an existing assistant by id and ownership
+                django_assistant = DjangoAssistant.objects.filter(id=assistant_pydantic.id, owner=user).first()
+
+                if django_assistant:
+                    # Update existing assistant
+                    DjangoAssistant.objects.filter(pk=django_assistant.pk).update(
+                        object=assistant_pydantic.object,
+                        created_at=assistant_pydantic.created_at,
+                        name=assistant_pydantic.name,
+                        description=assistant_pydantic.description,
+                        model=assistant_pydantic.model,
+                        instructions=assistant_pydantic.instructions,
+                        tools=serialized_tools,
+                        tool_resources=serialized_tool_resources,
+                        temperature=assistant_pydantic.temperature,
+                        top_p=assistant_pydantic.top_p,
+                        response_format=serialized_response_format,
+                        metadata=assistant_pydantic.metadata,
+                    )
                     logger.info(f"Existing assistant updated in Django DB: {django_assistant.id}")
-                
+                else:
+                    # Check if the assistant exists but is owned by another user
+                    if DjangoAssistant.objects.filter(id=assistant_pydantic.id).exists():
+                        continue
+
+                    # Create new assistant
+                    django_assistant = DjangoAssistant.objects.create(
+                        id=assistant_pydantic.id,
+                        object=assistant_pydantic.object,
+                        created_at=assistant_pydantic.created_at,
+                        owner=user,
+                        name=assistant_pydantic.name,
+                        description=assistant_pydantic.description,
+                        model=assistant_pydantic.model,
+                        instructions=assistant_pydantic.instructions,
+                        tools=serialized_tools,
+                        tool_resources=serialized_tool_resources,
+                        temperature=assistant_pydantic.temperature,
+                        top_p=assistant_pydantic.top_p,
+                        response_format=serialized_response_format,
+                        metadata=assistant_pydantic.metadata,
+                    )
+                    logger.info(f"New assistant added to Django DB: {django_assistant.id}")
+
                 # Add to the list of Django assistant instances
                 django_assistants.append(django_assistant)
-            
+
             # Delete any DjangoAssistant entries for this user not in the API's returned IDs
             DjangoAssistant.objects.filter(owner=user).exclude(id__in=ids).delete()
-            
+
             return django_assistants
 
         except ValidationError as ve:
@@ -242,4 +261,5 @@ class AssistantIntegrationService:
         except Exception as e:
             logger.error(f"Error listing assistants: {e}")
             raise
-            
+
+                
