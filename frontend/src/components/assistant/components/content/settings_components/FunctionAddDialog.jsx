@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import {
   useTheme,
   useMediaQuery,
@@ -11,7 +11,6 @@ import {
   Slide,
   Typography,
   Divider,
-  TextareaAutosize,
   Link,
   IconButton,
   MenuItem,
@@ -19,6 +18,18 @@ import {
 } from "@mui/material";
 import { BsStars } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
+import Editor from "react-simple-code-editor";
+import Prism from "prismjs";
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism.css";
+
+Prism.hooks.add("wrap", function (env) {
+  if (env.type === "operator") {
+    // Remove default background of prism.css
+    env.attributes.style =
+      "background: none !important; color: inherit !important;";
+  }
+});
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -26,13 +37,103 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const FunctionAddDialog = ({ openDialog, handleClose }) => {
   const theme = useTheme();
-  const isTablet = useMediaQuery(`(max-width:815px)`);
   const isMobile = useMediaQuery(`(max-width:500px)`);
   const fullScreen = useMediaQuery("(max-width:600px)");
 
   // Examples List
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  // JSON Content State
+  const [jsonContent, setJsonContent] = useState("");
+
+  // Syntax highlighting function
+  const highlightCode = (code) =>
+    Prism.highlight(code, Prism.languages.json, "json");
+
+  // Add a Prism hook for boolean values
+  useEffect(() => {
+    Prism.hooks.add("wrap", function (env) {
+      if (env.type === "boolean") {
+        env.attributes.style = `color: ${theme.palette.primary.main};`;
+      }
+    });
+  }, [theme]);
+
+  // Example JSONs
+  const exampleJSONs = {
+    get_weather: `{
+  "name": "get_weather",
+  "description": "Determine weather in my location",
+  "strict": true,
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string",
+        "description": "The city and state e.g. San Francisco, CA"
+      },
+      "unit": {
+        "type": "string",
+        "enum": [
+          "c",
+          "f"
+        ]
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "location",
+      "unit"
+    ]
+  }
+}`,
+    get_stock_price: `{
+  "name": "get_stock_price",
+  "description": "Get the current stock price",
+  "strict": true,
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "symbol": {
+        "type": "string",
+        "description": "The stock symbol"
+      }
+    },
+    "additionalProperties": false,
+    "required": ["symbol"]
+  }
+}`,
+    get_traffic: `{
+  "name": "get_traffic",
+  "description": "Gives current traffic conditions for a given area.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "Name of the city"
+          },
+          "state": {
+            "type": "string",
+            "description": "Two-letter state abbreviation"
+          }
+        },
+        "required": [
+          "city",
+          "state"
+        ]
+      }
+    },
+    "required": [
+      "location"
+    ]
+  }
+}`,
+  };
 
   const handleExamplesClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -156,7 +257,7 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
                   paddingY: 0.3,
                   borderRadius: 2,
                 }}
-                aria-label="stars"
+                aria-label="examples"
               >
                 <Typography variant="body2" sx={{}}>
                   Examples
@@ -179,7 +280,7 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
                 slotProps={{
                   paper: {
                     sx: {
-                      minWidth: 100,
+                      minWidth: 150,
                       borderRadius: 3,
                       boxShadow: 3,
                       overflow: "hidden",
@@ -191,14 +292,18 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
                   (text, index) => (
                     <MenuItem
                       key={index}
-                      onClick={handleCloseMenu}
+                      onClick={() => {
+                        handleCloseMenu();
+                        const functionName = text.replace("()", "");
+                        setJsonContent(exampleJSONs[functionName]);
+                      }}
                       sx={{
                         fontSize: "0.835rem",
                         padding: "4px 8px",
                         borderRadius: theme.shape.borderRadius,
-                         margin: "2px auto",
+                        margin: "2px auto",
                         "&:hover": {
-                            backgroundColor: theme.palette.action.hover,
+                          backgroundColor: theme.palette.action.hover,
                         },
                       }}
                     >
@@ -209,9 +314,29 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
               </Menu>
             </Box>
           </Box>
-          <TextareaAutosize
-            minRows={16}
-            placeholder={`{
+          <Box
+            sx={{
+              width: "100%",
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: "8px",
+              fontFamily: "'Roboto Mono', monospace",
+              fontSize: "0.875rem",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[900]
+                  : theme.palette.grey[100],
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[300]
+                  : theme.palette.text.primary,
+              minHeight: "16em",
+              overflow: "auto",
+              whiteSpace: "pre",
+              padding: "0",
+            }}
+          >
+            <Editor
+              placeholder={`{
   "name": "get_stock_price",
   "description": "Get the current stock price",
   "strict": true,
@@ -227,24 +352,22 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
     "required": ["symbol"]
   }
 }`}
-            style={{
-              width: "100%",
-              border: `1px solid ${theme.palette.divider}`,
-              borderRadius: "8px",
-              padding: "12px",
-              fontFamily: "'Roboto Mono', monospace",
-              fontSize: "0.875rem",
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[900]
-                  : theme.palette.grey[100],
-              color:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[300]
-                  : theme.palette.text.primary,
-              resize: "none",
-            }}
-          />
+              value={jsonContent}
+              onValueChange={(code) => setJsonContent(code)}
+              highlight={highlightCode}
+              padding={12}
+              style={{
+                width: "100%",
+                fontFamily: "'Roboto Mono', monospace",
+                fontSize: "0.875rem",
+                backgroundColor: "inherit",
+                color: "inherit",
+                minHeight: "26em",
+                overflow: "auto",
+                whiteSpace: "pre",
+              }}
+            />
+          </Box>
           <Typography
             variant="caption"
             sx={{
