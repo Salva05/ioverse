@@ -9,6 +9,7 @@ import {
   Divider,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import { FaRobot } from "react-icons/fa";
 import { LuContainer } from "react-icons/lu";
@@ -18,12 +19,13 @@ import { useAssistantContext } from "../../../../contexts/AssistantContext";
 import { useAssistantsData } from "../../../../hooks/assistant/useAssistantsData";
 import { useThreadsData } from "../../../../hooks/assistant/useThreadsData";
 import { motion } from "framer-motion";
+import { useIsMutating } from "@tanstack/react-query";
 
 const ActiveItem = () => {
   const { selectedEntity, assistant, setAssistant, thread, setThread } =
     useAssistantContext();
 
-  const { data: assistantsData } = useAssistantsData();
+  const { data: assistantsData, isLoading } = useAssistantsData();
   const { data: threadsData } = useThreadsData();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -70,6 +72,8 @@ const ActiveItem = () => {
     setAnchorEl(null);
   };
 
+  const isMutating = useIsMutating({ mutationKey: ["updateAssistant"] });
+
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
       <Button
@@ -90,11 +94,29 @@ const ActiveItem = () => {
           transition={{ duration: 0.4, ease: "easeInOut" }}
           style={{ display: "flex", alignItems: "center" }}
         >
-          {orderedItems.length > 0 ? (
+          {isLoading || isMutating ? (
             <>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                  fontFamily: "'Montserrat', serif",
+                }}
+              >
+                {isLoading ? "Loading..." : "Updating..."}
+              </Typography>
+              <CircularProgress size={20} sx={{ ml: 1 }} />
+            </>
+          ) : orderedItems.length > 0 ? (
+            <>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  fontFamily: "'Montserrat', serif",
+                }}
               >
                 {orderedItems[0]?.name ?? orderedItems[0]?.id}
               </Typography>
@@ -152,24 +174,38 @@ const ActiveItem = () => {
                 <CheckIcon sx={{ fontSize: "1.1rem", mb: 0.4 }} />
               )}
             </ListItemIcon>
-            {item?.name ?? item?.id}
+            <Typography
+              sx={{
+                fontSize: "inherit",
+                fontFamily: "'Montserrat', serif",
+              }}
+            >
+              {item?.name ?? item?.id}
+            </Typography>
           </MenuItem>
         ))}
         <Divider />
         <MenuItem
           onClick={handleClose}
           sx={{
-            mx: 1,
-            borderRadius: 1,
+            mx: 0.5,
+            borderRadius: 2,
             fontSize: "0.93rem",
-            padding: "4px 8px",
+            padding: "3px 8px",
             my: -0.2,
           }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ mr: -1.5 }}>
             <AddIcon sx={{ fontSize: "1.1rem" }} />
           </ListItemIcon>
-          Create {selectedEntity === "Assistant" ? " assistant" : " thread"}
+          <Typography
+            sx={{
+              fontSize: "inherit",
+              fontFamily: "'Montserrat', serif",
+            }}
+          >
+            Create {selectedEntity === "Assistant" ? " assistant" : " thread"}
+          </Typography>
         </MenuItem>
       </Menu>
     </Box>

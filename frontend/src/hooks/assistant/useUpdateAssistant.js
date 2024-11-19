@@ -7,6 +7,7 @@ export const useUpdateAssistant = () => {
 
   return useMutation({
     mutationFn: ({ id, assistantData }) => assistant.update(id, assistantData),
+    mutationKey: ["updateAssistant"],
     onSuccess: (data) => {
       // Update the specific assistant in the cache
       queryClient.setQueryData(['assistants'], (oldData) => {

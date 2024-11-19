@@ -14,10 +14,25 @@ import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import FileSearchPopover from "./FileSearchPopover";
 import InfoPopover from "./InfoPopover";
 import FileSearchAddDialog from "./FileSearchAddDialog";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 
 const drawerWidth = 240;
 
 const FileSearch = () => {
+  const { mutate } = useUpdateAssistant();
+  const { assistant } = useAssistantContext();
+
+  // Local state for the input value
+  const [switchState, setSwitchState] = useState(
+    assistant?.tools?.some((tool) => tool.type === "file_search") || false
+  );
+  useEffect(() => {
+    setSwitchState(
+      assistant?.tools?.some((tool) => tool.type === "file_search") || false
+    );
+  }, [assistant]);
+
   const theme = useTheme();
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isMobile = useMediaQuery(
@@ -63,6 +78,32 @@ const FileSearch = () => {
     setOpenedInfoPopover(false);
   };
 
+  const handleMutate = (newState) => {
+    const updatedAssistant = {
+      ...assistant,
+      tools: newState
+        ? [
+            ...(assistant.tools || []),
+            {
+              type: "file_search",
+              file_search: {},
+            },
+          ]
+        : (assistant.tools || []).filter((tool) => tool.type !== "file_search"),
+    };
+    mutate(
+      { id: assistant.id, assistantData: updatedAssistant },
+      {
+        onError: () => {
+          setSwitchState(
+            assistant?.tools?.some((tool) => tool.type === "file_search") ||
+              false
+          );
+        },
+      }
+    );
+  };
+
   return (
     <Box
       sx={{
@@ -73,7 +114,14 @@ const FileSearch = () => {
         ml: isMobile ? -1 : 0,
       }}
     >
-      <Switch />
+      <Switch
+        checked={switchState}
+        onChange={(e) => {
+          const newState = e.target.checked;
+          setSwitchState(newState);
+          handleMutate(newState);
+        }}
+      />
       <Typography
         variant="body1"
         sx={{
@@ -159,10 +207,16 @@ const FileSearch = () => {
         settingsAnchorEl={settingsAnchorEl}
         settingsPopoverClose={settingsPopoverClose}
         settingsOpen={settingsOpen}
+        model={assistant?.model || "gpt-4"}
+        switchState={switchState}
       />
 
       {/* Add Files Dialog */}
-      <FileSearchAddDialog openDialog={addFilesOpen} handleClose={addFilesDialogClose} vectorStoreButton={true} />
+      <FileSearchAddDialog
+        openDialog={addFilesOpen}
+        handleClose={addFilesDialogClose}
+        vectorStoreButton={true}
+      />
     </Box>
   );
 };

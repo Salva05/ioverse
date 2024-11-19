@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useContext } from "react";
+import React, { useState, forwardRef, useContext, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -18,6 +18,7 @@ import { BiExpandAlt } from "react-icons/bi";
 import { BsStars } from "react-icons/bs";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -26,7 +27,14 @@ const Transition = forwardRef(function Transition(props, ref) {
 const drawerWidth = 240;
 
 const SystemInstructions = () => {
+  const { mutate } = useUpdateAssistant();
   const { assistant } = useAssistantContext();
+
+  // Local state for input
+  const [instructionsInput, setInstructionsInput] = useState();
+  useEffect(() => {
+    setInstructionsInput(assistant?.instructions || "");
+  }, [assistant]);
 
   const theme = useTheme();
   const [openAnchor, setOpen] = useState(false);
@@ -47,8 +55,33 @@ const SystemInstructions = () => {
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = (resetInput = false) => {
     setOpen(false);
+    if (resetInput) setInstructionsInput(assistant?.instructions || "");
+  };
+
+  const handleInstructionsChange = (e) => {
+    setInstructionsInput(e.target.value);
+  };
+
+  const shouldUpdate = () => {
+    if (instructionsInput === assistant?.instructions) return false;
+    if (instructionsInput === "") return false;
+    return true;
+  };
+
+  const handleMutate = () => {
+    if (!shouldUpdate()) return;
+
+    const updatedAssistant = { ...assistant, instructions: instructionsInput };
+    mutate(
+      { id: assistant.id, assistantData: updatedAssistant },
+      {
+        onError: () => {
+          setInstructionsInput(assistant?.instructions || "");
+        },
+      }
+    );
   };
 
   return (
@@ -114,7 +147,9 @@ const SystemInstructions = () => {
         >
           <TextField
             id="outlined-basic"
-            value={assistant?.instructions || ""}
+            value={instructionsInput}
+            onChange={handleInstructionsChange}
+            onBlur={handleMutate}
             placeholder="You are a helpful assistant..."
             variant="outlined"
             multiline
@@ -203,11 +238,12 @@ const SystemInstructions = () => {
         <DialogContent>
           <TextField
             id="outlined-multiline-static"
+            onChange={handleInstructionsChange}
             multiline
             minRows={6}
             maxRows={20}
             placeholder="You are a helpful assistant..."
-            value={assistant?.instructions || ""}
+            value={instructionsInput}
             variant="outlined"
             fullWidth
             slotProps={{
@@ -252,7 +288,10 @@ const SystemInstructions = () => {
             Cancel
           </Button>
           <Button
-            onClick={handleClose}
+            onClick={() => {
+              handleMutate();
+              handleClose(true);
+            }}
             autoFocus
             variant="contained"
             size="small"

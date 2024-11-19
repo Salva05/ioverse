@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -7,6 +7,7 @@ import {
   MenuItem,
   ListItemIcon,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import AddIcon from "@mui/icons-material/Add";
@@ -19,40 +20,60 @@ import { useAssistantsData } from "../../../hooks/assistant/useAssistantsData";
 import { useThreadsData } from "../../../hooks/assistant/useThreadsData";
 import { motion } from "framer-motion";
 import { truncateText } from "../../../utils/textUtils";
+import { useIsMutating } from "@tanstack/react-query";
 
 const MobileActiveItem = () => {
-  const { selectedItem, selectedEntity, setSelectedItem } =
+  const { selectedEntity, assistant, setAssistant, thread, setThread } =
     useAssistantContext();
-  const { data: assistantsData } = useAssistantsData();
+
+  const { data: assistantsData, isLoading } = useAssistantsData();
   const { data: threadsData } = useThreadsData();
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const items = selectedEntity === "Assistant" ? assistantsData : threadsData;
 
+  // Find the selected item based on ID
+  const selectedItem = useMemo(() => {
+    if (!items || items.length === 0) return null;
+    const currentItem = selectedEntity === "Assistant" ? assistant : thread;
+    return items.find((item) => item.id === currentItem?.id) || items[0];
+  }, [items, assistant, thread, selectedEntity]);
+
   // Derived list with the selected item as the first item
   const orderedItems = useMemo(() => {
     if (!items || items.length === 0) return [];
     return [
-      items[selectedItem],
-      ...items.filter((_, index) => index !== selectedItem),
+      selectedItem,
+      ...items.filter((item) => item.id !== selectedItem.id),
     ];
   }, [items, selectedItem]);
 
-  // Handle opening the menu
+  // Update the entity object in the context
+  useEffect(() => {
+    if (selectedItem) {
+      if (selectedEntity === "Assistant") {
+        setAssistant(selectedItem);
+      } else {
+        setThread(selectedItem);
+      }
+    }
+  }, [selectedItem, selectedEntity, setAssistant, setThread]);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Handle element creation
   const handleCreate = () => {
     // will be defined later
   };
 
-  // Handle closing the menu
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const isMutating = useIsMutating({ mutationKey: ["updateAssistant"] });
 
   return (
     <Box>
@@ -62,7 +83,10 @@ const MobileActiveItem = () => {
         onClick={orderedItems.length > 0 ? handleClick : handleCreate}
       >
         {selectedEntity === "Assistant" ? (
-          <FaRobot size="1.5em" style={{ marginRight: 15, paddingBottom: 5, marginLeft: -5 }} />
+          <FaRobot
+            size="1.5em"
+            style={{ marginRight: 15, paddingBottom: 5, marginLeft: -5 }}
+          />
         ) : (
           <LuContainer
             size="1.45em"
@@ -74,13 +98,34 @@ const MobileActiveItem = () => {
           transition={{ duration: 0.4, ease: "easeInOut" }}
           style={{ display: "flex", alignItems: "center" }}
         >
-          {orderedItems.length > 0 ? (
+          {isLoading || isMutating ? (
             <>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                  fontFamily: "'Montserrat', serif",
+                }}
               >
-                {truncateText(orderedItems[0]?.name ?? orderedItems[0]?.id, 15)}
+                {isLoading ? "Loading..." : "Updating..."}
+              </Typography>
+              <CircularProgress size={20} sx={{ ml: 1 }} />
+            </>
+          ) : orderedItems.length > 0 ? (
+            <>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "0.95rem",
+                  fontFamily: "'Montserrat', serif",
+                }}
+              >
+                {truncateText(
+                  orderedItems[0]?.name ?? orderedItems[0]?.id,
+                   12
+                )}
               </Typography>
               <HiOutlineSelector size="1.1em" style={{ marginLeft: 5 }} />
             </>
@@ -88,7 +133,10 @@ const MobileActiveItem = () => {
             <>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "0.85rem"
+                }}
               >
                 Create {selectedEntity === "Assistant" ? "Assistant" : "Thread"}
               </Typography>
@@ -117,15 +165,17 @@ const MobileActiveItem = () => {
             key={item.id}
             selected={index === 0}
             onClick={() => {
-              const selectedIndex = items.findIndex((a) => a.id === item.id);
-              setSelectedItem(selectedIndex);
+              if (selectedEntity === "Assistant") {
+                setAssistant(item);
+              } else {
+                setThread(item);
+              }
               handleClose();
             }}
             sx={{
               mx: 0.5,
               borderRadius: 2,
               fontSize: "0.93rem",
-              padding: "3px 8px",
             }}
           >
             <ListItemIcon sx={{ mr: -1.5 }}>
@@ -133,7 +183,14 @@ const MobileActiveItem = () => {
                 <CheckIcon sx={{ fontSize: "1.1rem", mb: 0.4 }} />
               )}
             </ListItemIcon>
-            {item?.name ?? item?.id}
+            <Typography
+              sx={{
+                fontSize: "inherit",
+                fontFamily: "'Montserrat', serif",
+              }}
+            >
+              {item?.name ?? item?.id}
+            </Typography>
           </MenuItem>
         ))}
         <Divider />
@@ -147,10 +204,17 @@ const MobileActiveItem = () => {
             my: -0.2,
           }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ mr: -1.5 }}>
             <AddIcon sx={{ fontSize: "1.1rem" }} />
           </ListItemIcon>
-          Create {selectedEntity === "Assistant" ? " assistant" : " thread"}
+          <Typography
+            sx={{
+              fontSize: "inherit",
+              fontFamily: "'Montserrat', serif",
+            }}
+          >
+            Create {selectedEntity === "Assistant" ? " assistant" : " thread"}
+          </Typography>
         </MenuItem>
       </Menu>
     </Box>

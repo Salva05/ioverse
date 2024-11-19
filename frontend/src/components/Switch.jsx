@@ -62,9 +62,9 @@ const IOSSwitch = styled((props) => (
     },
   }));
 
-const Switch = () => {
+const Switch = ({ checked, onChange }) => {
   return (
-    <IOSSwitch sx={{ m: 1 }} />
+    <IOSSwitch checked={checked} onChange={onChange} sx={{ m: 1 }} />
   )
 }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
+  IconButton,
   Link,
   Popover,
   TextField,
@@ -8,22 +9,65 @@ import {
   useTheme,
 } from "@mui/material";
 import Slider from "../../../../Slider";
+import { computeModelMaxResultsDefault } from "../../../../../utils/computeModelMaxResulsDefault";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import HistoryIcon from "@mui/icons-material/History";
 
 const FileSearchPopover = ({
   settingsAnchorEl,
   settingsOpen,
   settingsPopoverClose,
+  model,
+  switchState,
 }) => {
+  const { assistant } = useAssistantContext();
+  const { mutate } = useUpdateAssistant();
+
   const theme = useTheme();
 
-  const [sliderValue, setSliderValue] = useState(20);
+  const MIN_VALUE = 1;
+  const MAX_VALUE = 50;
+  const DEFAULT_VALUE = () => {
+    // Check if the assistant and its tools exist
+    if (assistant?.tools?.length) {
+      const fileSearchTool = assistant.tools.find(
+        (tool) => tool.type === "file_search"
+      );
+      // Check if file search is active and has a max_num_results defined
+      if (fileSearchTool?.file_search?.max_num_results) {
+        return Math.min(
+          Math.max(fileSearchTool.file_search.max_num_results, MIN_VALUE),
+          MAX_VALUE
+        );
+      }
+    }
+    // Default to model-based computation if no valid file search tool is found
+    return computeModelMaxResultsDefault(model);
+  };
+
+  const [sliderValue, setSliderValue] = useState(DEFAULT_VALUE);
+  const [inputValue, setInputValue] = useState(DEFAULT_VALUE().toString());
+
   const [isSliderHovered, setIsSliderHovered] = useState(false);
   const [isTextFieldHovered, setIsTextFieldHovered] = useState(false);
   const [isTextFieldFocused, setIsTextFieldFocused] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
+  // Manage focus state
+  const handleTextFieldFocus = () => {
+    setIsTextFieldFocused(true);
+  };
+
+  useEffect(() => {
+    const updatedValue = DEFAULT_VALUE();
+    setSliderValue(updatedValue);
+    setInputValue(updatedValue.toString());
+  }, [model, assistant]);
+
   const handleSliderChange = (event, newValue) => {
     setSliderValue(newValue);
+    setInputValue(newValue.toString());
   };
 
   // Handle Slider Hover
@@ -60,19 +104,47 @@ const FileSearchPopover = ({
   const handleTextFieldMouseLeave = () => {
     setIsTextFieldHovered(false);
   };
-  const handleTextFieldFocus = () => {
-    setIsTextFieldFocused(true);
-  };
   const handleTextFieldBlur = () => {
     setIsTextFieldFocused(false);
-    if (sliderValue < 1) {
-      setSliderValue(1);
-    } else if (sliderValue > 50) {
-      setSliderValue(50);
-    }
+    validateAndSetValue();
   };
 
-  // Determine if borders should be shown
+  // Logic for performing the update and commit changes
+  const handleMutate = () => {
+    if (!switchState) return;
+    validateAndSetValue();
+    const clampedValue = Math.min(Math.max(sliderValue, MIN_VALUE), MAX_VALUE);
+    setSliderValue(clampedValue);
+    setInputValue(clampedValue.toString());
+    if (clampedValue === DEFAULT_VALUE()) return;
+    // Update assistant state with the new value
+    const updatedAssistant = {
+      ...assistant,
+      tools: assistant?.tools?.map((tool) =>
+        tool.type === "file_search"
+          ? {
+              ...tool,
+              file_search: {
+                ...tool.file_search,
+                max_num_results: clampedValue,
+              },
+            }
+          : tool
+      ),
+    };
+    mutate(
+      { id: assistant.id, assistantData: updatedAssistant },
+      {
+        onError: () => {
+          const defaultVal = DEFAULT_VALUE();
+          setSliderValue(defaultVal);
+          setInputValue(defaultVal.toString());
+        },
+      }
+    );
+  };
+
+  // Determine if borders of TextField should be shown
   const showBorders =
     isSliderHovered || isTextFieldHovered || isPressed || isTextFieldFocused;
 
@@ -83,15 +155,54 @@ const FileSearchPopover = ({
       setIsTextFieldHovered(false);
       setIsPressed(false);
       setIsTextFieldFocused(false);
+      setInputValue(sliderValue.toString());
     }
-  }, [settingsOpen]);
+  }, [settingsOpen, sliderValue]);
 
-  // Handle TextField Change with Validation
+  // Handle TextField Changes with Validation
   const handleTextFieldChange = (e) => {
-    const inputValue = Number(e.target.value);
-    if (inputValue >= 1 && inputValue <= 50) {
-      setSliderValue(inputValue);
+    const value = e.target.value.trim();
+    // Allow empty string or valid number within range
+    if (
+      value === "" ||
+      (/^\d+$/.test(value) &&
+        Number(value) <= MAX_VALUE &&
+        Number(value) >= MIN_VALUE)
+    ) {
+      setInputValue(value);
+
+      if (value === "") {
+        setSliderValue(MIN_VALUE);
+      } else {
+        const numericValue = Number(value);
+        setSliderValue(numericValue);
+      }
     }
+  };
+
+  // Validate input and update sliderValue
+  const validateAndSetValue = () => {
+    if (inputValue === "") {
+      // Reset inputValue to current sliderValue to maintain consistency
+      setInputValue(sliderValue.toString());
+      return;
+    }
+
+    const parsedValue = parseInt(inputValue, 10);
+    if (isNaN(parsedValue)) {
+      setInputValue(sliderValue.toString());
+      return;
+    }
+
+    let newValue = parsedValue;
+    if (parsedValue < MIN_VALUE) {
+      newValue = MIN_VALUE;
+    } else if (parsedValue > MAX_VALUE) {
+      newValue = MAX_VALUE;
+    }
+
+    setSliderValue(newValue);
+    setInputValue(newValue.toString());
   };
 
   return (
@@ -99,7 +210,10 @@ const FileSearchPopover = ({
       id="settings-popover"
       open={settingsOpen}
       anchorEl={settingsAnchorEl}
-      onClose={settingsPopoverClose}
+      onClose={() => {
+        handleMutate();
+        settingsPopoverClose();
+      }}
       sx={{
         "& .MuiPaper-root": {
           maxWidth: "270px",
@@ -139,45 +253,64 @@ const FileSearchPopover = ({
           >
             Max num results
           </Typography>
-          <TextField
-            value={sliderValue}
-            onChange={handleTextFieldChange}
-            onBlur={handleTextFieldBlur}
-            variant="outlined"
-            size="small"
-            type="text"
-            onMouseEnter={handleTextFieldMouseEnter}
-            onMouseLeave={handleTextFieldMouseLeave}
-            onFocus={handleTextFieldFocus}
-            inputProps={{
-              min: 1,
-              max: 50,
-              style: {
-                textAlign: "center",
-                padding: "0",
-                paddingTop: 1.6,
-                fontSize: "0.85rem",
-              },
-            }}
-            sx={{
-              width: `${Math.max(String(sliderValue).length + 1, 2)}ch`, // Width grows based on number of characters
-              "& .MuiOutlinedInput-root": {
-                padding: "0",
-                "& fieldset": {
-                  border: showBorders
-                    ? `1px solid ${theme.palette.grey[500]}`
-                    : "1px solid transparent",
-                  transition: "border-color 0.4s ease, border-width 0.2s ease",
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconButton
+              onClick={() => {
+                const defaultValue = DEFAULT_VALUE();
+                setSliderValue(defaultValue);
+                setInputValue(defaultValue.toString());
+              }}
+              sx={{
+                visibility:
+                  sliderValue !== DEFAULT_VALUE() ? "visible" : "hidden",
+                transition: "visibility 0.5s, opacity 0.4s",
+                opacity: sliderValue !== DEFAULT_VALUE() ? 1 : 0,
+              }}
+              aria-label="Reset to default"
+            >
+              <HistoryIcon fontSize="small" />
+            </IconButton>
+            <TextField
+              value={inputValue}
+              onChange={handleTextFieldChange}
+              onBlur={handleTextFieldBlur}
+              onFocus={handleTextFieldFocus} // Ensure handleTextFieldFocus is defined
+              variant="outlined"
+              size="small"
+              type="text"
+              onMouseEnter={handleTextFieldMouseEnter}
+              onMouseLeave={handleTextFieldMouseLeave}
+              inputProps={{
+                min: 1,
+                max: 50,
+                style: {
+                  textAlign: "center",
+                  padding: "0",
+                  paddingTop: 1.6,
+                  fontSize: "0.85rem",
                 },
-                "&:hover fieldset": {
-                  border: `1px solid ${theme.palette.grey[500]}`,
+              }}
+              sx={{
+                width: `${Math.max(String(sliderValue).length + 1, 2)}ch`, // Width grows based on number of characters
+                "& .MuiOutlinedInput-root": {
+                  padding: "0",
+                  "& fieldset": {
+                    border: showBorders
+                      ? `1px solid ${theme.palette.grey[500]}`
+                      : "1px solid transparent",
+                    transition:
+                      "border-color 0.4s ease, border-width 0.2s ease",
+                  },
+                  "&:hover fieldset": {
+                    border: `1px solid ${theme.palette.grey[500]}`,
+                  },
+                  "&.Mui-focused fieldset": {
+                    border: `1px solid ${theme.palette.grey[500]}`,
+                  },
                 },
-                "&.Mui-focused fieldset": {
-                  border: `1px solid ${theme.palette.grey[500]}`,
-                },
-              },
-            }}
-          />
+              }}
+            />
+          </Box>
         </Box>
 
         {/* Slider Row */}
@@ -191,8 +324,8 @@ const FileSearchPopover = ({
           <Slider
             value={sliderValue}
             onChange={handleSliderChange}
-            min={1}
-            max={50}
+            min={MIN_VALUE}
+            max={MAX_VALUE}
             onMouseDown={handleSliderMouseDown}
             onMouseUp={handleGlobalMouseUp}
             onMouseLeave={handleSliderMouseLeave}

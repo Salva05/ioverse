@@ -27,7 +27,6 @@ export const useAssistantsData = () => {
         "Failed to load assistants data. Please try again later.";
       toast.error(`Error: ${errorMessage}`, {});
       console.error("Error fetching assistants data:", error);
-    },
-    placeholderData: () => queryClient.getQueryData(["assistants"]) || [],
+    }
   });
 };

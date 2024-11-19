@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -9,6 +9,8 @@ import {
 } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 
 const models = [
   {
@@ -37,11 +39,60 @@ const models = [
     name: "gpt-4o-mini-2024-08-18",
     description: "",
   },
+  {
+    name: "gpt-4o-2024-08-06",
+    description: "",
+  },
+  {
+    name: "gpt-4o-05-13",
+    description: "",
+  },
+  {
+    name: "gpt-4-turbo-preview",
+    description: "",
+  },
+  {
+    name: "gpt-4-turbo-2024-04-09",
+    description: "",
+  },
+  {
+    name: "gpt-4-1106-preview",
+    description: "",
+  },
+  {
+    name: "gpt-4-0613",
+    description: "",
+  },
+  {
+    name: "gpt-4-0125-perview",
+    description: "",
+  },
+  {
+    name: "gpt-3.5-turbo-16k",
+    description: "",
+  },
+  {
+    name: "gpt-3.5-turbo-1106",
+    description: "",
+  },
+  {
+    name: "gpt-3.5-turbo-0125",
+    description: "",
+  },
 ];
 
 const drawerWidth = 240;
 
 const Model = () => {
+  const { mutate } = useUpdateAssistant();
+  const { assistant } = useAssistantContext();
+  
+  // Local state for the input value
+  const [modelInput, setModelInput] = useState(assistant?.model || models[3].name);
+  useEffect(() => {
+    setModelInput(assistant?.model || models[3].name);
+  }, [assistant]);
+
   const theme = useTheme();
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isTablet = useMediaQuery(
@@ -55,7 +106,26 @@ const Model = () => {
       : `(max-width:${open ? 500 + drawerWidth : 500}px)`
   );
 
-  const [model, setModel] = useState(models[0].name);
+  const handleModelChange = (e) => {
+    const newModel = e.target.value;
+    setModelInput(newModel);
+    handleMutate(newModel);
+  };
+
+  const handleMutate = (newModel) => {
+    if (newModel === assistant?.model) return;
+
+    const updatedAssistant = { ...assistant, model: newModel };
+
+    mutate(
+      { id: assistant.id, assistantData: updatedAssistant },
+      {
+        onError: () => {
+          setModelInput(assistant?.model || models[3].name);
+        },
+      }
+    );
+  };
 
   return (
     <Box
@@ -82,10 +152,8 @@ const Model = () => {
       >
         <Select
           displayEmpty
-          value={model}
-          onChange={(event) => {
-            setModel(event.target.value);
-          }}
+          value={modelInput}
+          onChange={handleModelChange}
           sx={{
             minWidth: isMobile ? "300px" : isTablet ? "375px" : "450px",
             "& .MuiOutlinedInput-notchedOutline": {
@@ -96,6 +164,14 @@ const Model = () => {
             },
           }}
           input={<OutlinedInput />}
+          MenuProps={{
+            PaperProps: {
+              className: "drawer-scrollbar",
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
           <Typography
             variant="caption"

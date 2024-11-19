@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 const drawerWidth = 240;
 
 const Name = () => {
-  const { mutate, isLoading } = useUpdateAssistant();
+  const { mutate } = useUpdateAssistant();
   const { assistant, setAssistant } = useAssistantContext();
 
   // Local state for the input value
@@ -83,7 +83,14 @@ const Name = () => {
     if (!shouldUpdate()) return;
 
     const updatedAssistant = { ...assistant, name: nameInput };
-    mutate({ id: assistant.id, assistantData: updatedAssistant });
+    mutate(
+      { id: assistant.id, assistantData: updatedAssistant },
+      {
+        onError: () => {
+          setNameInput(assistant?.name || "");
+        },
+      }
+    );
   };
 
   return (

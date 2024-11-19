@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import {
   useTheme,
   useMediaQuery,
@@ -14,6 +14,9 @@ import {
   Link,
 } from "@mui/material";
 import { IoIosImages } from "react-icons/io";
+import DragFilesContent from "./DragFilesContent";
+import FileListContent from "./FileListContent";
+import { getCurrentTime } from "../../../../../utils/getCurrentTime";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -31,6 +34,36 @@ const FileSearchAddDialog = ({
   const isMobile = useMediaQuery(`(max-width:500px)`);
   const shouldDisplayText = useMediaQuery(theme.breakpoints.up(402));
 
+  // State to manage uploaded files
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+
+  const handleFiles = (files) => {
+  const filesArray = Array.from(files).map((file) => ({
+    file,
+    uploadedAt: getCurrentTime(),
+  }));
+  setUploadedFiles((prevFiles) => [...prevFiles, ...filesArray]);
+};
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleRemoveFile = (index) => {
+    setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleAttach = () => {
+    // Yet to be implemented
+    console.log("Files to attach:", uploadedFiles);
+    handleClose();
+  };
+
   return (
     <Dialog
       open={openDialog}
@@ -42,6 +75,7 @@ const FileSearchAddDialog = ({
       sx={{
         "& .MuiPaper-root": {
           borderRadius: "12px",
+          margin: isMobile ? 1 : undefined,
         },
       }}
     >
@@ -58,81 +92,27 @@ const FileSearchAddDialog = ({
         </Typography>
       </DialogTitle>
       <DialogContent>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            minWidth: isMobile ? "248px" : isTablet ? "375px" : "450px",
-            minHeight: "200px",
-            px: 4,
-            py: isMobile ? 4 : isTablet ? 9 : 15,
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 3,
-            },
-            "& .MuiOutlinedInput-input": {
-              paddingY: 1.15,
-            },
-          }}
-        >
-          <IoIosImages
-            style={{
-              color: theme.palette.grey[500],
-              fontSize: "80px",
-            }}
+        {uploadedFiles.length === 0 ? (
+          // No File Uploaded
+          <DragFilesContent
+            isMobile={isMobile}
+            isTablet={isTablet}
+            handleFiles={handleFiles}
+            handleDragOver={handleDragOver}
+            handleDrop={handleDrop}
           />
-          <Typography
-            sx={{
-              fontFamily: "'Montserrat', serif",
-              fontSize: "0.9rem",
-              my: 2,
-            }}
-          >
-            Drag your files here or{" "}
-            <Typography
-              component="span"
-              sx={{
-                fontSize: "inherit",
-                textDecoration: "none",
-                color: theme.palette.primary.main,
-                fontFamily: "'Montserrat', serif",
-                transition: "color 0.4s ease",
-                "&:hover": {
-                  cursor: "pointer",
-                  color: theme.palette.primary.dark,
-                },
-              }}
-              onClick={() => console.log("Upload clicked")}
-            >
-              click to upload.
-            </Typography>
-          </Typography>
-          <Typography
-            sx={{
-              fontFamily: "'Montserrat', serif",
-              fontSize: "0.8rem",
-            }}
-          >
-            Information in attached files will be available to this assistant.
-          </Typography>
-          <Link
-            href="https://platform.openai.com/docs/assistants/tools/file-search"
-            target="_blank"
-            rel="noopener"
-            sx={{
-              fontSize: "0.8rem",
-              fontFamily: "'Montserrat', serif",
-              textDecoration: "none",
-              color: theme.palette.primary.main,
-              "&:hover": {
-                textDecoration: "underline",
-              },
-            }}
-          >
-            Learn more.
-          </Link>
-        </Box>
+        ) : (
+          // Uploaded Files
+          <FileListContent
+            handleDragOver={handleDragOver}
+            handleDrop={handleDrop}
+            uploadedFiles={uploadedFiles}
+            handleRemoveFile={handleRemoveFile}
+            handleFiles={handleFiles}
+            isMobile={isMobile}
+            isTablet={isTablet}
+          />
+        )}
       </DialogContent>
       <Divider sx={{ mx: theme.spacing(3) }} />
       <DialogActions
@@ -210,10 +190,10 @@ const FileSearchAddDialog = ({
             Cancel
           </Button>
           <Button
-            onClick={handleClose}
+            onClick={handleAttach}
             autoFocus
             variant="contained"
-            disabled // Mock for now
+            disabled={!uploadedFiles || uploadedFiles.length === 0}
             size="small"
             color="success"
             sx={{

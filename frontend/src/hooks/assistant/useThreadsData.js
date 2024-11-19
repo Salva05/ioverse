@@ -28,6 +28,5 @@ export const useThreadsData = () => {
       toast.error(`Error: ${errorMessage}`, {});
       console.error("Error fetching threads data:", error);
     },
-    placeholderData: () => queryClient.getQueryData(["threads"]) || [],
   });
 };
