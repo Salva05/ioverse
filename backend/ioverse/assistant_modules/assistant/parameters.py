@@ -107,8 +107,8 @@ class AssistantParamsUpdate(BaseModel):
         max_length=256000,
         description="The system instructions used by the assistant (max 256,000 characters).",
     )
-    tools: Optional[List[str]] = Field(
-        default=None,
+    tools: List[ToolType] = Field(
+        default_factory=list,
         max_items=128,
         description="List of tools enabled on the assistant (max 128 tools).",
     )
