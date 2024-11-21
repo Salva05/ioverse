@@ -12,9 +12,13 @@ import {
   TableRow,
   IconButton,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { InsertDriveFileOutlined, Add } from "@mui/icons-material";
 import { GoTrash } from "react-icons/go";
+import { GoXCircle } from "react-icons/go";
+import { formatFileSize } from "../../../../../utils/formatFileSize";
+import { format } from "date-fns";
 
 const FileListContent = ({
   handleDragOver,
@@ -125,112 +129,146 @@ const FileListContent = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {uploadedFiles.map(({ file, uploadedAt }, index) => (
-              <TableRow key={index}>
-                <TableCell
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    borderBottom: "none",
-                    padding: "8px 0px",
-                    whiteSpace: isSmallScreen ? "normal" : "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    maxWidth: isMobile ? "120px" : isTablet ? "160px" : "220px",
-                  }}
-                >
-                  <InsertDriveFileOutlined
-                    fontSize="small"
+            {uploadedFiles.map((entry, index) => {
+              const { file, status, data } = entry;
+
+              // Use data from server if available, else the file object
+              const filename = data?.filename || file?.name;
+              const bytes = data?.bytes || file.size;
+              const createdAt = data?.created_at
+                ? new Date(data.created_at * 1000)
+                : new Date();
+
+              return (
+                <TableRow key={entry.id}>
+                  <TableCell
                     sx={{
-                      marginRight: "4px",
-                      color:
-                        theme.palette.mode === "light"
-                          ? theme.palette.grey[700]
-                          : theme.palette.grey[400],
+                      display: "flex",
+                      alignItems: "center",
+                      borderBottom: "none",
+                      padding: "8px 0px",
+                      whiteSpace: isSmallScreen ? "normal" : "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: isMobile
+                        ? "120px"
+                        : isTablet
+                        ? "160px"
+                        : "220px",
                     }}
-                  />
-                  <Typography
-                    variant="body2"
+                  >
+                    {status === "success" ? (
+                      <InsertDriveFileOutlined
+                        fontSize="small"
+                        sx={{
+                          marginRight: "4px",
+                          color:
+                            theme.palette.mode === "light"
+                              ? theme.palette.grey[700]
+                              : theme.palette.grey[400],
+                        }}
+                      />
+                    ) : status === "loading" ? (
+                      <CircularProgress size={17} sx={{ marginRight: "6px" }} />
+                    ) : (
+                      <GoXCircle
+                        size={17}
+                        color="red"
+                        style={{ marginRight: "4px" }}
+                      />
+                    )}
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "'Montserrat', serif",
+                        fontSize: {
+                          xs: "0.7rem",
+                          sm: "0.75rem",
+                        },
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {filename}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    align="right"
                     sx={{
-                      fontFamily: "'Montserrat', serif",
-                      fontSize: {
-                        xs: "0.7rem",
-                        sm: "0.75rem",
-                      },
+                      borderBottom: "none",
+                      padding: "4px 10px",
                       whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "'Montserrat', serif",
+                        fontSize: {
+                          xs: "0.7rem",
+                          sm: "0.75rem",
+                        },
+                      }}
+                    >
+                      {status === "success" ? formatFileSize(bytes) : "-"}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    align="left"
+                    sx={{
+                      borderBottom: "none",
+                      padding: "4px 8px",
+                      whiteSpace: isSmallScreen ? "normal" : "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {file.name}
-                  </Typography>
-                </TableCell>
-                <TableCell
-                  align="right"
-                  sx={{
-                    borderBottom: "none",
-                    padding: "4px 10px",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "'Montserrat', serif",
+                        fontSize: {
+                          xs: "0.7rem",
+                          sm: "0.75rem",
+                        },
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {status === "success"
+                        ? format(createdAt, "MM/dd/yyyy, h:mm a")
+                        : status === "loading"
+                        ? <CircularProgress size={17} />
+                        : "Failed"}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    align="center"
                     sx={{
-                      fontFamily: "'Montserrat', serif",
-                      fontSize: {
-                        xs: "0.7rem",
-                        sm: "0.75rem",
-                      },
+                      borderBottom: "none",
+                      padding: "4px 10px",
                     }}
                   >
-                    {(file.size / 1024).toFixed(2)} KB
-                  </Typography>
-                </TableCell>
-                <TableCell
-                  align="left"
-                  sx={{
-                    borderBottom: "none",
-                    padding: "4px 8px",
-                    whiteSpace: isSmallScreen ? "normal" : "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontFamily: "'Montserrat', serif",
-                      fontSize: {
-                        xs: "0.7rem",
-                        sm: "0.75rem",
-                      },
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {uploadedAt}
-                  </Typography>
-                </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{
-                    borderBottom: "none",
-                    padding: "4px 10px",
-                  }}
-                >
-                  <IconButton
-                    size="small"
-                    onClick={() => handleRemoveFile(index)}
-                  >
-                    <GoTrash size="1rem" style={{ color:
-                        theme.palette.mode === "light"
-                          ? theme.palette.grey[700]
-                          : theme.palette.grey[400],}}/>
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveFile(index, data?.id)}
+                    >
+                      <GoTrash
+                        size="1rem"
+                        style={{
+                          color:
+                            theme.palette.mode === "light"
+                              ? theme.palette.grey[700]
+                              : theme.palette.grey[400],
+                        }}
+                      />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

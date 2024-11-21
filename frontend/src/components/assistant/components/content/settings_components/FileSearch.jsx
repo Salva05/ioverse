@@ -16,12 +16,15 @@ import InfoPopover from "./InfoPopover";
 import FileSearchAddDialog from "./FileSearchAddDialog";
 import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { GoDatabase } from "react-icons/go";
+import { formatFileSize } from "../../../../../utils/formatFileSize";
+import { truncateText } from "../../../../../utils/textUtils";
 
 const drawerWidth = 240;
 
 const FileSearch = () => {
   const { mutate } = useUpdateAssistant();
-  const { assistant } = useAssistantContext();
+  const { assistant, vectorStore, files } = useAssistantContext();
 
   // Local state for the input value
   const [switchState, setSwitchState] = useState(
@@ -35,10 +38,15 @@ const FileSearch = () => {
 
   const theme = useTheme();
   const { open, isSmallScreen } = useContext(DrawerContext);
-  const isMobile = useMediaQuery(
+  const isTablet = useMediaQuery(
     isSmallScreen
       ? `(max-width:815px)`
       : `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
+  const isMobile = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 500 + drawerWidth : 500}px)`
   );
 
   // Info Popover State
@@ -108,88 +116,187 @@ const FileSearch = () => {
     <Box
       sx={{
         display: "flex",
-        alignItems: "center",
-        flexDirection: "row",
+        flexDirection: "column",
         gap: 1,
-        ml: isMobile ? -1 : 0,
+        ml: isTablet ? -1 : 0,
+        // If model has Vector Store attached
+        pb: vectorStore ? 1 : 0,
+        pr: vectorStore ? 1 : 0,
+        borderBottom: vectorStore ? "1px solid" : "none",
+        borderRight: vectorStore ? "1px solid" : "none",
+        borderColor:
+          theme.palette.mode === "dark"
+            ? theme.palette.grey[500]
+            : theme.palette.grey[600],
       }}
     >
-      <Switch
-        checked={switchState}
-        onChange={(e) => {
-          const newState = e.target.checked;
-          setSwitchState(newState);
-          handleMutate(newState);
-        }}
-      />
-      <Typography
-        variant="body1"
-        sx={{
-          fontFamily: "'Montserrat', serif",
-        }}
-      >
-        File Search
-      </Typography>
-      <Box
-        component="span"
-        ref={infoPopoverAnchor}
-        aria-owns={infoOpenedPopover ? "info-popover" : undefined}
-        aria-haspopup="true"
-        onMouseEnter={infoPopoverEnter}
-        onMouseLeave={infoPopoverLeave}
-        sx={{ display: "inline-flex" }}
-      >
-        <RiInformation2Line />
-      </Box>
-      <Box sx={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
-        <Button
-          color="inherit"
-          onClick={settingsPopoverClick}
+      <Box sx={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
+        <Switch
+          checked={switchState}
+          onChange={(e) => {
+            const newState = e.target.checked;
+            setSwitchState(newState);
+            handleMutate(newState);
+          }}
+        />
+        <Typography
+          variant="body1"
           sx={{
-            textTransform: "none",
-            borderRadius: 2.3,
-            px: 1,
-            py: 0.7,
-            mr: 1,
-            minWidth: 0,
-            backgroundColor: (theme) => theme.palette.action.hover,
-            "&:hover": {
-              backgroundColor: (theme) => theme.palette.action.selected,
-            },
+            fontFamily: "'Montserrat', serif",
           }}
         >
-          <IoSettingsOutline size="1rem" />
-        </Button>
-
-        <Button
-          size="small"
-          color="inherit"
-          onClick={addFilesDialogOpen}
-          sx={{
-            textTransform: "none",
-            borderRadius: 2.3,
-            minWidth: 0,
-            pr: 1,
-            py: 0.3,
-            pl: 0.7,
-            backgroundColor: (theme) => theme.palette.action.hover,
-            "&:hover": {
-              backgroundColor: (theme) => theme.palette.action.selected,
-            },
-          }}
+          File Search
+        </Typography>
+        <Box
+          component="span"
+          ref={infoPopoverAnchor}
+          aria-owns={infoOpenedPopover ? "info-popover" : undefined}
+          aria-haspopup="true"
+          onMouseEnter={infoPopoverEnter}
+          onMouseLeave={infoPopoverLeave}
+          sx={{ display: "inline-flex" }}
         >
-          <GoPlus size="1rem" style={{ marginRight: 3 }} />
-          <Typography
+          <RiInformation2Line />
+        </Box>
+        <Box sx={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
+          <Button
+            color="inherit"
+            onClick={settingsPopoverClick}
             sx={{
-              fontSize: "0.95rem",
-              fontFamily: "'Montserrat', serif",
+              textTransform: "none",
+              borderRadius: 2.3,
+              px: 1,
+              py: 0.7,
+              mr: 1,
+              minWidth: 0,
+              backgroundColor: (theme) => theme.palette.action.hover,
+              "&:hover": {
+                backgroundColor: (theme) => theme.palette.action.selected,
+              },
             }}
           >
-            Files
-          </Typography>
-        </Button>
-      </Box>
+            <IoSettingsOutline size="1rem" />
+          </Button>
 
+          <Button
+            size="small"
+            color="inherit"
+            onClick={addFilesDialogOpen}
+            sx={{
+              textTransform: "none",
+              borderRadius: 2.3,
+              minWidth: 0,
+              pr: 1,
+              py: 0.3,
+              pl: 0.7,
+              backgroundColor: (theme) => theme.palette.action.hover,
+              "&:hover": {
+                backgroundColor: (theme) => theme.palette.action.selected,
+              },
+            }}
+          >
+            <GoPlus size="1rem" style={{ marginRight: 3 }} />
+            <Typography
+              sx={{
+                fontSize: "0.95rem",
+                fontFamily: "'Montserrat', serif",
+              }}
+            >
+              Files
+            </Typography>
+          </Button>
+        </Box>
+      </Box>
+      {vectorStore && (
+        <Box
+          onClick={() => {
+            console.log("Yet to be implemented.");
+          }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "row",
+            cursor: "pointer",
+            gap: 1,
+            transition: "all 0.3s ease-in-out",
+            "&:hover": {
+              backgroundColor: (theme) => theme.palette.action.hover,
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0px 4px 10px rgba(0,0,0,0.5)"
+                  : "0px 4px 10px rgba(0,0,0,0.2)",
+            },
+          }}
+        >
+          <GoDatabase style={{ marginLeft: 8 }} size="1.5rem" />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "column",
+              width: "100%",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "0.75rem",
+                  fontFamily: "'Montserrat', serif",
+                }}
+              >
+                Vector Store for{" "}
+                {truncateText(
+                  assistant?.name || "Unnamed Assistant",
+                  isMobile ? 17 : 25
+                )}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.7rem",
+                  fontFamily: "'Montserrat', serif",
+                  pr: 0.5,
+                  pt: 0.2,
+                  color:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[400]
+                      : theme.palette.grey[700],
+                }}
+              >
+                {vectorStore?.usage_bytes !== undefined &&
+                vectorStore.usage_bytes !== null
+                  ? formatFileSize(vectorStore.usage_bytes)
+                  : "n/a"}
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "0.7rem",
+                  fontFamily: "'Montserrat', serif",
+                  color:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[400]
+                      : theme.palette.grey[700],
+                }}
+              >
+                {vectorStore?.id || "n/a"}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      )}
       {/* Info Popover */}
       <InfoPopover
         infoOpenedPopover={infoOpenedPopover}

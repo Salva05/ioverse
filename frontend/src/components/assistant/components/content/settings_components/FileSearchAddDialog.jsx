@@ -11,12 +11,14 @@ import {
   Slide,
   Typography,
   Divider,
-  Link,
 } from "@mui/material";
-import { IoIosImages } from "react-icons/io";
 import DragFilesContent from "./DragFilesContent";
 import FileListContent from "./FileListContent";
-import { getCurrentTime } from "../../../../../utils/getCurrentTime";
+import { useCreateFile } from "../../../../../hooks/assistant/useCreateFile";
+import { toast } from "react-toastify";
+import { useDeleteFile } from "../../../../../hooks/assistant/useDeleteFile";
+import { v4 as uuidv4 } from "uuid";
+import { truncateText } from "../../../../../utils/textUtils";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -28,6 +30,10 @@ const FileSearchAddDialog = ({
   vectorStoreButton,
 }) => {
   const theme = useTheme();
+
+  const createFileMutation = useCreateFile();
+  const deleteFileMutation = useDeleteFile();
+
   // No need for accounting drawer here
   // Since it can't be opened while the dialg is on
   const isTablet = useMediaQuery(`(max-width:815px)`);
@@ -37,13 +43,58 @@ const FileSearchAddDialog = ({
   // State to manage uploaded files
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
-  const handleFiles = (files) => {
-  const filesArray = Array.from(files).map((file) => ({
-    file,
-    uploadedAt: getCurrentTime(),
-  }));
-  setUploadedFiles((prevFiles) => [...prevFiles, ...filesArray]);
-};
+  const handleFiles = async (files) => {
+    const fileArray = Array.from(files);
+    const uploadPromises = fileArray.map(async (file) => {
+      const id = uuidv4();
+
+      // Check if the file already exists in uploadedFiles based on name and size
+      const isDuplicate = uploadedFiles.some(
+        (entry) =>
+          entry.file.name === file.name && entry.file.size === file.size
+      );
+      if (isDuplicate) {
+        toast.error(
+          `The file "${truncateText(file.name, 14)}" has already been uploaded.`
+        );
+        return;
+      }
+
+      // Initially in 'loading' status
+      setUploadedFiles((prevFiles) => [
+        ...prevFiles,
+        { id, file, status: "loading" },
+      ]);
+
+      // Prepare form data
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("purpose", "assistants");
+
+      try {
+        const data = await createFileMutation.mutateAsync(formData);
+
+        // Update the file's status to 'success'
+        setUploadedFiles((prevFiles) =>
+          prevFiles.map((entry) =>
+            entry.id === id ? { ...entry, status: "success", data } : entry
+          )
+        );
+        toast.success(
+          `File "${truncateText(file.name, 14)}" uploaded successfully.`
+        );
+      } catch (error) {
+        setUploadedFiles((prevFiles) =>
+          prevFiles.map((entry) =>
+            entry.id === id ? { ...entry, status: "error" } : entry
+          )
+        );
+      }
+    });
+
+    // Execute all upload promises
+    await Promise.all(uploadPromises);
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -54,8 +105,17 @@ const FileSearchAddDialog = ({
     e.preventDefault();
   };
 
-  const handleRemoveFile = (index) => {
-    setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  const handleRemoveFile = (index, backendId) => {
+    const fileToRemove = uploadedFiles[index];
+    if (fileToRemove) {
+      // Remove from state
+      setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+
+      // If the file has been successfully uploaded, delete it from the backend
+      if (backendId) {
+        deleteFileMutation.mutate(backendId);
+      }
+    }
   };
 
   const handleAttach = () => {
@@ -91,7 +151,14 @@ const FileSearchAddDialog = ({
           Attach files to file search
         </Typography>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent
+      className="drawer-scrollbar"
+        sx={{
+          maxHeight: 600,
+          overflowY: "auto",
+          mr: 0.3
+        }}
+      >
         {uploadedFiles.length === 0 ? (
           // No File Uploaded
           <DragFilesContent
@@ -163,7 +230,16 @@ const FileSearchAddDialog = ({
           }}
         >
           <Button
-            onClick={handleClose}
+            onClick={() => {
+              // Perform batch deletion of all uploaded files
+              uploadedFiles.forEach((entry) => {
+                if (entry.status === "success" && entry.data && entry.data.id) {
+                  deleteFileMutation.mutate(entry.data.id);
+                }
+              });
+              setUploadedFiles([]);
+              handleClose();
+            }}
             variant="outlined"
             color="inherit"
             size="small"
