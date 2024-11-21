@@ -1,3 +1,4 @@
+import os
 from rest_framework import serializers
 from .validators import (
     validate_purpose,
@@ -306,6 +307,19 @@ class FileCreateSerializer(serializers.Serializer):
 
     def validate_purpose(self, value):
         return validate_purpose(value)
+    
+    def validate_file(self, value):
+        ALLOWED_EXTENSIONS = [
+            'c', 'cpp', 'css', 'csv', 'doc', 'docx', 'gif', 'go', 'html', 'java',
+            'jpeg', 'jpg', 'js', 'json', 'md', 'pdf', 'php', 'pkl', 'png', 'pptx',
+            'py', 'rb', 'tar', 'tex', 'ts', 'txt', 'webp', 'xlsx', 'xml', 'zip'
+        ]
+        ext = os.path.splitext(value.name)[1][1:].lower()  # Get extension without dot
+        if ext not in ALLOWED_EXTENSIONS:
+            raise serializers.ValidationError(
+                f"Unsupported file extension '{ext}'. Allowed extensions are: {', '.join(ALLOWED_EXTENSIONS)}."
+            )
+        return value
 
 # ======================
 # File List 
