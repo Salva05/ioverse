@@ -26,7 +26,8 @@ from .views.vectorstore import (
     VectorStoreListView,
     VectorStoreRetrieveView,
     VectorStoreUpdateView,
-    VectorStoreDeleteView
+    VectorStoreDeleteView,
+    VectorStoreStatusStreamView
 )
 from .views.vectorstorefile import (
     VectorStoreFileCreateView,
@@ -63,6 +64,7 @@ urlpatterns = [
     path('message/<str:thread_id>/<str:message_id>/delete/', MessageDeleteView.as_view(), name='message-delete'),
     # Vector Store
     path('vector_store/create/', VectorStoreCreateView.as_view(), name='vector_store-create'),
+    path('vector_store/<str:vector_store_id>/status/', VectorStoreStatusStreamView.as_view(), name='vector_store-status'),
     path('vector_store/list/', VectorStoreListView.as_view(), name='vector_store-list'),
     path('vector_store/<str:vector_store_id>/retrieve/', VectorStoreRetrieveView.as_view(), name='vector_store-retrieve'),
     path('vector_store/<str:vector_store_id>/update/', VectorStoreUpdateView.as_view(), name='vector_store-update'),

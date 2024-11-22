@@ -1,8 +1,10 @@
 import logging
+import time
 from typing import Any, Dict, List, Optional
 
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
 
 from assistant_modules.vector_store.services import VectorStoreService
 from assistant_modules.vector_store.parameters import (
@@ -25,12 +27,15 @@ class VectorStoreIntegrationService:
         Creates a VectorStore both in OpenAI and Django database.
         """
         try:
+            # Extract 'poll_for_uploads'
+            poll_for_uploads = data.pop('poll_for_uploads', False)
+            
             # Validate and transform data using Pydantic
             params = VectorStoreCreateParams(**data)
             
             # Use vector_store_service to create VectorStore in OpenAI
             vector_store_pydantic = self.vector_store_service.create_vector_store(params)
-
+            
             # Serialize FileCounts Pydantic obejct
             serialized_file_counts = serialize_pydantic_model(vector_store_pydantic.file_counts)
             
@@ -50,7 +55,19 @@ class VectorStoreIntegrationService:
                 owner=user
             )
             logger.info(f"VectorStore created in Django DB: {django_vector_store.id}")
-            return django_vector_store
+            
+            # Prepare the response data
+            response_data = {
+                "vector_store": django_vector_store,
+                "sse_url": None
+            }
+
+            # Fire SSE if poll flag is on True
+            if poll_for_uploads:
+                sse_url = reverse('vector_store-status', kwargs={'vector_store_id': vector_store_pydantic.id})
+                response_data["sse_url"] = sse_url
+            
+            return response_data
 
         except ValidationError as ve:
             logger.error(f"Pydantic validation error: {ve}")
@@ -217,3 +234,68 @@ class VectorStoreIntegrationService:
         except Exception as e:
             logger.error(f"Error listing VectorStores: {e}")
             raise
+
+    def poll_vector_store_status(self, vector_store_id, user, polling_interval=5, timeout=300):
+        """
+        Polls the status of a vector store and updates the Django model when completed.
+
+        Args:
+            vector_store_id (str): The ID of the vector store to poll.
+            user (User): The user owning the vector store.
+            polling_interval (int): Time (in seconds) to wait between polls.
+            timeout (int): Maximum time (in seconds) to poll before giving up.
+
+        Yields:
+            dict: Progress updates for the vector store.
+        """
+        start_time = time.time()
+
+        while True:
+            # Timeout handling
+            if time.time() - start_time > timeout:
+                yield {"status": "timeout", "message": "Polling timed out"}
+                break
+            try:
+                # Poll vector store status
+                vector_store_pydantic = self.vector_store_service.retrieve_vector_store(vector_store_id)
+                serialized_file_counts = serialize_pydantic_model(vector_store_pydantic.file_counts)
+
+                state = {
+                        "status": vector_store_pydantic.status,
+                        "file_counts": serialized_file_counts,
+                        "usage_bytes": vector_store_pydantic.usage_bytes
+                }
+                
+                # If completed, update Django model
+                if vector_store_pydantic.status == "completed":
+                    try:
+                        django_vector_store = DjangoVectorStore.objects.get(id=vector_store_id, owner=user)
+                        django_vector_store.usage_bytes = vector_store_pydantic.usage_bytes
+                        django_vector_store.file_counts = serialized_file_counts
+                        django_vector_store.status = vector_store_pydantic.status
+                        django_vector_store.expires_after = (
+                            vector_store_pydantic.expires_after.model_dump()
+                            if vector_store_pydantic.expires_after
+                            else None
+                        )
+                        django_vector_store.metadata = vector_store_pydantic.metadata
+                        django_vector_store.save()
+                        logger.info(f"VectorStore {vector_store_id} updated successfully.")
+                    except ObjectDoesNotExist:
+                        logger.error(f"VectorStore {vector_store_id} does not exist for user {user}.")
+                        yield {"status": "error", "message": "Vector store does not exist"}
+                        break
+                    # Flag as completed
+                    yield state
+                    break
+                else:
+                    yield state
+            except Exception as e:
+                logger.error(f"Error while polling VectorStore {vector_store_id}: {e}")
+                yield {"status": "error", "message": str(e)}
+                break
+
+            # Delay
+            time.sleep(polling_interval)
+            
+        

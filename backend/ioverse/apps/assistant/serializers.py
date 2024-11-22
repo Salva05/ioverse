@@ -216,7 +216,11 @@ class VectorStoreCreateSerializer(serializers.Serializer):
         allow_empty=True,
         help_text="Metadata with a maximum of 16 key-value pairs for the vector store."
     )
-
+    poll_for_uploads = serializers.BooleanField(
+        required=False,
+        help_text="Whether the server should track and send the status of the uploads back."
+    )
+    
     def validate_chunking_strategy(self, value):
         """Validate the chunking_strategy field based on the type."""
         strategy_type = value.get("type")
