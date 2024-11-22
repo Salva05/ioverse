@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  LinearProgress,
   Typography,
   useMediaQuery,
   useTheme,
@@ -24,7 +25,7 @@ const drawerWidth = 240;
 
 const FileSearch = () => {
   const { mutate } = useUpdateAssistant();
-  const { assistant, vectorStore, files } = useAssistantContext();
+  const { assistant, vectorStore } = useAssistantContext();
 
   // Local state for the input value
   const [switchState, setSwitchState] = useState(
@@ -208,94 +209,106 @@ const FileSearch = () => {
         </Box>
       </Box>
       {vectorStore && (
-        <Box
-          onClick={() => {
-            console.log("Yet to be implemented.");
-          }}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flexDirection: "row",
-            cursor: "pointer",
-            gap: 1,
-            transition: "all 0.3s ease-in-out",
-            "&:hover": {
-              backgroundColor: (theme) => theme.palette.action.hover,
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "0px 4px 10px rgba(0,0,0,0.5)"
-                  : "0px 4px 10px rgba(0,0,0,0.2)",
-            },
-          }}
-        >
-          <GoDatabase style={{ marginLeft: 8 }} size="1.5rem" />
+        <>
+          {vectorStore?.status === "in_progress" && (
+            <LinearProgress sx={{ height: 2 }} />
+          )}
           <Box
+            onClick={() => {
+              console.log("Yet to be implemented.");
+            }}
             sx={{
               display: "flex",
               alignItems: "center",
-              flexDirection: "column",
-              width: "100%",
+              flexDirection: "row",
+              cursor: "pointer",
+              gap: 1,
+              transition: "all 0.3s ease-in-out",
+              "&:hover": {
+                backgroundColor: (theme) => theme.palette.action.hover,
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0px 4px 10px rgba(0,0,0,0.5)"
+                    : "0px 4px 10px rgba(0,0,0,0.2)",
+              },
             }}
           >
+            <GoDatabase style={{ marginLeft: 8 }} size="1.5rem" />
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "space-between",
+                alignItems: "center",
+                flexDirection: "column",
                 width: "100%",
               }}
             >
-              <Typography
+              <Box
                 sx={{
-                  fontSize: "0.75rem",
-                  fontFamily: "'Montserrat', serif",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
                 }}
               >
-                Vector Store for{" "}
-                {truncateText(
-                  assistant?.name || "Unnamed Assistant",
-                  isMobile ? 17 : 25
-                )}
-              </Typography>
-              <Typography
+                <Typography
+                  sx={{
+                    fontSize: "0.75rem",
+                    fontFamily: "'Montserrat', serif",
+                  }}
+                >
+                  Vector Store for{" "}
+                  {truncateText(
+                    assistant?.name || "Unnamed Assistant",
+                    isMobile ? 17 : 25
+                  )}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "0.7rem",
+                    fontFamily: "'Montserrat', serif",
+                    pr: 0.5,
+                    pt: 0.2,
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[400]
+                        : theme.palette.grey[700],
+                  }}
+                >
+                  {vectorStore?.status === "in_progress" ? (
+                    <>
+                      {vectorStore?.file_counts.completed}{" "}/{" "}
+                      {vectorStore?.file_counts.total}
+                    </>
+                  ) : vectorStore?.usage_bytes !== undefined &&
+                    vectorStore.usage_bytes !== null ? (
+                    formatFileSize(vectorStore.usage_bytes)
+                  ) : (
+                    "n/a"
+                  )}
+                </Typography>
+              </Box>
+              <Box
                 sx={{
-                  fontSize: "0.7rem",
-                  fontFamily: "'Montserrat', serif",
-                  pr: 0.5,
-                  pt: 0.2,
-                  color:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.grey[400]
-                      : theme.palette.grey[700],
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
                 }}
               >
-                {vectorStore?.usage_bytes !== undefined &&
-                vectorStore.usage_bytes !== null
-                  ? formatFileSize(vectorStore.usage_bytes)
-                  : "n/a"}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "0.7rem",
-                  fontFamily: "'Montserrat', serif",
-                  color:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.grey[400]
-                      : theme.palette.grey[700],
-                }}
-              >
-                {vectorStore?.id || "n/a"}
-              </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "0.7rem",
+                    fontFamily: "'Montserrat', serif",
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[400]
+                        : theme.palette.grey[700],
+                  }}
+                >
+                  {vectorStore?.id || "n/a"}
+                </Typography>
+              </Box>
             </Box>
           </Box>
-        </Box>
+        </>
       )}
       {/* Info Popover */}
       <InfoPopover
@@ -323,6 +336,8 @@ const FileSearch = () => {
         openDialog={addFilesOpen}
         handleClose={addFilesDialogClose}
         vectorStoreButton={true}
+        vectorStore={vectorStore}
+        assistant={assistant}
       />
     </Box>
   );

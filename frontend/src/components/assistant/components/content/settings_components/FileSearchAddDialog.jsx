@@ -19,6 +19,11 @@ import { toast } from "react-toastify";
 import { useDeleteFile } from "../../../../../hooks/assistant/useDeleteFile";
 import { v4 as uuidv4 } from "uuid";
 import { truncateText } from "../../../../../utils/textUtils";
+import { useCreateVectorStore } from "../../../../../hooks/assistant/useCreateVectorStore";
+import { useFilesData } from "../../../../../hooks/assistant/useFilesData";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import { useQueryClient } from "@tanstack/react-query";
+import { connectToSSE } from "../../../../../services/connectToSSE";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -28,11 +33,18 @@ const FileSearchAddDialog = ({
   openDialog,
   handleClose,
   vectorStoreButton,
+  vectorStore,
+  assistant,
 }) => {
+  const queryClient = useQueryClient();
   const theme = useTheme();
+
+  const { files } = useFilesData();
+  const updateAssistant = useUpdateAssistant();
 
   const createFileMutation = useCreateFile();
   const deleteFileMutation = useDeleteFile();
+  const createVectorStoreMutation = useCreateVectorStore();
 
   // No need for accounting drawer here
   // Since it can't be opened while the dialg is on
@@ -80,9 +92,6 @@ const FileSearchAddDialog = ({
             entry.id === id ? { ...entry, status: "success", data } : entry
           )
         );
-        toast.success(
-          `File "${truncateText(file.name, 14)}" uploaded successfully.`
-        );
       } catch (error) {
         setUploadedFiles((prevFiles) =>
           prevFiles.map((entry) =>
@@ -119,8 +128,99 @@ const FileSearchAddDialog = ({
   };
 
   const handleAttach = () => {
-    // Yet to be implemented
-    console.log("Files to attach:", uploadedFiles);
+    // Check if the Assistant has a vector store associated
+    if (!vectorStore) {
+      // Populate an array of file ids
+      const filesIds = uploadedFiles.map((entry) => entry.data.id);
+      const vectorStoreData = {
+        file_ids: filesIds,
+        name: `Vector Store for ${assistant?.name || assistant.id}`,
+        poll_for_uploads: true, // Enable SSE polling
+      };
+
+      createVectorStoreMutation.mutate(vectorStoreData, {
+        onSuccess: (data) => {
+          // Update the cached list of Vector Stores
+          queryClient.setQueryData(["vectorStores"], (oldData) => {
+            return oldData
+              ? [...oldData, data.vector_store]
+              : [data.vector_store];
+          });
+
+          // Attach the Vector Store to the Active Assistant
+          const updatedAssistant = {
+            ...assistant,
+            tool_resources: {
+              ...assistant.tool_resources,
+              file_search: {
+                vector_store_ids: [data.vector_store.id],
+              },
+            },
+          };
+          updateAssistant.mutate({
+            id: assistant.id,
+            assistantData: updatedAssistant,
+          });
+
+          // Start SSE if polling is enabled
+          if (data.sse_url) {
+            const sseConnection = connectToSSE(
+              data.sse_url, // URL for the connection
+              // Callback for progresses
+              (sse) => {
+                // Update the active Vector Store's file uploaded
+                queryClient.setQueryData(["vectorStores"], (oldData) => {
+                  if (!oldData) return [];
+                  return oldData.map((item) =>
+                    item.id === data.vector_store.id
+                      ? {
+                          ...item,
+                          file_counts: sse.file_counts,
+                          status: sse.status,
+                        }
+                      : item
+                  );
+                });
+              },
+              // Callback for errors
+              (error) => {
+                console.error("SSE Error:", error);
+                toast.error("Error in upload progress updates.");
+              },
+              // Callback for completion
+              (sse) => {
+                // Update the active Vector Store's file uploaded
+                queryClient.setQueryData(["vectorStores"], (oldData) => {
+                  if (!oldData) return [];
+                  return oldData.map((item) =>
+                    item.id === data.vector_store.id
+                      ? {
+                          ...item,
+                          usage_bytes: sse.usage_bytes,
+                          file_counts: sse.file_counts,
+                          status: sse.status,
+                        }
+                      : item
+                  );
+                });
+                toast.success("Upload completed!");
+              }
+            );
+          }
+        },
+      });
+    }
+
+    // Yes: Upload the Files into the vector store
+
+    // No: 1.0) Create one
+
+    // 1.1) Attach it to the Assistant
+
+    // 1.2) Insert the files into the vector store
+
+    // Display the success popup
+
     handleClose();
   };
 
@@ -152,11 +252,11 @@ const FileSearchAddDialog = ({
         </Typography>
       </DialogTitle>
       <DialogContent
-      className="drawer-scrollbar"
+        className="drawer-scrollbar"
         sx={{
           maxHeight: 600,
           overflowY: "auto",
-          mr: 0.3
+          mr: 0.3,
         }}
       >
         {uploadedFiles.length === 0 ? (

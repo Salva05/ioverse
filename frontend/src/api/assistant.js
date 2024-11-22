@@ -43,6 +43,15 @@ export const vectorStore = {
     );
     return (await response).data;
   },
+
+  // POST
+  create: async (vectorStoreData) => {
+    const response = await axiosInstance.post(
+      "/assistant/vector_store/create/",
+      vectorStoreData
+    );
+    return response.data;
+  }
 };
 
 // Service for Files-related API calls

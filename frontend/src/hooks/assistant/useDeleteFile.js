@@ -8,7 +8,7 @@ export const useDeleteFile = () => {
   return useMutation({
     mutationFn: (id) => files.delete(id),
     onSuccess: (_, id) => {
-      queryClient.setQueryData(["uploadedFiles"], (oldFiles) =>
+      queryClient.setQueryData(["files"], (oldFiles) =>
         oldFiles ? oldFiles.filter((file) => file.id !== id) : []
       );
       toast.success("File deleted successfully.");
