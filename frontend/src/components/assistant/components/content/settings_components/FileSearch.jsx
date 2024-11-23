@@ -83,6 +83,7 @@ const FileSearch = () => {
   const infoPopoverEnter = () => {
     setOpenedInfoPopover(true);
   };
+  
   const infoPopoverLeave = () => {
     setOpenedInfoPopover(false);
   };

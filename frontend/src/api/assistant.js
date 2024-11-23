@@ -51,7 +51,16 @@ export const vectorStore = {
       vectorStoreData
     );
     return response.data;
-  }
+  },
+
+  // PUT
+  update: async (id, vectorStore) => {
+    const response = await axiosInstance.put(
+      `/assistant/vector_store/${id}/update/`,
+      assistant
+    );
+    return response.data;
+  },
 };
 
 // Service for Files-related API calls
@@ -75,6 +84,18 @@ export const files = {
   delete: async (id) => {
     const response = await axiosInstance.delete(
       `/assistant/file/${id}/delete/`
+    );
+    return response.data;
+  },
+};
+
+// Service for Vector Store Batch-related API calls
+export const vectorStoreBatch = {
+  // POST
+  create: async (batchData) => {
+    const response = await axiosInstance.post(
+      "/assistant/vector_store_batch/create/",
+      batchData
     );
     return response.data;
   },

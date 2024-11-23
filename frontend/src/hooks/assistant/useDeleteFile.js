@@ -12,6 +12,11 @@ export const useDeleteFile = () => {
         oldFiles ? oldFiles.filter((file) => file.id !== id) : []
       );
       toast.success("File deleted successfully.");
+
+      // Update vector stores
+      setTimeout(() => {
+        queryClient.invalidateQueries(["vectorStores"])
+      }, 2000);
     },
     onError: (error) => {
       const errorMessage =

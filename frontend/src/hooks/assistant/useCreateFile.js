@@ -12,7 +12,7 @@ export const useCreateFile = () => {
       queryClient.setQueryData(["files"], (oldFiles) => {
         return oldFiles ? [...oldFiles, newFile] : [newFile];
       });
-
+      queryClient.invalidateQueries(["files"]);
       toast.success(
         `File "${truncateText(newFile.filename, 14)}" uploaded successfully.`
       );

@@ -24,6 +24,7 @@ import { useFilesData } from "../../../../../hooks/assistant/useFilesData";
 import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
 import { useQueryClient } from "@tanstack/react-query";
 import { connectToSSE } from "../../../../../services/connectToSSE";
+import { useCreateVectorStoreBatch } from "../../../../../hooks/assistant/useCreateVectorStoreBatch";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -45,6 +46,7 @@ const FileSearchAddDialog = ({
   const createFileMutation = useCreateFile();
   const deleteFileMutation = useDeleteFile();
   const createVectorStoreMutation = useCreateVectorStore();
+  const createBatch = useCreateVectorStoreBatch();
 
   // No need for accounting drawer here
   // Since it can't be opened while the dialg is on
@@ -120,7 +122,6 @@ const FileSearchAddDialog = ({
       // Remove from state
       setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
 
-      // If the file has been successfully uploaded, delete it from the backend
       if (backendId) {
         deleteFileMutation.mutate(backendId);
       }
@@ -128,10 +129,11 @@ const FileSearchAddDialog = ({
   };
 
   const handleAttach = () => {
-    // Check if the Assistant has a vector store associated
+    const filesIds = uploadedFiles.map((entry) => entry.data.id);
+
+    // Case if no vector store is active on the assistant
     if (!vectorStore) {
       // Populate an array of file ids
-      const filesIds = uploadedFiles.map((entry) => entry.data.id);
       const vectorStoreData = {
         file_ids: filesIds,
         name: `Vector Store for ${assistant?.name || assistant.id}`,
@@ -203,31 +205,96 @@ const FileSearchAddDialog = ({
                       : item
                   );
                 });
-                toast.success("Upload completed!");
               }
             );
           }
         },
       });
+    } else {
+      // Case if vector store is already active on the assitant
+      // Create a Vector Store Batch
+      const batch = {
+        vector_store_id: vectorStore.id,
+        file_ids: filesIds,
+      };
+
+      createBatch.mutate(batch, {
+        onSuccess: (data) => {
+          const sseConnection = connectToSSE(
+            data?.sse_url, // URL for the connection
+            // Callback for progresses
+            (sse) => {
+              // Update the active Vector Store's file uploaded
+              queryClient.setQueryData(["vectorStores"], (oldData) => {
+                if (!oldData) return [];
+                return oldData.map((item) =>
+                  item.id === data.vector_store_id
+                    ? {
+                        ...item,
+                        file_counts: {
+                          in_progress:
+                            item.file_counts.in_progress +
+                            sse.file_counts.in_progress,
+                          completed:
+                            item.file_counts.completed +
+                            sse.file_counts.completed,
+                          failed:
+                            item.file_counts.failed + sse.file_counts.failed,
+                          cancelled:
+                            item.file_counts.cancelled +
+                            sse.file_counts.cancelled,
+                          total: item.file_counts.total + sse.file_counts.total,
+                        },
+                        status: sse.status,
+                      }
+                    : item
+                );
+              });
+            },
+            // Callback for errors
+            (error) => {
+              console.error("SSE Error:", error);
+              toast.error("Error in upload progress updates.");
+            },
+            // Callback for completion
+            (sse) => {
+              // Update the active Vector Store's file uploaded
+              queryClient.setQueryData(["vectorStores"], (oldData) => {
+                if (!oldData) return [];
+                return oldData.map((item) =>
+                  item.id === data.vector_store_id
+                    ? {
+                        ...item,
+                        status: sse.status,
+                      }
+                    : item
+                );
+              });
+            }
+          );
+        },
+      });
     }
 
-    // Yes: Upload the Files into the vector store
-
-    // No: 1.0) Create one
-
-    // 1.1) Attach it to the Assistant
-
-    // 1.2) Insert the files into the vector store
-
-    // Display the success popup
-
+    setUploadedFiles([]);
     handleClose();
   };
 
   return (
     <Dialog
       open={openDialog}
-      onClose={handleClose}
+      onClose={(event, reason) => {
+        if (
+          !vectorStore &&
+          (reason === "backdropClick" || reason === "escapeKeyDown") &&
+          uploadedFiles.length
+        ) {
+          toast.info(
+            "Files not yet enabled for retrieval.\n Make sure to attach them to a vector store."
+          );
+        }
+        handleClose();
+      }}
       aria-labelledby="edit-system-instructions-title"
       aria-describedby="edit-system-instructions-description"
       maxWidth="sm"
@@ -248,8 +315,24 @@ const FileSearchAddDialog = ({
             fontSize: "1.1rem",
           }}
         >
-          Attach files to file search
+          {!vectorStore
+            ? "Attach files to file search"
+            : "Attach files to vector store"}
         </Typography>
+        {vectorStore ? (
+          <Typography
+            variant="body1"
+            sx={{
+              fontFamily: "'Montserrat', serif",
+              fontSize: "0.9rem",
+              color: (theme) => theme.palette.text.secondary,
+            }}
+          >
+            {vectorStore.id}
+          </Typography>
+        ) : (
+          ""
+        )}
       </DialogTitle>
       <DialogContent
         className="drawer-scrollbar"
@@ -291,7 +374,7 @@ const FileSearchAddDialog = ({
         }}
       >
         {/* Left Side Button */}
-        {vectorStoreButton && (
+        {!vectorStore && vectorStoreButton && (
           <Button
             onClick={() => {
               console.log("Select Vector Store clicked");
