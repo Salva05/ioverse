@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 # Allowed Models
 class AllowedModels(str, Enum):
@@ -126,7 +126,8 @@ class VectorStoreFileBatch(BaseModel):
     vector_store_id: str
     status: str
     file_counts: FileCounts
-
+    sse_url: Optional[str] = Field(None, description="Server-Sent Events URL for polling")
+    
 # Code Interpreter Resource
 class CodeInterpreterResource(BaseModel):
     file_ids: List[str] = Field(

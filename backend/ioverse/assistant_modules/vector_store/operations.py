@@ -34,11 +34,11 @@ class VectorStoreClient:
         return self.client.beta.vector_stores.files.delete(vector_store_id, file_id)
     
     # Vector Store File Batches
-    def create_vector_store_file_batch(self, vector_store_id, **kwargs):
-        return self.client.beta.vector_stores.file_batches.create(vector_store_id, **kwargs)
+    def create_vector_store_file_batch(self, **kwargs):
+        return self.client.beta.vector_stores.file_batches.create(**kwargs)
     
     def retrieve_vector_store_file_batch(self, vector_store_id, batch_id):
-        return self.client.beta.vector_stores.file_batches.retrieve(vector_store_id, batch_id)
+        return self.client.beta.vector_stores.file_batches.retrieve(vector_store_id=vector_store_id, batch_id=batch_id)
     
     def cancel_vector_store_file_batch(self, vector_store_id, batch_id):
         return self.client.beta.vector_stores.file_batches.cancel(vector_store_id, batch_id)

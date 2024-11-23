@@ -9,7 +9,6 @@ from assistant_modules.vector_store.parameters import (
     VectorStoreFileCreateParams
 )
 from apps.assistant.models import VectorStoreFile as DjangoVectorStoreFile
-from ..helpers import serialize_pydantic_model
 from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)

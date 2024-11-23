@@ -273,6 +273,39 @@ class VectorStoreFileCreateSerializer(serializers.Serializer):
     )
     
 # ======================
+# Vector Store Batch (OpenAI Response)
+# ======================
+
+class VectorStoreBatchSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    object = serializers.CharField(read_only=True)
+    created_at = serializers.IntegerField(read_only=True)
+    vector_store_id = serializers.CharField()
+    status = serializers.CharField(max_length=50)
+    file_counts = serializers.JSONField()
+    # For polling to the stream endpoint
+    sse_url = serializers.URLField(read_only=True)
+    
+# ======================
+# Vector Store Batch Creation
+# ======================
+
+class VectorStoreBatchCreateSerializer(serializers.Serializer):
+    vector_store_id = serializers.CharField(
+        required=True,
+        help_text="The ID of the vector store for which to create a File."
+    )
+    file_ids = serializers.ListField(
+        required=True,
+        help_text="A File ID that the vector store should use. Useful for tools like file_search that can access files."
+    )
+    chunking_strategy = serializers.DictField(
+        child=serializers.CharField(),
+        required=False,
+        help_text="The chunking strategy used to chunk the file(s). If not set, will use the auto strategy."
+    )
+    
+# ======================
 # Vector Store File
 # ======================
 

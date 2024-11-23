@@ -147,11 +147,11 @@ class VectorStoreService:
             raise
     
     # Vector Store File Batches
-    def create_vector_store_file_batch(self, vector_store_id: str, params: VectorStoreFileBatchCreateParams) -> VectorStoreFileBatch:
+    def create_vector_store_file_batch(self, params: VectorStoreFileBatchCreateParams) -> VectorStoreFileBatch:
         try:
             batch_data = params.model_dump(exclude_unset=True)
-            response = self.client.create_vector_store_file_batch(vector_store_id, **batch_data)
-            response.model_dump()
+            response = self.client.create_vector_store_file_batch(**batch_data)
+            response = response.model_dump()
             batch = VectorStoreFileBatch.model_validate(response)
             logger.info(f"Vector store file batch created: {batch.id}")
             return batch
@@ -162,6 +162,7 @@ class VectorStoreService:
     def retrieve_vector_store_file_batch(self, vector_store_id: str, batch_id: str) -> VectorStoreFileBatch:
         try:
             response = self.client.retrieve_vector_store_file_batch(vector_store_id, batch_id)
+            response = response.model_dump()
             batch = VectorStoreFileBatch.model_validate(response)
             logger.info(f"Vector store file batch retrieved: {batch.id}")
             return batch

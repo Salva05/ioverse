@@ -42,6 +42,7 @@ from .views.file import (
     FileDeleteView
 )
 from .views.run import RunAPIView , RunStepAPIView
+from .views.vectorstorebatch import VectorStoreBacthCreateView, VectorStoreBatchStatusStreamView
 
 urlpatterns = [
     # Assistant
@@ -74,6 +75,9 @@ urlpatterns = [
     path('vector_store_file/<str:vector_store_id>/list/', VectorStoreFileListView.as_view(), name='vector_store_file-list'),
     path('vector_store_file/<str:vector_store_file_id>/retrieve/', VectorStoreFileRetrieveView.as_view(), name='vector_store_file-retrieve'),
     path('vector_store_file/<str:vector_store_file_id>/delete/', VectorStoreFileDeleteView.as_view(), name='vector_store_file-delete'),
+    # Vector Store Batch
+    path('vector_store_batch/create/', VectorStoreBacthCreateView.as_view(), name='vector_store_batch-create'),
+    path('vector_store_batch/<str:vector_store_id>/<str:batch_id>/status/', VectorStoreBatchStatusStreamView.as_view(), name='vector_store_batch-status'),
     # File
     path('file/create/', FileCreateView.as_view(), name='file-create'),
     path('file/list/', FileListView.as_view(), name='file-list'),

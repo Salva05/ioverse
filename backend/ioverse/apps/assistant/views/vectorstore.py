@@ -1,8 +1,6 @@
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework_simplejwt.exceptions import InvalidToken
-from rest_framework_simplejwt.tokens import UntypedToken
 
 from apps.assistant.serializers import VectorStoreSerializer, VectorStoreCreateSerializer, VectorStoreUpdateSerializer
 from apps.assistant.services.vectorstore_services import VectorStoreIntegrationService
@@ -96,10 +94,10 @@ class VectorStoreListView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             django_vector_stores = service.list_vector_stores(request.user, **params)
-
             
             # Serialize each VectorStore instance
             serialized_vector_stores = [VectorStoreSerializer(vs).data for vs in django_vector_stores]
+            
             return Response(serialized_vector_stores, status=status.HTTP_200_OK)
         
         except ValidationError as ve:
@@ -145,7 +143,7 @@ class VectorStoreDeleteView(APIView):
 class VectorStoreStatusStreamView(APIView):
     permission_classes = [IsAuthenticatedWithQueryToken]
     renderer_classes = [SSEEventRenderer]
-    polling_interval = 2  # seconds
+    polling_interval = 1  # seconds
     timeout = 300  # seconds
 
     def get(self, request, *args, **kwargs):

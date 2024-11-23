@@ -67,6 +67,10 @@ class VectorStoreFileCreateParams(BaseModel):
     )
 
 class VectorStoreFileBatchCreateParams(BaseModel):
+    vector_store_id: str = Field(
+        ...,
+        description="The ID of the vector store for which to create a File."
+    )
     file_ids: List[str] = Field(
         ...,
         description="A list of File IDs that the vector store should use."

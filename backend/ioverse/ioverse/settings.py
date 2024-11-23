@@ -82,7 +82,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'images': '10/minute',
-        'user': '20/minute',
+        'user': '60/minute',
     },
 }
 
