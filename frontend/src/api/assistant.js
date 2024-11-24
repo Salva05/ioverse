@@ -89,6 +89,17 @@ export const files = {
   },
 };
 
+// Service for Vector Store File-related API calls
+export const vectorStoreFile = {
+  // GET
+  get: async (vectorStoreId) => {
+    const response = await axiosInstance.get(
+      `/assistant/vector_store_file/${vectorStoreId}/list/`
+    );
+    return response.data;
+  },
+};
+
 // Service for Vector Store Batch-related API calls
 export const vectorStoreBatch = {
   // POST

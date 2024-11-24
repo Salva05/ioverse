@@ -25,12 +25,15 @@ import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssi
 import { useQueryClient } from "@tanstack/react-query";
 import { connectToSSE } from "../../../../../services/connectToSSE";
 import { useCreateVectorStoreBatch } from "../../../../../hooks/assistant/useCreateVectorStoreBatch";
+import { vectorStore as vs } from "../../../../../api/assistant";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const FileSearchAddDialog = ({
+  handleSelectVectorStore,
   openDialog,
   handleClose,
   vectorStoreButton,
@@ -42,6 +45,7 @@ const FileSearchAddDialog = ({
 
   const { files } = useFilesData();
   const updateAssistant = useUpdateAssistant();
+  const { setVectorStore } = useAssistantContext();
 
   const createFileMutation = useCreateFile();
   const deleteFileMutation = useDeleteFile();
@@ -224,6 +228,11 @@ const FileSearchAddDialog = ({
             data?.sse_url, // URL for the connection
             // Callback for progresses
             (sse) => {
+              // Snapshot of flie_counts to have constant values for vector store at each SSE update
+              const vs_file_counts = {
+                total: vectorStore.file_counts.total,
+                completed: vectorStore.file_counts.completed,
+              };
               // Update the active Vector Store's file uploaded
               queryClient.setQueryData(["vectorStores"], (oldData) => {
                 if (!oldData) return [];
@@ -232,18 +241,11 @@ const FileSearchAddDialog = ({
                     ? {
                         ...item,
                         file_counts: {
-                          in_progress:
-                            item.file_counts.in_progress +
-                            sse.file_counts.in_progress,
+                          ...item.file_counts,
                           completed:
-                            item.file_counts.completed +
+                            vs_file_counts.completed +
                             sse.file_counts.completed,
-                          failed:
-                            item.file_counts.failed + sse.file_counts.failed,
-                          cancelled:
-                            item.file_counts.cancelled +
-                            sse.file_counts.cancelled,
-                          total: item.file_counts.total + sse.file_counts.total,
+                          total: vs_file_counts.total + sse.file_counts.total,
                         },
                         status: sse.status,
                       }
@@ -257,19 +259,24 @@ const FileSearchAddDialog = ({
               toast.error("Error in upload progress updates.");
             },
             // Callback for completion
-            (sse) => {
-              // Update the active Vector Store's file uploaded
-              queryClient.setQueryData(["vectorStores"], (oldData) => {
-                if (!oldData) return [];
-                return oldData.map((item) =>
-                  item.id === data.vector_store_id
-                    ? {
-                        ...item,
-                        status: sse.status,
-                      }
-                    : item
-                );
-              });
+            async (sse) => {
+              // Update the Vector Stores query and the active Vector Store
+              try {
+                // Retrieve the updated vector store and set it as active
+                const updatedVectorStore = await vs.retrieve(vectorStore.id);
+                setVectorStore(updatedVectorStore);
+                queryClient.setQueryData(["vectorStores"], (oldData) => {
+                  if (!oldData) return [];
+                  return oldData.map((item) =>
+                    item.id === data.vector_store_id ? updatedVectorStore : item
+                  );
+                });
+              } catch (error) {
+                console.error("Error retrieving the Vector Store:", error);
+                toast.error("Failed to retrieve the updated Vector Store.");
+              }
+              // Update vector store files whenever accessed
+              queryClient.invalidateQueries(["vectorStoreFiles", vectorStore.id]);
             }
           );
         },
@@ -285,7 +292,6 @@ const FileSearchAddDialog = ({
       open={openDialog}
       onClose={(event, reason) => {
         if (
-          !vectorStore &&
           (reason === "backdropClick" || reason === "escapeKeyDown") &&
           uploadedFiles.length
         ) {
@@ -376,9 +382,7 @@ const FileSearchAddDialog = ({
         {/* Left Side Button */}
         {!vectorStore && vectorStoreButton && (
           <Button
-            onClick={() => {
-              console.log("Select Vector Store clicked");
-            }}
+            onClick={handleSelectVectorStore}
             variant="contained"
             size="small"
             sx={{

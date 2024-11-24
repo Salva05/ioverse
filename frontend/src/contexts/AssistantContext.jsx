@@ -4,7 +4,6 @@ import { useThreadsData } from "../hooks/assistant/useThreadsData";
 import { useVectorStoresData } from "../hooks/assistant/useVectorStoresData";
 import { useFilesData } from "../hooks/assistant/useFilesData";
 import { useQueryClient } from "@tanstack/react-query";
-
 export const AssistantContext = createContext();
 
 export const useAssistantContext = () => useContext(AssistantContext);
@@ -15,8 +14,7 @@ export const AssistantProvider = ({ children }) => {
   // Actual data from backend
   const { data: assistants } = useAssistantsData();
   const { data: threads } = useThreadsData();
-  const { data: vectorStores, refetch: refetchVectorStores } =
-    useVectorStoresData();
+  const { data: vectorStores } = useVectorStoresData();
   const { data: files } = useFilesData();
 
   // Current active Tab and Entity (Domain Model)
@@ -80,6 +78,7 @@ export const AssistantProvider = ({ children }) => {
     setAssistant,
     thread,
     setThread,
+    vectorStores,
     vectorStore,
     setVectorStore,
     files,

@@ -51,6 +51,7 @@ const DragFilesContent = ({
         sx={{
           fontFamily: "'Montserrat', serif",
           fontSize: "0.9rem",
+          fontWeight: "bold",
           my: 2,
         }}
       >
@@ -62,6 +63,7 @@ const DragFilesContent = ({
             textDecoration: "none",
             color: theme.palette.primary.main,
             fontFamily: "'Montserrat', serif",
+            fontWeight: "bold",
             transition: "color 0.4s ease",
             "&:hover": {
               cursor: "pointer",

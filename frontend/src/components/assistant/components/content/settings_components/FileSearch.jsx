@@ -20,6 +20,8 @@ import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 import { GoDatabase } from "react-icons/go";
 import { formatFileSize } from "../../../../../utils/formatFileSize";
 import { truncateText } from "../../../../../utils/textUtils";
+import VectorStoreSelectionDialog from "./VectorStoreSelectionDialog";
+import VectorStoreDetailsDialog from "./VectorStoreDetailsDialog";
 
 const drawerWidth = 240;
 
@@ -61,6 +63,12 @@ const FileSearch = () => {
   // Add Files Dialog
   const [addFilesOpen, setAddFilesOpen] = useState(false);
 
+  // Select Vector Store dialog
+  const [openVSSelection, setOpenVSSelection] = useState(false);
+
+  // Vector Store Details Dialog
+  const [openVectorStoreDetails, setOpenVectorStoreDetials] = useState(false);
+
   // Add Files states
   const addFilesDialogOpen = () => {
     setAddFilesOpen(true);
@@ -83,9 +91,28 @@ const FileSearch = () => {
   const infoPopoverEnter = () => {
     setOpenedInfoPopover(true);
   };
-  
+
   const infoPopoverLeave = () => {
     setOpenedInfoPopover(false);
+  };
+
+  // To show the dialog for selecting a vector store to attach
+  const handleSelectVectorStore = (shouldCloseBothDialogs = false) => {
+    if (!openVSSelection) {
+      setAddFilesOpen(false);
+    } else {
+      if (shouldCloseBothDialogs) {
+        setAddFilesOpen(false);
+      } else {
+        setAddFilesOpen(true);
+      }
+    }
+    setOpenVSSelection((prev) => !prev);
+  };
+
+  // To show the dialog for selecting a vector store to attach
+  const handleVectorStoreDetials = () => {
+    setOpenVectorStoreDetials((prev) => !prev);
   };
 
   const handleMutate = (newState) => {
@@ -215,9 +242,7 @@ const FileSearch = () => {
             <LinearProgress sx={{ height: 2 }} />
           )}
           <Box
-            onClick={() => {
-              console.log("Yet to be implemented.");
-            }}
+            onClick={handleVectorStoreDetials}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -276,7 +301,7 @@ const FileSearch = () => {
                 >
                   {vectorStore?.status === "in_progress" ? (
                     <>
-                      {vectorStore?.file_counts.completed}{" "}/{" "}
+                      {vectorStore?.file_counts.completed} /{" "}
                       {vectorStore?.file_counts.total}
                     </>
                   ) : vectorStore?.usage_bytes !== undefined &&
@@ -334,11 +359,24 @@ const FileSearch = () => {
 
       {/* Add Files Dialog */}
       <FileSearchAddDialog
+        handleSelectVectorStore={handleSelectVectorStore}
         openDialog={addFilesOpen}
         handleClose={addFilesDialogClose}
         vectorStoreButton={true}
         vectorStore={vectorStore}
         assistant={assistant}
+      />
+
+      {/* Select Vector Store Dialog */}
+      <VectorStoreSelectionDialog
+        open={openVSSelection}
+        handleClose={handleSelectVectorStore}
+      />
+
+      {/* Vector Store Details Dialog */}
+      <VectorStoreDetailsDialog
+        open={openVectorStoreDetails}
+        handleClose={handleVectorStoreDetials}
       />
     </Box>
   );
