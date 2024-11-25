@@ -18,8 +18,8 @@ export const useThreadsData = () => {
   return useQuery({
     queryKey: ["threads"],
     queryFn: fetchThreads,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 7 * 60 * 1000, // 7 minutes
+    cacheTime: 12 * 60 * 1000, // 12 minutes
     refetchOnWindowFocus: false,
     onError: (error) => {
       const errorMessage =

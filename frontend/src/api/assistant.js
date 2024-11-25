@@ -57,10 +57,19 @@ export const vectorStore = {
   update: async (id, vectorStore) => {
     const response = await axiosInstance.put(
       `/assistant/vector_store/${id}/update/`,
-      assistant
+      vectorStore
     );
     return response.data;
   },
+
+  // DELETE
+  delete: async (id) => {
+    const response = await axiosInstance.delete(
+      `/assistant/vector_store/${id}/delete/`,
+      vectorStore
+    );
+    return response.data;
+  }
 };
 
 // Service for Files-related API calls

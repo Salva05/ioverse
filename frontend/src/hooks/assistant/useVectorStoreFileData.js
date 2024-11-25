@@ -18,8 +18,8 @@ export const useVectorStoreFilesData = (vectorStoreId) => {
   return useQuery({
     queryKey: ["vectorStoreFiles", vectorStoreId],
     queryFn: () => fetchVectorStoreFiles(vectorStoreId), 
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 6 * 60 * 1000, // 6 minutes
+    cacheTime: 11 * 60 * 1000, // 11 minutes
     refetchOnWindowFocus: false,
     enabled: !!vectorStoreId, // only run when vectorStoreId is defined
     onError: (error) => {

@@ -18,8 +18,8 @@ export const useFilesData = () => {
   return useQuery({
     queryKey: ["files"],
     queryFn: fetchFiles,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 8 * 60 * 1000, // 8 minutes
+    cacheTime: 13 * 60 * 1000, // 13 minutes
     refetchOnWindowFocus: false,
     onError: (error) => {
       const errorMessage =

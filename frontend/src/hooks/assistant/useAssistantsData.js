@@ -18,8 +18,8 @@ export const useAssistantsData = () => {
   return useQuery({
     queryKey: ["assistants"],
     queryFn: fetchAssistants,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 9 * 60 * 1000, // 9 minutes
+    cacheTime: 14 * 60 * 1000, // 14 minutes
     refetchOnWindowFocus: false,
     onError: (error) => {
       const errorMessage =

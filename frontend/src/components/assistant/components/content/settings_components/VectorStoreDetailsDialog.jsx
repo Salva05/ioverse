@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -19,6 +19,8 @@ import {
   IconButton,
   TextField,
   Popover,
+  CircularProgress,
+  Slide,
 } from "@mui/material";
 import { LuPencil } from "react-icons/lu";
 import { IoInformationCircleOutline } from "react-icons/io5";
@@ -32,10 +34,44 @@ import { formatFileSize } from "../../../../../utils/formatFileSize";
 import { format } from "date-fns";
 import { RiLinkM } from "react-icons/ri";
 import CopyToClipboard from "react-copy-to-clipboard";
+import { toast } from "react-toastify";
+import { useUpdateVectorStore } from "../../../../../hooks/assistant/useUpdateVectorStore";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import { useDeleteVectorStore } from "../../../../../hooks/assistant/useDeleteVectorStore";
+import { useDeleteFile } from "../../../../../hooks/assistant/useDeleteFile";
 
-const VectorStoreDetailsDialog = ({ open, handleClose }) => {
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const VectorStoreDetailsDialog = ({
+  open,
+  handleClose,
+  openAddFilesDialog,
+}) => {
   const { vectorStore } = useAssistantContext();
+  const { mutate: updateVectorStore, isPending: isUpdatingName } =
+    useUpdateVectorStore();
+  const {
+    mutate: deleteVectorStore,
+    isPending: isDeletingVs,
+    isSuccess: deletedVs,
+  } = useDeleteVectorStore();
+
+  const { assistant } = useAssistantContext();
+  const {
+    mutate: updateAssistant,
+    isPending: isUpdatingAssistant,
+    isSuccess: updatedAssistant,
+  } = useUpdateAssistant();
+
   const { data: files = [] } = useFilesData();
+  const {
+    mutate: deleteFile,
+    isPending: isDeletingFile,
+    isSuccess: fileDeleted,
+  } = useDeleteFile();
+
   const { data: vectorStoreFiles = [] } = useVectorStoreFilesData(
     vectorStore?.id
   );
@@ -46,8 +82,9 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
   const isMobile = useMediaQuery(`(max-width:500px)`);
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [idFileToDelete, setIdFileToDelete] = useState(""); // For updating UI when a file has to be removed in the useEffect
 
-  const [title, setTitle] = useState(vectorStore?.name || "");
+  const [title, setTitle] = useState(vectorStore?.name || "Untitled storage");
   const [isEditable, setIsEditable] = useState(false);
   const textFieldRef = useRef(null);
 
@@ -96,22 +133,32 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
   // Focus the TextField when it becomes editable
   useEffect(() => {
     if (isEditable && textFieldRef.current) {
+      if (!vectorStore.name) setTitle("");
       textFieldRef.current.focus();
     }
   }, [isEditable]);
 
   useEffect(() => {
-    setTitle(vectorStore?.name || "");
+    setTitle(vectorStore?.name || "Untitled storage");
   }, [vectorStore]);
 
   // Handler to exit edit mode and update the title
   const handleExitEditMode = () => {
     setIsEditable(false);
     if (!title.trim()) {
-      setTitle(vectorStore?.name || "");
+      setTitle(vectorStore?.name || "Untitled storage");
+    } else if (title.length > 40) {
+      toast.error("The name can't be more than 40 characters long.");
+      setTitle(vectorStore?.name);
     } else {
       if (vectorStore && title !== vectorStore.name) {
-        // ...
+        const updatedVectorStore = {
+          name: title,
+        };
+        updateVectorStore({
+          id: vectorStore.id,
+          vectorStoreData: updatedVectorStore,
+        });
       }
     }
   };
@@ -128,6 +175,55 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
     }
   };
 
+  const handleDetach = () => {
+    handleClose();
+    const updatedAssistant = {
+      ...assistant,
+      tool_resources: {
+        ...assistant.tool_resources,
+        file_search: {
+          vector_store_ids: [],
+        },
+      },
+    };
+    updateAssistant({
+      id: assistant.id,
+      assistantData: updatedAssistant,
+    });
+  };
+
+  const handleDelete = () => {
+    deleteVectorStore(vectorStore.id);
+  };
+
+  const handleRemoveFile = (id) => {
+    const fileToRemove = files.find((file) => file.id === id);
+
+    if (fileToRemove) {
+      setIdFileToDelete(fileToRemove.id);
+      deleteFile(id);
+    } else {
+      toast.info("This file doesn't seem to exist.");
+    }
+  };
+
+  // Close dialog when the vector store is deleted
+  useEffect(() => {
+    if (deletedVs) {
+      handleClose();
+    }
+  }, [deletedVs]);
+
+  // Update the UI and remove the file when the mutation is completed
+  useEffect(() => {
+    if (fileDeleted) {
+      setUploadedFiles((prevFiles) =>
+        prevFiles.filter((file) => file.id != idFileToDelete)
+      );
+      setIdFileToDelete("");
+    }
+  }, [fileDeleted]);
+  
   return (
     <>
       <Dialog
@@ -137,13 +233,11 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
         aria-describedby="select-vector-store-description"
         maxWidth="sm"
         disableEscapeKeyDown={isEditable}
+        TransitionComponent={Transition}
         sx={{
           "& .MuiPaper-root": {
             borderRadius: "12px",
             margin: isMobile ? 1 : undefined,
-          },
-          "& .MuiDialog-container": {
-            transition: "opacity 0.4s ease-in-out !important",
           },
         }}
       >
@@ -183,6 +277,12 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
                 }}
               >
                 {title}
+                {isUpdatingName && (
+                  <CircularProgress
+                    size={17}
+                    sx={{ marginLeft: "6px", verticalAlign: "middle" }}
+                  />
+                )}
               </Typography>
             )}
             {!isEditable && (
@@ -270,11 +370,15 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
                   {row.label === "ID" ? (
                     <CopyToClipboard text={row.content} onCopy={handleCopy}>
                       <Typography
-                        onMouseEnter={handlePopoverOpen}
-                        onMouseLeave={handlePopoverClose}
+                        onMouseEnter={
+                          isEditable ? undefined : handlePopoverOpen
+                        }
+                        onMouseLeave={
+                          isEditable ? undefined : handlePopoverClose
+                        }
                         sx={{
                           fontFamily: "'Montserrat', serif",
-                          cursor: "pointer",
+                          cursor: isEditable ? "" : "pointer",
                           fontWeight: "normal",
                           fontSize: isMobile
                             ? "0.8rem"
@@ -496,17 +600,31 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
                           >
                             <IconButton
                               size="small"
-                              onClick={() => console.log("Plop")}
+                              disabled={isDeletingFile}
+                              onClick={() =>
+                                isDeletingFile
+                                  ? undefined
+                                  : handleRemoveFile(file.id)
+                              }
                             >
-                              <GoTrash
-                                size="1rem"
-                                style={{
-                                  color:
-                                    theme.palette.mode === "light"
-                                      ? theme.palette.grey[700]
-                                      : theme.palette.grey[400],
-                                }}
-                              />
+                              {isDeletingFile && file.id === idFileToDelete ? (
+                                <CircularProgress
+                                  size={15}
+                                  sx={{
+                                    verticalAlign: "middle",
+                                  }}
+                                />
+                              ) : (
+                                <GoTrash
+                                  size="1rem"
+                                  style={{
+                                    color:
+                                      theme.palette.mode === "light"
+                                        ? isDeletingFile ? theme.palette.grey[400] : theme.palette.grey[900]
+                                        : isDeletingFile ? theme.palette.grey[500] : theme.palette.grey[200],
+                                  }}
+                                />
+                              )}
                             </IconButton>
                           </TableCell>
                         </TableRow>
@@ -538,6 +656,10 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
               variant="outlined"
               fullWidth
               startIcon={<Add />}
+              onClick={() => {
+                handleClose();
+                openAddFilesDialog();
+              }}
               sx={{
                 mb: 2,
                 borderRadius: "10px",
@@ -571,7 +693,7 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
           }}
         >
           <Button
-            onClick={() => {}}
+            onClick={handleDelete}
             variant="contained"
             size="small"
             sx={{
@@ -579,17 +701,25 @@ const VectorStoreDetailsDialog = ({ open, handleClose }) => {
               paddingY: 0.8,
               minWidth: "auto",
               color: "inherit",
-              backgroundColor: (theme) => theme.palette.error.light, // Optional background
+              backgroundColor: (theme) => theme.palette.error.light,
               "&:hover": {
-                backgroundColor: (theme) => theme.palette.error.dark, // Darker on hover
+                backgroundColor: (theme) => theme.palette.error.dark,
               },
               textTransform: "none",
             }}
           >
-            <GoTrash size={18} />
+            {isDeletingVs ? (
+              <CircularProgress
+                size={17}
+                color="inherit"
+                sx={{ verticalAlign: "middle" }}
+              />
+            ) : (
+              <GoTrash size={18} />
+            )}
           </Button>
           <Button
-            onClick={() => {}}
+            onClick={handleDetach}
             variant="contained"
             size="small"
             startIcon={<RiLinkM size={23} style />}

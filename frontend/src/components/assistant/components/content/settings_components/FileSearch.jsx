@@ -159,7 +159,7 @@ const FileSearch = () => {
             : theme.palette.grey[600],
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
+      <Box sx={{ display: "flex", alignItems: "center", flexDirection: "row", gap: 1 }}>
         <Switch
           checked={switchState}
           onChange={(e) => {
@@ -281,9 +281,8 @@ const FileSearch = () => {
                     fontFamily: "'Montserrat', serif",
                   }}
                 >
-                  Vector Store for{" "}
                   {truncateText(
-                    assistant?.name || "Unnamed Assistant",
+                    vectorStore?.name || "Untitled storage",
                     isMobile ? 17 : 25
                   )}
                 </Typography>
@@ -377,6 +376,7 @@ const FileSearch = () => {
       <VectorStoreDetailsDialog
         open={openVectorStoreDetails}
         handleClose={handleVectorStoreDetials}
+        openAddFilesDialog={addFilesDialogOpen}
       />
     </Box>
   );
