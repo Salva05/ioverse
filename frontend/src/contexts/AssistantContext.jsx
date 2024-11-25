@@ -12,10 +12,10 @@ export const AssistantProvider = ({ children }) => {
   const queryClient = useQueryClient();
 
   // Actual data from backend
-  const { data: assistants } = useAssistantsData();
-  const { data: threads } = useThreadsData();
-  const { data: vectorStores } = useVectorStoresData();
-  const { data: files } = useFilesData();
+  const { data: assistants = [] } = useAssistantsData();
+  const { data: threads = [] } = useThreadsData();
+  const { data: vectorStores = [] } = useVectorStoresData();
+  const { data: files = [] } = useFilesData();
 
   // Current active Tab and Entity (Domain Model)
   const [selectedTab, setSelectedTab] = useState("Settings");

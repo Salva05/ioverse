@@ -26,6 +26,19 @@ import VectorStoreDetailsDialog from "./VectorStoreDetailsDialog";
 const drawerWidth = 240;
 
 const FileSearch = () => {
+  const theme = useTheme();
+  const { open, isSmallScreen } = useContext(DrawerContext);
+  const isTablet = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 815 + drawerWidth : 815}px)`
+  );
+  const isMobile = useMediaQuery(
+    isSmallScreen
+      ? `(max-width:815px)`
+      : `(max-width:${open ? 500 + drawerWidth : 500}px)`
+  );
+  
   const { mutate } = useUpdateAssistant();
   const { assistant, vectorStore } = useAssistantContext();
 
@@ -39,18 +52,6 @@ const FileSearch = () => {
     );
   }, [assistant]);
 
-  const theme = useTheme();
-  const { open, isSmallScreen } = useContext(DrawerContext);
-  const isTablet = useMediaQuery(
-    isSmallScreen
-      ? `(max-width:815px)`
-      : `(max-width:${open ? 815 + drawerWidth : 815}px)`
-  );
-  const isMobile = useMediaQuery(
-    isSmallScreen
-      ? `(max-width:815px)`
-      : `(max-width:${open ? 500 + drawerWidth : 500}px)`
-  );
 
   // Info Popover State
   const infoPopoverAnchor = useRef(null);
@@ -259,7 +260,7 @@ const FileSearch = () => {
               },
             }}
           >
-            <GoDatabase style={{ marginLeft: 8 }} size="1.5rem" />
+            <GoDatabase style={{ marginLeft: 10 }} size="1.5rem" />
             <Box
               sx={{
                 display: "flex",
