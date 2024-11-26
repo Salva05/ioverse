@@ -15,6 +15,7 @@ import {
   IconButton,
   MenuItem,
   Menu,
+  CircularProgress,
 } from "@mui/material";
 import { BsStars } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
@@ -22,10 +23,17 @@ import Editor from "react-simple-code-editor";
 import Prism from "prismjs";
 import "prismjs/components/prism-json";
 import "prismjs/themes/prism.css";
+import { exampleJSONs } from "../../../../../utils/exampleJSONFunctions";
+import { toast } from "react-toastify";
+import { handleEditorKeyDown } from "../../../../../utils/codeFormatter";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import { getFunctionToolErrorMessage } from "../../../../../utils/getFunctionToolErrorMessage";
+import { GoTrash } from "react-icons/go";
 
+// Remove default background of prism.css for semicolon
+// which was causing it to be white
 Prism.hooks.add("wrap", function (env) {
   if (env.type === "operator") {
-    // Remove default background of prism.css
     env.attributes.style =
       "background: none !important; color: inherit !important;";
   }
@@ -35,10 +43,24 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const FunctionAddDialog = ({ openDialog, handleClose }) => {
+const FunctionAddDialog = ({
+  openDialog,
+  handleClose,
+  assistant,
+  activeFunction,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(`(max-width:500px)`);
   const fullScreen = useMediaQuery("(max-width:600px)");
+
+  const { mutate, isPending, isSuccess } = useUpdateAssistant();
+
+  // highlight boolean values
+  Prism.hooks.add("wrap", function (env) {
+    if (env.type === "boolean") {
+      env.attributes.style = `color: ${theme.palette.primary.main};`;
+    }
+  });
 
   // Examples List
   const [anchorEl, setAnchorEl] = useState(null);
@@ -47,93 +69,23 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
   // JSON Content State
   const [jsonContent, setJsonContent] = useState("");
 
+  useEffect(() => {
+    if (activeFunction && openDialog) {
+      try {
+        const formattedJSON = JSON.stringify(activeFunction, null, 2);
+        setJsonContent(formattedJSON);
+      } catch (error) {
+        console.error("Failed to stringify activeFunction:", error);
+        setJsonContent("");
+      }
+    } else {
+      setJsonContent("");
+    }
+  }, [activeFunction, openDialog]);
+
   // Syntax highlighting function
   const highlightCode = (code) =>
     Prism.highlight(code, Prism.languages.json, "json");
-
-  // Add a Prism hook for boolean values
-  useEffect(() => {
-    Prism.hooks.add("wrap", function (env) {
-      if (env.type === "boolean") {
-        env.attributes.style = `color: ${theme.palette.primary.main};`;
-      }
-    });
-  }, [theme]);
-
-  // Example JSONs
-  const exampleJSONs = {
-    get_weather: `{
-  "name": "get_weather",
-  "description": "Determine weather in my location",
-  "strict": true,
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "location": {
-        "type": "string",
-        "description": "The city and state e.g. San Francisco, CA"
-      },
-      "unit": {
-        "type": "string",
-        "enum": [
-          "c",
-          "f"
-        ]
-      }
-    },
-    "additionalProperties": false,
-    "required": [
-      "location",
-      "unit"
-    ]
-  }
-}`,
-    get_stock_price: `{
-  "name": "get_stock_price",
-  "description": "Get the current stock price",
-  "strict": true,
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "symbol": {
-        "type": "string",
-        "description": "The stock symbol"
-      }
-    },
-    "additionalProperties": false,
-    "required": ["symbol"]
-  }
-}`,
-    get_traffic: `{
-  "name": "get_traffic",
-  "description": "Gives current traffic conditions for a given area.",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "location": {
-        "type": "object",
-        "properties": {
-          "city": {
-            "type": "string",
-            "description": "Name of the city"
-          },
-          "state": {
-            "type": "string",
-            "description": "Two-letter state abbreviation"
-          }
-        },
-        "required": [
-          "city",
-          "state"
-        ]
-      }
-    },
-    "required": [
-      "location"
-    ]
-  }
-}`,
-  };
 
   const handleExamplesClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -142,6 +94,56 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
+
+  // Save function handler
+  const handleSave = () => {
+    const f = jsonContent.trim();
+
+    if (!f) {
+      toast.error("Function definition is empty.");
+      return;
+    }
+
+    try {
+      // Attempt to parse the JSON content
+      const parsedJSON = JSON.parse(f);
+
+      // Check for 'name' required property
+      if (!parsedJSON.name) {
+        toast.error("The JSON must contain a 'name' property.");
+        return;
+      }
+
+      const newFunction = {
+        type: "function",
+        function: parsedJSON,
+      };
+
+      const updatedAssistant = {
+        ...assistant,
+        tools: [...assistant.tools, newFunction],
+      };
+
+      // Update the assistant and catch any API-specific error
+      mutate({
+        id: assistant.id,
+        assistantData: updatedAssistant,
+        customOnError: (error) => {
+          const errorMessage = getFunctionToolErrorMessage(error);
+          toast.error(errorMessage);
+        },
+      });
+    } catch (error) {
+      toast.error(error.message || "Invalid JSON format.");
+    }
+  };
+
+  useEffect(() => {
+    if (isSuccess) {
+      setJsonContent("");
+      handleClose();
+    }
+  }, [isSuccess]);
 
   return (
     <Dialog
@@ -168,6 +170,13 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
             fontSize: isMobile ? "1rem" : "1.1rem",
           }}
         >
+          {isPending && (
+            <CircularProgress
+              color="inherit"
+              size={18}
+              sx={{ verticalAlign: "middle", mr: 2, mb: 0.5 }}
+            />
+          )}
           Add Function
         </Typography>
       </DialogTitle>
@@ -336,24 +345,12 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
             }}
           >
             <Editor
-              placeholder={`{
-  "name": "get_stock_price",
-  "description": "Get the current stock price",
-  "strict": true,
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "symbol": {
-        "type": "string",
-        "description": "The stock symbol"
-      }
-    },
-    "additionalProperties": false,
-    "required": ["symbol"]
-  }
-}`}
+              placeholder={exampleJSONs["placeholder_function"]}
               value={jsonContent}
-              onValueChange={(code) => setJsonContent(code)}
+              onValueChange={(code) => setJsonContent(code)} // Updates the content
+              onKeyDown={(event) =>
+                handleEditorKeyDown(event, jsonContent, setJsonContent)
+              }
               highlight={highlightCode}
               padding={12}
               style={{
@@ -409,6 +406,27 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
           justifyContent: "space-between",
         }}
       >
+        {activeFunction && (
+          <Button
+            onClick={() => {}}
+            variant="contained"
+            size="small"
+            sx={{
+              paddingX: 1,
+              paddingY: 0.8,
+              minWidth: "auto",
+              color: "inherit",
+              backgroundColor: (theme) => theme.palette.error.light,
+              "&:hover": {
+                backgroundColor: (theme) => theme.palette.error.dark,
+              },
+              textTransform: "none",
+            }}
+          >
+            <GoTrash size={18} />
+          </Button>
+        )}
+
         <Box sx={{ flexGrow: 1 }} />
         <Box
           sx={{
@@ -444,7 +462,7 @@ const FunctionAddDialog = ({ openDialog, handleClose }) => {
             Cancel
           </Button>
           <Button
-            onClick={handleClose}
+            onClick={handleSave}
             autoFocus
             variant="contained"
             size="small"

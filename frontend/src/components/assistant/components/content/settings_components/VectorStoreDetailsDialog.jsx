@@ -210,7 +210,7 @@ const VectorStoreDetailsDialog = ({
   // Close dialog when the vector store is deleted
   useEffect(() => {
     if (deletedVs) {
-      handleClose();
+      handleDetach();
     }
   }, [deletedVs]);
 

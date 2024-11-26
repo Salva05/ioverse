@@ -14,11 +14,10 @@ import {
   useTheme,
   useMediaQuery,
   IconButton,
-  createTheme,
   ThemeProvider,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
 import chat from "../api/chat";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -26,6 +25,9 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import he from "he";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { GrSystem } from "react-icons/gr";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 const drawerWidth = 240;
 
@@ -101,21 +103,23 @@ const MessageItem = ({ sender, message }) => {
 };
 
 export default function SharedConversation() {
-  const [conversationTitle, setConversationTitle] = useState("");
   const [conversation, setConversation] = useState([]);
   const [error, setError] = useState(null);
   const { share_token } = useParams();
   const messagesEndRef = useRef(null);
-  
+
   const theme = useTheme();
-  const { darkMode, toggleDarkMode } = useDarkMode();
+  const { themePreference, toggleThemePreference } = useDarkMode();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const openMenu = (event) => setAnchorEl(event.currentTarget);
+  const closeMenu = () => setAnchorEl(null);
 
   useEffect(() => {
     const fetchConversation = async () => {
       try {
         const response = await chat.getSharedConversation(share_token);
         setConversation(response.messages);
-        setConversationTitle(response.title || "Untitled");
         scrollToBottom();
       } catch (error) {
         setError("Conversation not found.");
@@ -144,13 +148,102 @@ export default function SharedConversation() {
     <ThemeProvider theme={theme}>
       <StyledAppBar position="fixed" open={false}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <IconButton
-            onClick={toggleDarkMode}
-            color="inherit"
-            edge="start"
-          >
-            {darkMode ? <LightModeIcon fontSize="small"/> : <DarkModeIcon fontSize="small"/>}
+          <IconButton color="inherit" onClick={openMenu}>
+            {themePreference === "light" ? (
+              <LightModeIcon fontSize="small" />
+            ) : themePreference === "dark" ? (
+              <DarkModeIcon fontSize="small" />
+            ) : (
+              <GrSystem size={17} />
+            )}
           </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={closeMenu}
+          >
+            <MenuItem
+              selected={themePreference === "light"}
+              onClick={() => {
+                toggleThemePreference("light");
+                closeMenu();
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                borderRadius: "10px",
+                padding: "4px 16px",
+                minWidth: "150px",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "8px",
+                }}
+              >
+                <LightModeIcon fontSize="small" />
+              </Box>
+              Light Theme
+            </MenuItem>
+            <MenuItem
+              selected={themePreference === "dark"}
+              onClick={() => {
+                toggleThemePreference("dark");
+                closeMenu();
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                borderRadius: "10px",
+                padding: "4px 16px",
+                minWidth: "150px",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "8px",
+                }}
+              >
+                <DarkModeIcon fontSize="small" />
+              </Box>
+              Dark Theme
+            </MenuItem>
+            <MenuItem
+              selected={themePreference === "system"}
+              onClick={() => {
+                toggleThemePreference("system");
+                closeMenu();
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                borderRadius: "10px",
+                padding: "4px 16px",
+                minWidth: "150px",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "8px",
+                }}
+              >
+                <GrSystem size={17} />
+              </Box>
+              System Theme
+            </MenuItem>
+          </Menu>
           <Typography
             variant="h6"
             noWrap

@@ -45,7 +45,7 @@ const CodeInterpreter = () => {
   const { files } = useAssistantContext();
   const [idFileToDelete, setIdFileToDelete] = useState("");
 
-  // State for conditional renders and to check if the assistant's code_interpreter resouce has any file inside
+  // State for conditional renders checking if the assistant's code_interpreter resouce has any file inside
   const [hasFiles, setHasFiles] = useState(
     Boolean(assistant?.tool_resources?.code_interpreter?.file_ids?.length)
   );
@@ -252,7 +252,6 @@ const CodeInterpreter = () => {
                     key={fileId}
                     sx={{
                       position: "relative",
-                      cursor: "pointer",
                       transition: "all 0.3s ease-in-out",
                       "&:hover": {
                         backgroundColor: (theme) => theme.palette.action.hover,
@@ -269,6 +268,7 @@ const CodeInterpreter = () => {
                   >
                     <ListItemIcon
                       sx={{
+                        cursor: "pointer",
                         border: "1px solid",
                         borderColor: (theme) => theme.palette.divider,
                         backgroundColor: (theme) => theme.palette.action.hover,
@@ -278,6 +278,12 @@ const CodeInterpreter = () => {
                         ml: -0.7,
                         mr: 1,
                         borderRadius: 2,
+                        "&:hover + .list-item-text span": {
+                          color: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.primary.light
+                              : theme.palette.primary.dark,
+                        },
                       }}
                     >
                       <InsertDriveFileOutlined
@@ -287,7 +293,32 @@ const CodeInterpreter = () => {
                       />
                     </ListItemIcon>
                     <ListItemText
-                      primary={file?.filename || fileId}
+                      className="list-item-text"
+                      primary={
+                        <span
+                          style={{
+                            cursor: "pointer",
+                            color: "inherit",
+                            transition: "color 0.3s ease-in-out",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.color =
+                              theme.palette.mode === "dark"
+                                ? theme.palette.primary.light
+                                : theme.palette.primary.dark;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.color = "inherit";
+                          }}
+                          onClick={() => {
+                            console.log(
+                              `Clicked on file: ${file?.filename || fileId}`
+                            );
+                          }}
+                        >
+                          {file?.filename || fileId}
+                        </span>
+                      }
                       primaryTypographyProps={{
                         fontFamily: "'Montserrat', serif",
                         color: "text.secondary",
@@ -298,6 +329,7 @@ const CodeInterpreter = () => {
                       className="trash-icon"
                       edge="end"
                       aria-label="delete"
+                      disabled={isPending && !(fileId === idFileToDelete)}
                       onClick={() =>
                         isPending ? undefined : handleDetachFile(fileId)
                       }
@@ -318,10 +350,7 @@ const CodeInterpreter = () => {
                             ? "none"
                             : "auto",
                         "&:hover": {
-                          backgroundColor:
-                            isPending && fileId !== idFileToDelete
-                              ? "transparent"
-                              : "inherit",
+                          backgroundColor: "transparent",
                           opacity:
                             isPending && fileId === idFileToDelete ? 1 : 0.7,
                           visibility: "visible",

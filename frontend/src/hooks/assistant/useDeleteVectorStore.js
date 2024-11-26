@@ -11,7 +11,6 @@ export const useDeleteVectorStore = () => {
       queryClient.setQueryData(["vectorStores"], (oldFiles) =>
         oldFiles ? oldFiles.filter((vs) => vs.id !== id) : []
       );
-      toast.success("Vector Store deleted successfully.");
     },
     onError: (error) => {
       const errorMessage =

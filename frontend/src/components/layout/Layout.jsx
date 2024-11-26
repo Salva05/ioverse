@@ -13,7 +13,7 @@ import { DrawerContext } from "../../contexts/DrawerContext";
 import { useDarkMode } from "../../contexts/DarkModeContext";
 
 export default function Layout() {
-  const { darkMode, toggleDarkMode } = useDarkMode();
+  const { darkMode } = useDarkMode();
   const theme = createTheme({
     palette: {
       mode: darkMode ? "dark" : "light",
