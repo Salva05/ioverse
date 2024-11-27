@@ -111,7 +111,7 @@ export default function AppBar({ handleDrawerOpen }) {
               >
                 <LightModeIcon fontSize="small" />
               </Box>
-              Light Theme
+              Light
             </MenuItem>
             <MenuItem
               selected={themePreference === "dark"}
@@ -138,7 +138,7 @@ export default function AppBar({ handleDrawerOpen }) {
               >
                 <DarkModeIcon fontSize="small" />
               </Box>
-              Dark Theme
+              Dark
             </MenuItem>
             <MenuItem
               selected={themePreference === "system"}
@@ -165,7 +165,7 @@ export default function AppBar({ handleDrawerOpen }) {
               >
                 <GrSystem size={17} />
               </Box>
-              System Theme
+              System
             </MenuItem>
           </Menu>
           {shouldShowChatOptions && (

@@ -48,6 +48,8 @@ const FunctionAddDialog = ({
   handleClose,
   assistant,
   activeFunction,
+  handleRemove,
+  isRemovalPending,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(`(max-width:500px)`);
@@ -119,10 +121,26 @@ const FunctionAddDialog = ({
         function: parsedJSON,
       };
 
-      const updatedAssistant = {
-        ...assistant,
-        tools: [...assistant.tools, newFunction],
-      };
+      let updatedAssistant;
+
+      if (activeFunction) { // Update the existing function
+        updatedAssistant = {
+          ...assistant,
+          tools: [
+            ...assistant.tools.filter(
+              (tool) =>
+                tool.type !== "function" || // Keep all non-function tools
+                tool.function.name !== activeFunction.name // Exclude the active function tool
+            ),
+            newFunction,
+          ],
+        };
+      } else {  // Create a new function
+        updatedAssistant = {
+          ...assistant,
+          tools: [...assistant.tools, newFunction],
+        };
+      }
 
       // Update the assistant and catch any API-specific error
       mutate({
@@ -408,7 +426,7 @@ const FunctionAddDialog = ({
       >
         {activeFunction && (
           <Button
-            onClick={() => {}}
+            onClick={() => handleRemove(activeFunction.name, true)}
             variant="contained"
             size="small"
             sx={{
@@ -423,7 +441,15 @@ const FunctionAddDialog = ({
               textTransform: "none",
             }}
           >
-            <GoTrash size={18} />
+            {isRemovalPending ? (
+              <CircularProgress
+                color="inherit"
+                size={18}
+                sx={{ verticalAlign: "middle" }}
+              />
+            ) : (
+              <GoTrash size={18} />
+            )}
           </Button>
         )}
 
@@ -436,6 +462,7 @@ const FunctionAddDialog = ({
         >
           <Button
             onClick={handleClose}
+            disabled={isRemovalPending}
             variant="outlined"
             color="inherit"
             size="small"
@@ -463,6 +490,7 @@ const FunctionAddDialog = ({
           </Button>
           <Button
             onClick={handleSave}
+            disabled={isRemovalPending}
             autoFocus
             variant="contained"
             size="small"

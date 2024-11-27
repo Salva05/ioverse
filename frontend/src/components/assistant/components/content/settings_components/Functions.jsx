@@ -46,29 +46,18 @@ const Functions = () => {
 
   const [functionBeingDeleted, setFunctionBeingDeleted] = useState(""); // Holds the name of the function being deleted
 
-  const handleRemove = (functionName) => {
-    // Add the function to the set of functions being deleted
-    setFunctionBeingDeleted(functionName);
-
-    // Separate tools into function and non-function categories
-    const functionTools = assistant.tools.filter(
-      (tool) => tool.type === "function"
-    );
-    const nonFunctionTools = assistant.tools.filter(
-      (tool) => tool.type !== "function"
-    );
-
-    // Update the function tools, excluding the one to be removed
-    const updatedFunctionTools = functionTools.filter(
-      (f) => f.function.name !== functionName
-    );
-    // Merge the updated function tools with non-function tools
+  const handleRemove = (functionName, shouldCloseFunctionDialog) => {
+    setFunctionBeingDeleted(functionName); // Track the function being deleted
+  
     const updatedAssistant = {
       ...assistant,
-      tools: [...nonFunctionTools, ...updatedFunctionTools],
+      tools: assistant.tools.filter(
+        (tool) =>
+          tool.type !== "function" || // Keep all non-function tools
+          tool.function.name !== functionName // Exclude the matching function tool
+      ),
     };
-
-    // Update the assistant to effectively remove the function tool
+  
     mutate({
       id: assistant.id,
       assistantData: updatedAssistant,
@@ -77,8 +66,11 @@ const Functions = () => {
         toast.error(errorMessage);
         setFunctionBeingDeleted("");
       },
-      customOnSuccess: (data) => {
+      customOnSuccess: () => {
         setFunctionBeingDeleted("");
+        if (shouldCloseFunctionDialog) {
+          addFunctionsDialogClose();
+        }
       },
     });
   };
@@ -283,7 +275,9 @@ const Functions = () => {
                 />
                 <IconButton
                   className="trash-icon"
-                  disabled={isPending && !(functionBeingDeleted === f.function.name)}
+                  disabled={
+                    isPending && !(functionBeingDeleted === f.function.name)
+                  }
                   edge="end"
                   aria-label="delete"
                   onClick={() =>
@@ -348,6 +342,8 @@ const Functions = () => {
         handleClose={addFunctionsDialogClose}
         assistant={assistant}
         activeFunction={activeFunction}
+        handleRemove={handleRemove}
+        isRemovalPending={isPending}
       />
     </Box>
   );
