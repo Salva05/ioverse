@@ -46,9 +46,9 @@ const Functions = () => {
 
   const [functionBeingDeleted, setFunctionBeingDeleted] = useState(""); // Holds the name of the function being deleted
 
-  const handleRemove = (functionName, shouldCloseFunctionDialog) => {
+  const handleRemove = (functionName, callback) => {
     setFunctionBeingDeleted(functionName); // Track the function being deleted
-  
+
     const updatedAssistant = {
       ...assistant,
       tools: assistant.tools.filter(
@@ -57,22 +57,30 @@ const Functions = () => {
           tool.function.name !== functionName // Exclude the matching function tool
       ),
     };
-  
-    mutate({
-      id: assistant.id,
-      assistantData: updatedAssistant,
-      customOnError: (error) => {
-        const errorMessage = getFunctionToolErrorMessage(error);
-        toast.error(errorMessage);
-        setFunctionBeingDeleted("");
+
+    mutate(
+      {
+        id: assistant.id,
+        assistantData: updatedAssistant,
+        customOnError: (error) => {
+          const errorMessage = getFunctionToolErrorMessage(error);
+          toast.error(errorMessage);
+          setFunctionBeingDeleted("");
+        },
+        customOnSuccess: () => {
+          setFunctionBeingDeleted("");
+          if (shouldCloseFunctionDialog) {
+            addFunctionsDialogClose();
+          }
+        },
       },
-      customOnSuccess: () => {
-        setFunctionBeingDeleted("");
-        if (shouldCloseFunctionDialog) {
-          addFunctionsDialogClose();
-        }
-      },
-    });
+      {
+        onSuccess: () => {
+          setFunctionBeingDeleted("");
+          if (callback && typeof callback === "function") callback();
+        },
+      }
+    );
   };
 
   // Info Popover State

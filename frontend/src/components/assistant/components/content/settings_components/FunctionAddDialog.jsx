@@ -426,7 +426,7 @@ const FunctionAddDialog = ({
       >
         {activeFunction && (
           <Button
-            onClick={() => handleRemove(activeFunction.name, true)}
+            onClick={() => handleRemove(activeFunction.name, handleClose)}
             variant="contained"
             size="small"
             sx={{
