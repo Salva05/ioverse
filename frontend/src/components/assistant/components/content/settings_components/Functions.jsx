@@ -11,7 +11,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useMemo, useRef, useState } from "react";
 import { RiInformation2Line } from "react-icons/ri";
 import { GoPlus, GoTrash } from "react-icons/go";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
@@ -34,8 +34,8 @@ const Functions = () => {
       : `(max-width:${open ? 815 + drawerWidth : 815}px)`
   );
 
-  const { assistant, setAssistant } = useAssistantContext();
-  const { mutate, isPending, isSuccess } = useUpdateAssistant();
+  const { assistant } = useAssistantContext();
+  const { mutate, isPending } = useUpdateAssistant();
 
   // State for conditional renders. Holds the assistant's functions
   const functions = useMemo(() => {

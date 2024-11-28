@@ -20,7 +20,6 @@ import { useDeleteFile } from "../../../../../hooks/assistant/useDeleteFile";
 import { v4 as uuidv4 } from "uuid";
 import { truncateText } from "../../../../../utils/textUtils";
 import { useCreateVectorStore } from "../../../../../hooks/assistant/useCreateVectorStore";
-import { useFilesData } from "../../../../../hooks/assistant/useFilesData";
 import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
 import { useQueryClient } from "@tanstack/react-query";
 import { connectToSSE } from "../../../../../services/connectToSSE";
@@ -43,7 +42,6 @@ const FileSearchAddDialog = ({
   const queryClient = useQueryClient();
   const theme = useTheme();
 
-  const { files } = useFilesData();
   const updateAssistant = useUpdateAssistant();
   const { setVectorStore } = useAssistantContext();
 
@@ -133,7 +131,10 @@ const FileSearchAddDialog = ({
   };
 
   const handleAttach = () => {
-    const filesIds = uploadedFiles.map((entry) => entry.data.id);
+    // Extract IDs for only successfully uploaded files
+    const filesIds = uploadedFiles
+      .filter((entry) => entry.status === "success")
+      .map((entry) => entry.data.id);
 
     // Case if no vector store is active on the assistant
     if (!vectorStore) {
@@ -276,7 +277,10 @@ const FileSearchAddDialog = ({
                 toast.error("Failed to retrieve the updated Vector Store.");
               }
               // Update vector store files whenever accessed
-              queryClient.invalidateQueries(["vectorStoreFiles", vectorStore.id]);
+              queryClient.invalidateQueries([
+                "vectorStoreFiles",
+                vectorStore.id,
+              ]);
             }
           );
         },

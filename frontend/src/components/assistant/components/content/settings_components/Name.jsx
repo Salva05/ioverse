@@ -14,7 +14,7 @@ const drawerWidth = 240;
 
 const Name = () => {
   const { mutate } = useUpdateAssistant();
-  const { assistant, setAssistant } = useAssistantContext();
+  const { assistant } = useAssistantContext();
 
   // Local state for the input value
   const [nameInput, setNameInput] = useState(assistant?.name || "");

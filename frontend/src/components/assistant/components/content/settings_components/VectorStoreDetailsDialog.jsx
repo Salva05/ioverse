@@ -28,7 +28,6 @@ import { RiHourglass2Fill } from "react-icons/ri";
 import { InsertDriveFileOutlined, Add } from "@mui/icons-material";
 import { GoTrash } from "react-icons/go";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
-import { useFilesData } from "../../../../../hooks/assistant/useFilesData";
 import { useVectorStoreFilesData } from "../../../../../hooks/assistant/useVectorStoreFileData";
 import { formatFileSize } from "../../../../../utils/formatFileSize";
 import { format } from "date-fns";
@@ -49,32 +48,28 @@ const VectorStoreDetailsDialog = ({
   handleClose,
   openAddFilesDialog,
 }) => {
+  const { assistant } = useAssistantContext();
   const { vectorStore } = useAssistantContext();
+
+  const { files } = useAssistantContext();
+  const { data: vectorStoreFiles = [] } = useVectorStoreFilesData(
+    vectorStore?.id
+  );
+
   const { mutate: updateVectorStore, isPending: isUpdatingName } =
     useUpdateVectorStore();
+  const { mutate: updateAssistant } = useUpdateAssistant();
+
   const {
     mutate: deleteVectorStore,
     isPending: isDeletingVs,
     isSuccess: deletedVs,
   } = useDeleteVectorStore();
-
-  const { assistant } = useAssistantContext();
-  const {
-    mutate: updateAssistant,
-    isPending: isUpdatingAssistant,
-    isSuccess: updatedAssistant,
-  } = useUpdateAssistant();
-
-  const { data: files = [] } = useFilesData();
   const {
     mutate: deleteFile,
     isPending: isDeletingFile,
     isSuccess: fileDeleted,
   } = useDeleteFile();
-
-  const { data: vectorStoreFiles = [] } = useVectorStoreFilesData(
-    vectorStore?.id
-  );
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -223,7 +218,7 @@ const VectorStoreDetailsDialog = ({
       setIdFileToDelete("");
     }
   }, [fileDeleted]);
-  
+
   return (
     <>
       <Dialog
@@ -620,8 +615,12 @@ const VectorStoreDetailsDialog = ({
                                   style={{
                                     color:
                                       theme.palette.mode === "light"
-                                        ? isDeletingFile ? theme.palette.grey[400] : theme.palette.grey[900]
-                                        : isDeletingFile ? theme.palette.grey[500] : theme.palette.grey[200],
+                                        ? isDeletingFile
+                                          ? theme.palette.grey[400]
+                                          : theme.palette.grey[900]
+                                        : isDeletingFile
+                                        ? theme.palette.grey[500]
+                                        : theme.palette.grey[200],
                                   }}
                                 />
                               )}

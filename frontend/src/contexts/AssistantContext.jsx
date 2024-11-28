@@ -9,10 +9,29 @@ export const useAssistantContext = () => useContext(AssistantContext);
 
 export const AssistantProvider = ({ children }) => {
   // Actual data from backend
-  const { data: assistants = [] } = useAssistantsData();
-  const { data: threads = [] } = useThreadsData();
-  const { data: vectorStores = [] } = useVectorStoresData();
-  const { data: files = [] } = useFilesData();
+  const {
+    data: assistants = [],
+    isLoading: isAssistantsLoading,
+    isError: isAssistantsError,
+  } = useAssistantsData();
+
+  const {
+    data: threads = [],
+    isLoading: isThreadsLoading,
+    isError: isThreadsError,
+  } = useThreadsData();
+
+  const {
+    data: vectorStores = [],
+    isLoading: isVectorStoresLoading,
+    isError: isVectorStoresError,
+  } = useVectorStoresData();
+
+  const {
+    data: files = [],
+    isLoading: isFilesLoading,
+    isError: isFilesError,
+  } = useFilesData();
 
   // Current active Tab and Entity (Domain Model)
   const [selectedTab, setSelectedTab] = useState("Settings");
@@ -73,12 +92,22 @@ export const AssistantProvider = ({ children }) => {
     setSelectedEntity,
     assistant,
     setAssistant,
+    assistants,
+    isAssistantsLoading,
+    isAssistantsError,
+    threads,
+    isThreadsLoading,
+    isThreadsError,
     thread,
     setThread,
     vectorStores,
+    isVectorStoresLoading,
+    isVectorStoresError,
     vectorStore,
     setVectorStore,
     files,
+    isFilesLoading,
+    isFilesError,
   };
 
   return (

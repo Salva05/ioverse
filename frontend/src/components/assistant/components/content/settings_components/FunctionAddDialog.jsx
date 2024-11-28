@@ -116,6 +116,18 @@ const FunctionAddDialog = ({
         return;
       }
 
+      // Add default 'strict' and 'parameters' fields if not provided
+      if (parsedJSON.strict === undefined) {
+        parsedJSON.strict = false;
+      }
+      if (!parsedJSON.parameters) {
+        parsedJSON.parameters = {
+          type: "object",
+          properties: {},
+          required: [],
+        };
+      }
+      
       const newFunction = {
         type: "function",
         function: parsedJSON,
@@ -123,7 +135,8 @@ const FunctionAddDialog = ({
 
       let updatedAssistant;
 
-      if (activeFunction) { // Update the existing function
+      if (activeFunction) {
+        // Update the existing function
         updatedAssistant = {
           ...assistant,
           tools: [
@@ -135,7 +148,8 @@ const FunctionAddDialog = ({
             newFunction,
           ],
         };
-      } else {  // Create a new function
+      } else {
+        // Create a new function
         updatedAssistant = {
           ...assistant,
           tools: [...assistant.tools, newFunction],

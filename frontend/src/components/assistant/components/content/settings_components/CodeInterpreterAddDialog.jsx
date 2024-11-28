@@ -19,19 +19,15 @@ import { toast } from "react-toastify";
 import { useDeleteFile } from "../../../../../hooks/assistant/useDeleteFile";
 import { v4 as uuidv4 } from "uuid";
 import { truncateText } from "../../../../../utils/textUtils";
-import { useFilesData } from "../../../../../hooks/assistant/useFilesData";
 import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
-import { useQueryClient } from "@tanstack/react-query";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const CodeInterpreterAddDialog = ({ openDialog, handleClose, assistant }) => {
-  const queryClient = useQueryClient();
   const theme = useTheme();
 
-  const { files } = useFilesData();
   const { mutate } = useUpdateAssistant();
 
   const createFileMutation = useCreateFile();
@@ -117,10 +113,10 @@ const CodeInterpreterAddDialog = ({ openDialog, handleClose, assistant }) => {
   };
 
   const handleAttach = () => {
-    // Retrieve id of every file
-    const filesIds = Array.isArray(uploadedFiles)
-      ? uploadedFiles.map((entry) => entry.data.id)
-      : [];
+    // Extract IDs for only successfully uploaded files
+    const filesIds = uploadedFiles
+      .filter((entry) => entry.status === "success")
+      .map((entry) => entry.data.id);
 
     // Check if filesIds exceeds the limit
     if (filesIds.length > 20) {

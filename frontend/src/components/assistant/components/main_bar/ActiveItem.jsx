@@ -16,23 +16,31 @@ import { LuContainer } from "react-icons/lu";
 import { HiOutlineSelector } from "react-icons/hi";
 import { IoMdAdd } from "react-icons/io";
 import { useAssistantContext } from "../../../../contexts/AssistantContext";
-import { useAssistantsData } from "../../../../hooks/assistant/useAssistantsData";
-import { useThreadsData } from "../../../../hooks/assistant/useThreadsData";
 import { motion } from "framer-motion";
 import { useIsMutating } from "@tanstack/react-query";
 
 const ActiveItem = () => {
-  const { selectedEntity, assistant, setAssistant, thread, setThread } =
-    useAssistantContext();
+  const {
+    selectedEntity,
+    assistant,
+    setAssistant,
+    assistants,
+    isAssistantsLoading,
+    thread,
+    setThread,
+    threads,
+    isThreadsLoading,
+  } = useAssistantContext();
 
-  const { data: assistantsData, isLoading } = useAssistantsData();
-  const { data: threadsData } = useThreadsData();
+  // Loading state for the selected domain
+  const isLoading =
+  selectedEntity === "Assistant" ? isAssistantsLoading : isThreadsLoading;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  const items = selectedEntity === "Assistant" ? assistantsData : threadsData;
-
+  const items = selectedEntity === "Assistant" ? assistants : threads;
+  
   // Find the selected item based on ID
   const selectedItem = useMemo(() => {
     if (!items || items.length === 0) return null;
