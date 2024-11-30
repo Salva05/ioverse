@@ -7,7 +7,21 @@ from pydantic import ValidationError
 
 logger = logging.getLogger('assistant_service')
 
-
+# OpenAI's response for an assistant whose response_format is set to json_schema
+# weirdly contains a trailing '_' in the "schema" field that is not accepted 
+# when the same response is sent back to OpenAI, causing an error        
+def remove_trailing_underscore(response_dict: dict) -> dict:
+    """
+    Removes the trailing underscore from the `schema_` key in the
+    `response_format` -> `json_schema` of the given response dictionary.
+    """
+    if 'response_format' in response_dict and 'json_schema' in response_dict['response_format']:
+        schema = response_dict['response_format']['json_schema']
+        if 'schema_' in schema:
+            schema['schema'] = schema.pop('schema_')  # Rename key from 'schema_' to 'schema'
+    return response_dict
+    
+            
 class AssistantService:
     def __init__(self):
         self.client = AssistantClient()
@@ -19,7 +33,8 @@ class AssistantService:
         
             # Convert OpenAI Assistant instance to dict
             response_dict = response.model_dump()
-            
+            response_dict = remove_trailing_underscore(response_dict)
+
             assistant = Assistant.model_validate(response_dict)
             logger.info(f"Assistant created: {assistant.id}")
             return assistant
@@ -37,6 +52,12 @@ class AssistantService:
             # Convert OpenAI Assistant instance to dict
             response_dict = response.model_dump()
             
+            # Check and fix trailing underscore in `response_format` -> `json_schema` -> `schema_`
+            if 'response_format' in response_dict and 'json_schema' in response_dict['response_format']:
+                schema = response_dict['response_format']['json_schema']
+                if 'schema_' in schema:
+                    schema['schema'] = schema.pop('schema_')  # Rename key from 'schema_' to 'schema'    
+            
             assistant = Assistant.model_validate(response_dict)
             logger.info(f"Assistant retrieved: {assistant.id}")
             return assistant
@@ -51,10 +72,12 @@ class AssistantService:
         try:
             list_params = params.model_dump(exclude_unset=False)
             response = self.client.list_assistants(**list_params)
-            
+
             # Convert OpenAI Assistant List instance to dict 
             response_dict = response.model_dump()
-            
+            for item in response_dict['data']:
+                item = remove_trailing_underscore(item)
+                        
             # Map each item to the Assistant model
             assistants = [Assistant.model_validate(item) for item in response_dict['data']]
             
@@ -75,7 +98,8 @@ class AssistantService:
             
             # Convert OpenAI Assistant instance to dict
             response_dict = response.model_dump()
-            
+            response_dict = remove_trailing_underscore(response_dict)
+                    
             assistant = Assistant.model_validate(response_dict)
             logger.info(f"Assistant updated: {assistant.id}")
             return assistant

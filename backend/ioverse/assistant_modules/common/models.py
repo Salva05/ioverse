@@ -11,7 +11,7 @@ class AllowedModels(str, Enum):
     GPT_4 = 'gpt-4'
     GPT_3_5_TURBO = 'gpt-3.5-turbo'
     GPT_40_MINI_2024_07_18 = 'gpt-4o-mini-2024-07-18'
-    GPT_4O_2024_08_06 = 'gpt-4o-mini-2024-08-06'
+    GPT_4O_2024_08_06 = 'gpt-4o-2024-08-06'
     GPT_4O_2024_05_13 = 'gpt-4o-2024-05-13'
     GPT_4_TURBO_PREVIEW = 'gpt-4-turbo-preview'
     GPT_4_TURBO_2024_04_09 = 'gpt-4-turbo-2024-04-09'
@@ -180,8 +180,6 @@ class ToolResources(BaseModel):
 class JsonSchemaResponseFormat(BaseModel):
     type: Literal['json_schema']
     json_schema: Dict[str, Any]
-    strict: Optional[bool] = Field(default=False)
-
 
 class JsonObjectResponseFormat(BaseModel):
     type: Literal['json_object']
