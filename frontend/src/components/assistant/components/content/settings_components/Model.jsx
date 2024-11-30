@@ -64,7 +64,7 @@ const models = [
     description: "",
   },
   {
-    name: "gpt-4-0125-perview",
+    name: "gpt-4-0125-preview",
     description: "",
   },
   {
@@ -84,15 +84,6 @@ const models = [
 const drawerWidth = 240;
 
 const Model = () => {
-  const { mutate } = useUpdateAssistant();
-  const { assistant } = useAssistantContext();
-  
-  // Local state for the input value
-  const [modelInput, setModelInput] = useState(assistant?.model || models[3].name);
-  useEffect(() => {
-    setModelInput(assistant?.model || models[3].name);
-  }, [assistant]);
-
   const theme = useTheme();
   const { open, isSmallScreen } = useContext(DrawerContext);
   const isTablet = useMediaQuery(
@@ -105,6 +96,16 @@ const Model = () => {
       ? `(max-width:500px)`
       : `(max-width:${open ? 500 + drawerWidth : 500}px)`
   );
+
+  const { mutate } = useUpdateAssistant();
+  const { assistant } = useAssistantContext();
+  
+  // Local state for the input value
+  const [modelInput, setModelInput] = useState(assistant?.model || models[3].name);
+  useEffect(() => {
+    setModelInput(assistant?.model || models[3].name);
+  }, [assistant]);
+
 
   const handleModelChange = (e) => {
     const newModel = e.target.value;

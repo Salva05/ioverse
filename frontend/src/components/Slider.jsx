@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { Slider as MUISlider} from "@mui/material";
 
-const Slider = ({ value, onChange, ...props }) => {
+const Slider = ({ value, onChange, handleChangeCommitted, ...props }) => {
   const theme = useTheme();
   return (
     <MUISlider
       value={value}
       onChange={onChange}
       min={props.min}
+      onChangeCommitted={handleChangeCommitted}
       max={props.max}
       step={props.step}
       sx={{

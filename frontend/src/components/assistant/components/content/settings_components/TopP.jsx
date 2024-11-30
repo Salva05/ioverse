@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   IconButton,
@@ -9,20 +9,40 @@ import {
 import Slider from "../../../../Slider";
 import HistoryIcon from "@mui/icons-material/History";
 import InfoPopover from "./InfoPopover";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
 
 const MIN_VALUE = 0.01;
 const MAX_VALUE = 1.0;
-const DEFAULT_VALUE = 1.0;
 
 const TopP = () => {
   const theme = useTheme();
 
-  const [sliderValue, setSliderValue] = useState(DEFAULT_VALUE);
-  const [inputValue, setInputValue] = useState(DEFAULT_VALUE.toFixed(2));
+  const { assistant } = useAssistantContext();
+  const { mutate } = useUpdateAssistant();
+
+  const DEFAULT_VALUE = () => assistant?.top_p || 1.0;
+
+  // Hold the firstly computed top_p
+  const historyValueRef = useRef(null);
+  useEffect(() => {
+    if (historyValueRef.current === null && assistant?.top_p !== undefined) {
+      historyValueRef.current = assistant.top_p;
+    }
+  }, [assistant]);
+
+  const [sliderValue, setSliderValue] = useState(DEFAULT_VALUE());
+  const [inputValue, setInputValue] = useState(DEFAULT_VALUE().toFixed(2));
   const [isSliderHovered, setIsSliderHovered] = useState(false);
   const [isTextFieldHovered, setIsTextFieldHovered] = useState(false);
   const [isTextFieldFocused, setIsTextFieldFocused] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
+
+  useEffect(() => {
+    const updatedValue = DEFAULT_VALUE();
+    setSliderValue(updatedValue);
+    setInputValue(updatedValue.toFixed(2));
+  }, [assistant]);
 
   // Info Popover State
   const infoPopoverAnchor = useRef(null);
@@ -80,7 +100,7 @@ const TopP = () => {
   };
   const handleTextFieldBlur = () => {
     setIsTextFieldFocused(false);
-    validateAndSetValue();
+    handleMutate(inputValue);
   };
 
   // Determine if borders should be shown
@@ -91,33 +111,38 @@ const TopP = () => {
   const handleTextFieldChange = (e) => {
     const value = e.target.value;
     // Allow empty string or valid number with up to two decimal places
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+    if (
+      value === "" ||
+      (/^\d*\.?\d{0,2}$/.test(value) && Number(value) <= MAX_VALUE)
+    ) {
       setInputValue(value);
+      if (value === "") {
+        setSliderValue(MIN_VALUE);
+      } else {
+        const numericValue = Number(value);
+        setSliderValue(numericValue);
+      }
     }
   };
 
   // Validate input and update sliderValue
-  const validateAndSetValue = () => {
-    if (inputValue === "") {
+  const validateAndSetValue = (value) => {
+    if (value === "") {
       setInputValue(sliderValue.toFixed(2));
       return;
     }
 
-    const parsedValue = parseFloat(inputValue);
+    let parsedValue = parseFloat(value);
     if (isNaN(parsedValue)) {
       setInputValue(sliderValue.toFixed(2));
       return;
     }
 
-    let newValue = parsedValue;
-    if (parsedValue < MIN_VALUE) {
-      newValue = MIN_VALUE;
-    } else if (parsedValue > MAX_VALUE) {
-      newValue = MAX_VALUE;
-    }
+    parsedValue = Math.min(Math.max(parsedValue, MIN_VALUE), MAX_VALUE);
 
-    setSliderValue(newValue);
-    setInputValue(newValue.toFixed(2));
+    setSliderValue(parsedValue);
+    setInputValue(parsedValue.toFixed(2));
+    return parsedValue;
   };
 
   // Calculate the dynamic width based on inputValue length
@@ -126,9 +151,41 @@ const TopP = () => {
     return `${length + 1}ch`;
   };
 
+  const handleSliderChangeCommitted = (event, newValue) => {
+    handleMutate(newValue);
+  };
+
+  // Logic for performing the update and commit changes
+  const handleMutate = (value) => {
+    const validatedValue = validateAndSetValue(value);
+
+    if (validatedValue === DEFAULT_VALUE()) return;
+
+    // Update assistant state with the new value
+    const updatedAssistant = {
+      ...assistant,
+      top_p: validatedValue,
+    };
+
+    mutate({
+      id: assistant.id,
+      assistantData: updatedAssistant,
+      customOnError: (error) => {
+        const defaultVal = DEFAULT_VALUE();
+        setSliderValue(defaultVal);
+        setInputValue(defaultVal.toString());
+        const errorMessage =
+          error.response?.data?.message ||
+          "Failed to update assistant. Please try again later.";
+        toast.error(`Error: ${errorMessage}`);
+      },
+    });
+  };
+
   const handleReset = () => {
-    setSliderValue(DEFAULT_VALUE);
-    setInputValue(DEFAULT_VALUE.toFixed(2));
+    setSliderValue(historyValueRef.current);
+    setInputValue(historyValueRef.current.toFixed(2));
+    handleMutate(historyValueRef.current);
   };
 
   return (
@@ -169,9 +226,9 @@ const TopP = () => {
         <IconButton
           onClick={handleReset}
           sx={{
-            visibility: sliderValue !== DEFAULT_VALUE ? "visible" : "hidden",
+            visibility: sliderValue !== historyValueRef.current ? "visible" : "hidden",
             transition: "visibility 0.5s, opacity 0.4s",
-            opacity: sliderValue !== DEFAULT_VALUE ? 1 : 0,
+            opacity: sliderValue !== historyValueRef.current ? 1 : 0,
           }}
           aria-label="Reset to default"
         >
@@ -226,6 +283,7 @@ const TopP = () => {
         <Slider
           value={sliderValue}
           onChange={handleSliderChange}
+          handleChangeCommitted={handleSliderChangeCommitted}
           min={MIN_VALUE}
           max={MAX_VALUE}
           step={0.01}

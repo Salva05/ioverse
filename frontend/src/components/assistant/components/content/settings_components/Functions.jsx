@@ -67,12 +67,6 @@ const Functions = () => {
           toast.error(errorMessage);
           setFunctionBeingDeleted("");
         },
-        customOnSuccess: () => {
-          setFunctionBeingDeleted("");
-          if (shouldCloseFunctionDialog) {
-            addFunctionsDialogClose();
-          }
-        },
       },
       {
         onSuccess: () => {

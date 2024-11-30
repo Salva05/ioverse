@@ -8,7 +8,7 @@ export const useUpdateAssistant = () => {
   const { setAssistant } = useAssistantContext();
 
   return useMutation({
-    mutationFn: ({ id, assistantData }) => assistant.update(id, assistantData),
+    mutationFn: ({ id, assistantData}) => assistant.update(id, assistantData),
     mutationKey: ["updateAssistant"],
     onMutate: async ({ id, assistantData }) => {
       await queryClient.cancelQueries(["assistants"]);

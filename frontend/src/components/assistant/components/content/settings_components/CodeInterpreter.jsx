@@ -26,6 +26,7 @@ import { GoTrash } from "react-icons/go";
 import { toast } from "react-toastify";
 import { useDeleteFile } from "../../../../../hooks/assistant/useDeleteFile";
 import { useQueryClient } from "@tanstack/react-query";
+import { extractOpenAIError } from "../../../../../utils/extractOpenAIError";
 
 const drawerWidth = 240;
 
@@ -125,18 +126,21 @@ const CodeInterpreter = () => {
             (tool) => tool.type !== "code_interpreter"
           ),
     };
-    mutate(
-      { id: assistant.id, assistantData: updatedAssistant },
-      {
-        onError: () => {
-          setSwitchState(
-            assistant?.tools?.some(
-              (tool) => tool.type === "code_interpreter"
-            ) || false
-          );
-        },
-      }
-    );
+    mutate({
+      id: assistant.id,
+      assistantData: updatedAssistant,
+      customOnError: (error) => {
+        setSwitchState(
+          assistant?.tools?.some((tool) => tool.type === "code_interpreter") ||
+            false
+        );
+        if (error?.response?.data.error) {
+          toast.error(extractOpenAIError(error?.response?.data.error));
+        } else {
+          toast.error("Failed to update assistant. Please try again later.");
+        }
+      },
+    });
   };
 
   useEffect(() => {

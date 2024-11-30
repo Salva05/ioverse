@@ -86,5 +86,111 @@ placeholder_function: `{
     "additionalProperties": false,
     "required": ["symbol"]
   }
-}`
+}`,
+// These represents the set of json_schema response formats availables as examples
+math_response: `{
+  "name": "math_response",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "steps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "explanation": {
+              "type": "string"
+            },
+            "output": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "explanation",
+            "output"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "final_answer": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "steps",
+      "final_answer"
+    ]
+  }
+}`,
+paper_metadata: `{
+  "name": "paper_metadata",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "authors": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "abstract": {
+        "type": "string"
+      },
+      "keywords": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "title",
+      "authors",
+      "abstract",
+      "keywords"
+    ],
+    "additionalProperties": false
+  },
+  "strict": true
+}`,
+content_compliance: `{
+  "name": "content_compliance",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "violates": {
+        "type": "boolean",
+        "description": "Indicates whether the content violates policies."
+      },
+      "violation_categories": {
+        "type": "array",
+        "description": "Categories under which the content violates policies.",
+        "items": {
+          "type": "string",
+          "enum": [
+            "sexual",
+            "violence",
+            "self_harm"
+          ]
+        }
+      },
+      "violation_reason": {
+        "type": "string",
+        "description": "Explanation of why the content violates policies."
+      }
+    },
+    "required": [
+      "violates",
+      "violation_categories",
+      "violation_reason"
+    ],
+    "additionalProperties": false
+  },
+  "strict": true
+}`,
 };

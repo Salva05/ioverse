@@ -50,6 +50,8 @@ const FunctionAddDialog = ({
   activeFunction,
   handleRemove,
   isRemovalPending,
+  menuOptions = ["get_weather()", "get_stock_price()", "get_traffic()"],
+  isResponseFormat = false,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(`(max-width:500px)`);
@@ -116,44 +118,63 @@ const FunctionAddDialog = ({
         return;
       }
 
-      // Add default 'strict' and 'parameters' fields if not provided
-      if (parsedJSON.strict === undefined) {
-        parsedJSON.strict = false;
+      // For function
+      if (!isResponseFormat) {
+        // Add default 'strict' and 'parameters' fields if not provided
+        if (parsedJSON.strict === undefined) {
+          parsedJSON.strict = false;
+        }
+        if (!parsedJSON.parameters) {
+          parsedJSON.parameters = {
+            type: "object",
+            properties: {},
+            required: [],
+          };
+        }
       }
-      if (!parsedJSON.parameters) {
-        parsedJSON.parameters = {
-          type: "object",
-          properties: {},
-          required: [],
-        };
-      }
-      
-      const newFunction = {
-        type: "function",
-        function: parsedJSON,
-      };
 
       let updatedAssistant;
 
-      if (activeFunction) {
-        // Update the existing function
+      // Conditional insertion of function or json_schema
+      if (isResponseFormat) {
+        // Schema creation
+        const newSchema = {
+          type: "json_schema",
+          json_schema: parsedJSON,
+        };
+        // Assistant update
         updatedAssistant = {
           ...assistant,
-          tools: [
-            ...assistant.tools.filter(
-              (tool) =>
-                tool.type !== "function" || // Keep all non-function tools
-                tool.function.name !== activeFunction.name // Exclude the active function tool
-            ),
-            newFunction,
-          ],
+          response_format: newSchema,
         };
+
       } else {
-        // Create a new function
-        updatedAssistant = {
-          ...assistant,
-          tools: [...assistant.tools, newFunction],
+        // Function creation
+        const newFunction = {
+          type: "function",
+          function: parsedJSON,
         };
+
+        if (activeFunction) {
+          // Update the existing function
+          updatedAssistant = {
+            ...assistant,
+            tools: [
+              ...assistant.tools.filter(
+                (tool) =>
+                  tool.type !== "function" || // Keep all non-function tools
+                  tool.function.name !== activeFunction.name // Exclude the active function tool
+              ),
+              newFunction,
+            ],
+          };
+        } else {
+          // Create a new function
+          updatedAssistant = {
+            ...assistant,
+            tools: [...assistant.tools, newFunction],
+          };
+        }
       }
 
       // Update the assistant and catch any API-specific error
@@ -209,7 +230,7 @@ const FunctionAddDialog = ({
               sx={{ verticalAlign: "middle", mr: 2, mb: 0.5 }}
             />
           )}
-          Add Function
+          {isResponseFormat ? "Add response format" : "Add Function"}
         </Typography>
       </DialogTitle>
       <DialogContent
@@ -227,10 +248,15 @@ const FunctionAddDialog = ({
             fontSize: isMobile ? "0.8rem" : "0.85rem",
           }}
         >
-          The model will intelligently decide to call functions based on input
-          it receives from the user.{" "}
+          {!isResponseFormat
+            ? "The model will intelligently decide to call functions based on input it receives from the user."
+            : "Use a JSON schema to define the structure of the model's response format."}{" "}
           <Link
-            href="https://platform.openai.com/docs/guides/function-calling"
+            href={
+              isResponseFormat
+                ? "https://platform.openai.com/docs/guides/structured-outputs"
+                : "https://platform.openai.com/docs/guides/function-calling"
+            }
             target="_blank"
             rel="noopener"
             sx={{
@@ -329,29 +355,27 @@ const FunctionAddDialog = ({
                   },
                 }}
               >
-                {["get_weather()", "get_stock_price()", "get_traffic()"].map(
-                  (text, index) => (
-                    <MenuItem
-                      key={index}
-                      onClick={() => {
-                        handleCloseMenu();
-                        const functionName = text.replace("()", "");
-                        setJsonContent(exampleJSONs[functionName]);
-                      }}
-                      sx={{
-                        fontSize: "0.835rem",
-                        padding: "4px 8px",
-                        borderRadius: theme.shape.borderRadius,
-                        margin: "2px auto",
-                        "&:hover": {
-                          backgroundColor: theme.palette.action.hover,
-                        },
-                      }}
-                    >
-                      {text}
-                    </MenuItem>
-                  )
-                )}
+                {menuOptions.map((text, index) => (
+                  <MenuItem
+                    key={index}
+                    onClick={() => {
+                      handleCloseMenu();
+                      const functionName = text.replace("()", "");
+                      setJsonContent(exampleJSONs[functionName]);
+                    }}
+                    sx={{
+                      fontSize: "0.835rem",
+                      padding: "4px 8px",
+                      borderRadius: theme.shape.borderRadius,
+                      margin: "2px auto",
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                    }}
+                  >
+                    {text}
+                  </MenuItem>
+                ))}
               </Menu>
             </Box>
           </Box>
@@ -397,37 +421,39 @@ const FunctionAddDialog = ({
               }}
             />
           </Box>
-          <Typography
-            variant="caption"
-            sx={{
-              mt: 1,
-              color: theme.palette.text.secondary,
-              fontFamily: "'Montserrat', serif",
-            }}
-          >
-            Add{" "}
+          {!isResponseFormat && (
             <Typography
+              variant="caption"
               sx={{
+                mt: 1,
+                color: theme.palette.text.secondary,
                 fontFamily: "'Montserrat', serif",
-                display: "inline",
-                fontSize: "inherit",
-                border: "1px solid",
-                pl: 0.7,
-                pr: 0.5,
-                pt: 0.2,
-                pb: 0.4,
-                borderRadius: 1.8,
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.background.paper
-                    : theme.palette.grey[100],
-                mr: 0.6,
               }}
             >
-              "strict": true{" "}
+              Add{" "}
+              <Typography
+                sx={{
+                  fontFamily: "'Montserrat', serif",
+                  display: "inline",
+                  fontSize: "inherit",
+                  border: "1px solid",
+                  pl: 0.7,
+                  pr: 0.5,
+                  pt: 0.2,
+                  pb: 0.4,
+                  borderRadius: 1.8,
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.background.paper
+                      : theme.palette.grey[100],
+                  mr: 0.6,
+                }}
+              >
+                "strict": true{" "}
+              </Typography>
+              to ensure the model's response always follows this schema.
             </Typography>
-            to ensure the model's response always follows this schema.
-          </Typography>
+          )}
         </Box>
       </DialogContent>
       <DialogActions
@@ -438,7 +464,7 @@ const FunctionAddDialog = ({
           justifyContent: "space-between",
         }}
       >
-        {activeFunction && (
+        {activeFunction && !isResponseFormat && (
           <Button
             onClick={() => handleRemove(activeFunction.name, handleClose)}
             variant="contained"

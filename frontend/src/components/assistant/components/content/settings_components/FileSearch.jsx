@@ -22,6 +22,8 @@ import { formatFileSize } from "../../../../../utils/formatFileSize";
 import { truncateText } from "../../../../../utils/textUtils";
 import VectorStoreSelectionDialog from "./VectorStoreSelectionDialog";
 import VectorStoreDetailsDialog from "./VectorStoreDetailsDialog";
+import { toast } from "react-toastify";
+import { extractOpenAIError } from "../../../../../utils/extractOpenAIError";
 
 const drawerWidth = 240;
 
@@ -38,7 +40,7 @@ const FileSearch = () => {
       ? `(max-width:815px)`
       : `(max-width:${open ? 500 + drawerWidth : 500}px)`
   );
-  
+
   const { mutate } = useUpdateAssistant();
   const { assistant, vectorStore } = useAssistantContext();
 
@@ -51,7 +53,6 @@ const FileSearch = () => {
       assistant?.tools?.some((tool) => tool.type === "file_search") || false
     );
   }, [assistant]);
-
 
   // Info Popover State
   const infoPopoverAnchor = useRef(null);
@@ -129,17 +130,20 @@ const FileSearch = () => {
           ]
         : (assistant.tools || []).filter((tool) => tool.type !== "file_search"),
     };
-    mutate(
-      { id: assistant.id, assistantData: updatedAssistant },
-      {
-        onError: () => {
-          setSwitchState(
-            assistant?.tools?.some((tool) => tool.type === "file_search") ||
-              false
-          );
-        },
-      }
-    );
+    mutate({
+      id: assistant.id,
+      assistantData: updatedAssistant,
+      customOnError: (error) => {
+        setSwitchState(
+          assistant?.tools?.some((tool) => tool.type === "file_search") || false
+        );
+        if (error?.response?.data.error) {
+          toast.error(extractOpenAIError(error?.response?.data.error));
+        } else {
+          toast.error("Failed to update assistant. Please try again later.");
+        }
+      },
+    });
   };
 
   return (
@@ -160,7 +164,14 @@ const FileSearch = () => {
             : theme.palette.grey[600],
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", flexDirection: "row", gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexDirection: "row",
+          gap: 1,
+        }}
+      >
         <Switch
           checked={switchState}
           onChange={(e) => {

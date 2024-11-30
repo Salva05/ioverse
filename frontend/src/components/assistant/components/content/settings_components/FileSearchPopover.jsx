@@ -109,41 +109,6 @@ const FileSearchPopover = ({
     validateAndSetValue();
   };
 
-  // Logic for performing the update and commit changes
-  const handleMutate = () => {
-    if (!switchState) return;
-    validateAndSetValue();
-    const clampedValue = Math.min(Math.max(sliderValue, MIN_VALUE), MAX_VALUE);
-    setSliderValue(clampedValue);
-    setInputValue(clampedValue.toString());
-    if (clampedValue === DEFAULT_VALUE()) return;
-    // Update assistant state with the new value
-    const updatedAssistant = {
-      ...assistant,
-      tools: assistant?.tools?.map((tool) =>
-        tool.type === "file_search"
-          ? {
-              ...tool,
-              file_search: {
-                ...tool.file_search,
-                max_num_results: clampedValue,
-              },
-            }
-          : tool
-      ),
-    };
-    mutate(
-      { id: assistant.id, assistantData: updatedAssistant },
-      {
-        onError: () => {
-          const defaultVal = DEFAULT_VALUE();
-          setSliderValue(defaultVal);
-          setInputValue(defaultVal.toString());
-        },
-      }
-    );
-  };
-
   // Determine if borders of TextField should be shown
   const showBorders =
     isSliderHovered || isTextFieldHovered || isPressed || isTextFieldFocused;
@@ -188,21 +153,54 @@ const FileSearchPopover = ({
       return;
     }
 
-    const parsedValue = parseInt(inputValue, 10);
+    let parsedValue = parseInt(inputValue, 10);
     if (isNaN(parsedValue)) {
       setInputValue(sliderValue.toString());
       return;
     }
 
-    let newValue = parsedValue;
-    if (parsedValue < MIN_VALUE) {
-      newValue = MIN_VALUE;
-    } else if (parsedValue > MAX_VALUE) {
-      newValue = MAX_VALUE;
-    }
+    parsedValue = Math.min(Math.max(parsedValue, MIN_VALUE), MAX_VALUE);
 
-    setSliderValue(newValue);
-    setInputValue(newValue.toString());
+    setSliderValue(parsedValue);
+    setInputValue(parsedValue.toString());
+  };
+
+  // Logic for performing the update and commit changes
+  const handleMutate = () => {
+    if (!switchState) return;
+    validateAndSetValue();
+    const clampedValue = Math.min(Math.max(sliderValue, MIN_VALUE), MAX_VALUE);
+    setSliderValue(clampedValue);
+    setInputValue(clampedValue.toString());
+    
+    if (clampedValue === DEFAULT_VALUE()) return;
+    
+    // Update assistant state with the new value
+    const updatedAssistant = {
+      ...assistant,
+      tools: assistant?.tools?.map((tool) =>
+        tool.type === "file_search"
+          ? {
+              ...tool,
+              file_search: {
+                ...tool.file_search,
+                max_num_results: clampedValue,
+              },
+            }
+          : tool
+      ),
+    };
+
+    mutate(
+      { id: assistant.id, assistantData: updatedAssistant },
+      {
+        onError: () => {
+          const defaultVal = DEFAULT_VALUE();
+          setSliderValue(defaultVal);
+          setInputValue(defaultVal.toString());
+        },
+      }
+    );
   };
 
   return (
@@ -274,7 +272,7 @@ const FileSearchPopover = ({
               value={inputValue}
               onChange={handleTextFieldChange}
               onBlur={handleTextFieldBlur}
-              onFocus={handleTextFieldFocus} // Ensure handleTextFieldFocus is defined
+              onFocus={handleTextFieldFocus}
               variant="outlined"
               size="small"
               type="text"

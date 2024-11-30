@@ -19,65 +19,80 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 
 const queryClient = new QueryClient();
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <Layout />,
+      children: [
+        {
+          path: "account",
+          element: (
+            <ProtectedRoute>
+              <Account />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "chat",
+          element: (
+            <ProtectedRoute>
+              <ChatSystem />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "text-to-image",
+          element: (
+            <ProtectedRoute>
+              <TextToImage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "assistant",
+          element: <Assistant />,
+        },
+        {
+          path: "login",
+          element: <Login />,
+        },
+        {
+          path: "register",
+          element: <SignUp />,
+        },
+        {
+          path: "shared-conversation/:share_token",
+          element: <SharedConversation />,
+        },
+        {
+          path: "shared-image/:share_token",
+          element: <SharedImage />,
+        },
+      ],
+    },
+  ],
   {
-    path: "/",
-    element: <Layout />,
-    children: [
-      {
-        path: "account",
-        element: (
-          <ProtectedRoute>
-            <Account />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "chat",
-        element: (
-          <ProtectedRoute>
-            <ChatSystem />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "text-to-image",
-        element: (
-          <ProtectedRoute>
-            <TextToImage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "assistant",
-        element: <Assistant />,
-      },
-      {
-        path: "login",
-        element: <Login />,
-      },
-      {
-        path: "register",
-        element: <SignUp />,
-      },
-      {
-        path: "shared-conversation/:share_token",
-        element: <SharedConversation />,
-      },
-      {
-        path: "shared-image/:share_token",
-        element: <SharedImage />,
-      },
-    ],
-  },
-]);
+    future: {
+      v7_skipActionErrorRevalidation: true, // Prevents revalidation when action errors occur
+      v7_startTransition: true, // Wrap state updates in React.startTransition
+      v7_relativeSplatPath: true, // Enables relative paths in nested routes
+      v7_fetcherPersist: true, // Retains fetcher state during navigation
+      v7_normalizeFormMethod: true, // Normalizes form methods (e.g., POST or GET)
+      v7_partialHydration: true, // Supports partial hydration for server-side rendering
+    },
+  }
+);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ConversationProvider>
         <DarkModeProvider>
-          <RouterProvider router={router} />
+          <RouterProvider
+            future={{ v7_startTransition: true }} // Enables React's startTransition API
+            router={router}
+          />
         </DarkModeProvider>
       </ConversationProvider>
     </QueryClientProvider>
