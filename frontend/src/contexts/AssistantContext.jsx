@@ -46,27 +46,6 @@ export const AssistantProvider = ({ children }) => {
   // Current Vector Store for the active Assistant (as Object)
   const [vectorStore, setVectorStore] = useState(null);
 
-  // Assistant Update
-  useEffect(() => {
-    if (!assistants || assistants.length === 0) {
-      setAssistant(null);
-      setVectorStore(null);
-    } else {
-      // Check if current assistant exists in the new assistants data
-      const updatedAssistant = assistants.find((a) => a.id === assistant?.id);
-
-      if (updatedAssistant) {
-        setAssistant(updatedAssistant); // Update
-      } else {
-        // Select latest assistant
-        const latestAssistant = assistants.reduce((latest, current) => {
-          return current.created_at > latest.created_at ? current : latest;
-        });
-        setAssistant(latestAssistant);
-      }
-    }
-  }, [assistants]);
-
   // Vector Store Update
   useEffect(() => {
     if (!assistant || !vectorStores) {

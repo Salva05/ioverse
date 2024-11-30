@@ -132,7 +132,7 @@ const MobileActiveItem = () => {
               >
                 {truncateText(
                   orderedItems[0]?.name ?? orderedItems[0]?.id,
-                   12
+                   17
                 )}
               </Typography>
               <HiOutlineSelector size="1.1em" style={{ marginLeft: 5 }} />
@@ -195,6 +195,10 @@ const MobileActiveItem = () => {
               sx={{
                 fontSize: "inherit",
                 fontFamily: "'Montserrat', serif",
+                maxWidth: 250,
+                whiteSpace: "normal",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
               }}
             >
               {item?.name ?? item?.id}

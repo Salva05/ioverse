@@ -14,6 +14,9 @@ import {
 import React, { useContext, forwardRef, useState } from "react";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { useDeleteAssistant } from "../../../../../hooks/assistant/useDeleteAssistant";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -24,12 +27,14 @@ const drawerWidth = 240;
 const Delete = () => {
   const theme = useTheme();
   const { open, isSmallScreen } = useContext(DrawerContext);
-  const isTablet = useMediaQuery(`(max-width:815px)`);
   const isMobile = useMediaQuery(
     isSmallScreen
       ? `(max-width:815px)`
       : `(max-width:${open ? 815 + drawerWidth : 815}px)`
   );
+
+  const { assistant } = useAssistantContext();
+  const { mutate, isPending } = useDeleteAssistant();
 
   // Confirm Delete Dialog
   const [openDialog, setOpenDialog] = useState(false);
@@ -39,6 +44,17 @@ const Delete = () => {
   };
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  const handleDelete = () => {
+    mutate(
+      { id: assistant.id },
+      {
+        onSuccess: () => {
+          handleCloseDialog();
+        },
+      }
+    );
   };
 
   return (
@@ -178,11 +194,11 @@ const Delete = () => {
               Cancel
             </Button>
             <Button
-              onClick={handleCloseDialog}
+              onClick={handleDelete}
               autoFocus
               variant="contained"
               size="small"
-              color="success"
+              disabled={isPending}
               sx={{
                 textTransform: "none",
                 fontFamily: "'Montserrat', serif",
@@ -195,9 +211,25 @@ const Delete = () => {
                 "&:focus": {
                   boxShadow: `0 0 0 4px ${theme.palette.error.light}`,
                 },
+                overflow: "hidden",
+                minWidth: 40,
+                height: 36,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              Delete
+              {isPending ? (
+                <CircularProgress
+                  size={20}
+                  color="inherit"
+                  sx={{
+                    color: theme.palette.common.white,
+                  }}
+                />
+              ) : (
+                "Delete"
+              )}
             </Button>
           </Box>
         </DialogActions>

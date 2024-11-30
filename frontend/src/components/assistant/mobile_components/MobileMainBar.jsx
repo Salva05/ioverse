@@ -3,19 +3,26 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import MobileActiveItem from "./MobileActiveItem";
 import SwitchEntityButton from "../components/main_bar/SwitchEntityButton";
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import MobileTabs from "./MobileTabs";
 
 const MobileMainBar = () => {
+  const theme = useTheme();
+
   return (
     <>
       <Box>
         <AppBar
-          position="static"
+          position="fixed"
           color="transparent"
           enableColorOnDark
-          sx={{ boxShadow: "none" }}
+          sx={{
+            boxShadow: "none",
+            top: theme.mixins.toolbar.minHeight,
+            backgroundColor: theme.palette.background.default,
+            zIndex: theme.zIndex.appBar - 1,
+          }}
         >
           <Toolbar
             sx={{
@@ -39,14 +46,14 @@ const MobileMainBar = () => {
             >
               <MobileTabs />
               {/* Right Section */}
-                <motion.div
-                  layout
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 7 }}
-                >
-                  <SwitchEntityButton />
-                </motion.div>
+              <motion.div
+                layout
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 7 }}
+              >
+                <SwitchEntityButton />
+              </motion.div>
             </Box>
           </Toolbar>
         </AppBar>

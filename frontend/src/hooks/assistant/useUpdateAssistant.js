@@ -5,7 +5,6 @@ import { useAssistantContext } from "../../contexts/AssistantContext";
 
 export const useUpdateAssistant = () => {
   const queryClient = useQueryClient();
-  const { setAssistant } = useAssistantContext();
 
   return useMutation({
     mutationFn: ({ id, assistantData}) => assistant.update(id, assistantData),

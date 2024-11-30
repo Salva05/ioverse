@@ -16,6 +16,21 @@ export const assistant = {
     );
     return response.data;
   },
+
+  // DELETE
+  delete: async (id) => {
+    const response = await axiosInstance.delete(`/assistant/${id}/delete/`);
+    return response.data;
+  },
+
+  // POST
+  create: async (assistantData) => {
+    const response = await axiosInstance.post(
+      "/assistant/create/",
+      assistantData
+    );
+    return response.data;
+  },
 };
 
 // Service for Thread-related API calls
@@ -69,7 +84,7 @@ export const vectorStore = {
       vectorStore
     );
     return response.data;
-  }
+  },
 };
 
 // Service for Files-related API calls

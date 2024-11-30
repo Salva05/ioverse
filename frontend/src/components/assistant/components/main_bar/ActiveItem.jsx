@@ -18,6 +18,7 @@ import { IoMdAdd } from "react-icons/io";
 import { useAssistantContext } from "../../../../contexts/AssistantContext";
 import { motion } from "framer-motion";
 import { useIsMutating } from "@tanstack/react-query";
+import { truncateText } from "../../../../utils/textUtils";
 
 const ActiveItem = () => {
   const {
@@ -34,13 +35,13 @@ const ActiveItem = () => {
 
   // Loading state for the selected domain
   const isLoading =
-  selectedEntity === "Assistant" ? isAssistantsLoading : isThreadsLoading;
+    selectedEntity === "Assistant" ? isAssistantsLoading : isThreadsLoading;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const items = selectedEntity === "Assistant" ? assistants : threads;
-  
+
   // Find the selected item based on ID
   const selectedItem = useMemo(() => {
     if (!items || items.length === 0) return null;
@@ -126,7 +127,7 @@ const ActiveItem = () => {
                   fontFamily: "'Montserrat', serif",
                 }}
               >
-                {orderedItems[0]?.name ?? orderedItems[0]?.id}
+                {truncateText(orderedItems[0]?.name ?? orderedItems[0]?.id, 30)}
               </Typography>
               <HiOutlineSelector size="1.1em" style={{ marginLeft: 5 }} />
             </>
@@ -186,6 +187,10 @@ const ActiveItem = () => {
               sx={{
                 fontSize: "inherit",
                 fontFamily: "'Montserrat', serif",
+                maxWidth: 330,
+                whiteSpace: "normal",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
               }}
             >
               {item?.name ?? item?.id}

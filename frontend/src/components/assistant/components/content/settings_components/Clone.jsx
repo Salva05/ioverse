@@ -4,10 +4,13 @@ import {
   Button,
   Typography,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import React, { useContext } from "react";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { FaRegClone } from "react-icons/fa";
+import { useCreateAssistant } from "../../../../../hooks/assistant/useCreateAssistant";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 
 const drawerWidth = 240;
 
@@ -19,6 +22,18 @@ const Clone = () => {
       ? `(max-width:815px)`
       : `(max-width:${open ? 815 + drawerWidth : 815}px)`
   );
+
+  const { mutate, isPending } = useCreateAssistant();
+  const { assistant } = useAssistantContext();
+
+  const handleDuplicate = () => {
+    let clonedAssistant = { ...assistant };
+    delete clonedAssistant.id;
+    if (assistant?.name) {
+      clonedAssistant.name = `Copy of ${assistant.name}`;
+    }
+    mutate(clonedAssistant);
+  };
 
   return (
     <Box
@@ -42,7 +57,8 @@ const Clone = () => {
       <Box sx={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
         <Button
           size="small"
-          onClick={() => {}}
+          onClick={handleDuplicate}
+          disabled={isPending}
           sx={{
             textTransform: "none",
             borderRadius: 2.3,
@@ -63,15 +79,28 @@ const Clone = () => {
             },
           }}
         >
-          <FaRegClone size="1rem" style={{ marginRight: 3 }} />
-          <Typography
-            sx={{
-              fontSize: "0.95rem",
-              fontFamily: "'Montserrat', serif",
-            }}
-          >
-            Clone
-          </Typography>
+          {isPending ? (
+            <CircularProgress
+              size={20}
+              color="inherit"
+              sx={{
+                m: 0.2,
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              }}
+            />
+          ) : (
+            <>
+              <FaRegClone size="1rem" style={{ marginRight: 3 }} />
+              <Typography
+                sx={{
+                  fontSize: "0.95rem",
+                  fontFamily: "'Montserrat', serif",
+                }}
+              >
+                Clone
+              </Typography>
+            </>
+          )}
         </Button>
       </Box>
     </Box>

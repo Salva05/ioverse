@@ -4,7 +4,7 @@ import Toolbar from "@mui/material/Toolbar";
 import ActiveItem from "./main_bar/ActiveItem";
 import Tabs from "./main_bar/Tabs";
 import SwitchEntityButton from "./main_bar/SwitchEntityButton";
-import { Box, useMediaQuery } from "@mui/material";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import { DrawerContext } from "../../../contexts/DrawerContext";
 
@@ -16,7 +16,7 @@ const MainBar = () => {
   const isMobile = useMediaQuery(
     `(max-width:${open ? 815 + drawerWidth : 815}px)`
   );
-
+const theme = useTheme();
   // To prevent incorrect displaying in first milliseconds of render
   // while darwer menu is still closing
   useEffect(() => {
@@ -30,10 +30,15 @@ const MainBar = () => {
 
   return (
     <AppBar
-      position="static"
+      position="fixed"
       color="transparent"
       enableColorOnDark
-      sx={{ boxShadow: "none" }}
+      sx={{
+        boxShadow: "none",
+        backgroundColor: theme.palette.background.default,
+        top: theme.mixins.toolbar.minHeight,
+        zIndex: theme.zIndex.appBar - 1,
+      }}
     >
       <Toolbar
         sx={{

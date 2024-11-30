@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import MainBar from "../components/MainBar";
-import { Box, useMediaQuery } from "@mui/material";
+import { Box, Toolbar, useMediaQuery } from "@mui/material";
 import MobileMainBar from "../mobile_components/MobileMainBar";
 import Content from "../components/Content";
 import { Container as MUIContainer } from "@mui/material";
@@ -19,6 +19,7 @@ const Container = () => {
       <Box sx={{ mb: "10px" }}>
         {isMobile ? <MobileMainBar /> : <MainBar />}
       </Box>
+      <Toolbar />
       <MUIContainer>
         <Content />
       </MUIContainer>
