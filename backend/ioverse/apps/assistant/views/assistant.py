@@ -10,17 +10,17 @@ class AssistantCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request):
-        serializer = AssistantSerializer(data=request.data)
-        if serializer.is_valid():
-            service = AssistantIntegrationService()
-            try:
-                django_assistant = service.create_assistant(serializer.validated_data, request.user)
-                return Response(AssistantSerializer(django_assistant).data, status=status.HTTP_201_CREATED)
-            except ValidationError as ve:
-                return Response({"errors": ve.errors()}, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        service = AssistantIntegrationService()
+        try:
+            django_assistant = service.create_assistant(request.data, request.user)
+            return Response(
+                AssistantSerializer(django_assistant).data,
+                status=status.HTTP_201_CREATED,
+            )
+        except ValidationError as ve:
+            return Response({"errors": ve.errors()}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AssistantRetrieveView(APIView):
     permission_classes = [permissions.IsAuthenticated]

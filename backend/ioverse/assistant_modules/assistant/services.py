@@ -20,7 +20,17 @@ def remove_trailing_underscore(response_dict: dict) -> dict:
         if 'schema_' in schema:
             schema['schema'] = schema.pop('schema_')  # Rename key from 'schema_' to 'schema'
     return response_dict
-    
+
+def remove_none_values(data):
+    """
+    Recursively remove keys with None values from a dictionary.
+    """
+    if isinstance(data, dict):
+        return {k: remove_none_values(v) for k, v in data.items() if v is not None}
+    elif isinstance(data, list):
+        return [remove_none_values(v) for v in data if v is not None]
+    else:
+        return data
             
 class AssistantService:
     def __init__(self):
@@ -28,7 +38,8 @@ class AssistantService:
 
     def create_assistant(self, params: AssistantParams) -> Assistant:
         try:
-            assistant_data = params.model_dump(exclude_unset=False)
+            # remove none values
+            assistant_data = remove_none_values(params.model_dump(exclude_unset=False))
             response = self.client.create_assistant(**assistant_data)
         
             # Convert OpenAI Assistant instance to dict
