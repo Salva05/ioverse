@@ -180,7 +180,7 @@ const TextToImage = () => {
           align="center"
           sx={{
             fontWeight: "700",
-            fontFamily: "Arial, sans-serif",
+            fontFamily: "'Montserrat', serif",
             letterSpacing: "0.05em",
           }}
         >
@@ -226,10 +226,7 @@ const TextToImage = () => {
               label="Model Used"
             >
               {modelOptions.map((option) => (
-                <MenuItem
-                  key={option.value}
-                  value={option.value}
-                >
+                <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
               ))}
@@ -275,10 +272,7 @@ const TextToImage = () => {
                   label="Quality"
                 >
                   {qualityOptions.map((option) => (
-                    <MenuItem
-                      key={option.value}
-                      value={option.value}
-                    >
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
@@ -297,10 +291,7 @@ const TextToImage = () => {
                   label="Style"
                 >
                   {styleOptions.map((option) => (
-                    <MenuItem
-                      key={option.value}
-                      value={option.value}
-                    >
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
@@ -344,10 +335,7 @@ const TextToImage = () => {
               label="Response Format"
             >
               {responseFormatOptions.map((option) => (
-                <MenuItem
-                  key={option.value}
-                  value={option.value}
-                >
+                <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
               ))}
@@ -362,7 +350,9 @@ const TextToImage = () => {
             fullWidth
             disabled={loading}
           >
-            Generate Image
+            <Typography sx={{ fontFamily: "'Montserrat', serif" }}>
+              Generate Image
+            </Typography>
           </Button>
           {loading && (
             <Box sx={{ width: "100%", marginTop: "5px" }}>

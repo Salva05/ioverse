@@ -11,12 +11,13 @@ import { DrawerContext } from "../../../contexts/DrawerContext";
 const drawerWidth = 240;
 
 const MainBar = () => {
+  const theme = useTheme();
   const { open } = useContext(DrawerContext);
   const [showTabs, setShowTabs] = useState(open);
   const isMobile = useMediaQuery(
     `(max-width:${open ? 815 + drawerWidth : 815}px)`
   );
-const theme = useTheme();
+  
   // To prevent incorrect displaying in first milliseconds of render
   // while darwer menu is still closing
   useEffect(() => {
@@ -38,6 +39,18 @@ const theme = useTheme();
         backgroundColor: theme.palette.background.default,
         top: theme.mixins.toolbar.minHeight,
         zIndex: theme.zIndex.appBar - 1,
+        transition: theme.transitions.create(["margin-left", "width"], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
+        ...(open && {
+          marginLeft: `${drawerWidth}px`,
+          width: `calc(100% - ${drawerWidth}px)`,
+          transition: theme.transitions.create(["margin-left", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+        }),
       }}
     >
       <Toolbar
@@ -64,9 +77,7 @@ const theme = useTheme();
         </Box>
 
         {/* Right Section */}
-        <Box
-          sx={{ flex: "0 0 auto" }}
-        >
+        <Box sx={{ flex: "0 0 auto" }}>
           <motion.div
             layout
             whileHover={{ scale: 1.1 }}

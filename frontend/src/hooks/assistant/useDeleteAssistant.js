@@ -5,7 +5,6 @@ import { useAssistantContext } from "../../contexts/AssistantContext";
 
 export const useDeleteAssistant = () => {
   const queryClient = useQueryClient();
-  const { assistants } = useAssistantContext();
   const { setAssistant } = useAssistantContext();
 
   return useMutation({
@@ -16,22 +15,21 @@ export const useDeleteAssistant = () => {
       toast.success("Assistant deleted successfully.");
 
       // Update context with the latest assistant
-      queryClient
-        .fetchQuery(["assistants"])
-        .then((updatedAssistants) => {
-          if (updatedAssistants.length > 0) {
-            // Select latest assistant after refetch
-            const latestAssistant = updatedAssistants.reduce((latest, current) => {
-              return current.created_at > latest.created_at ? current : latest;
-            });
-            setAssistant(latestAssistant);
-          } else {
-            setAssistant(null);
-          }
-        })
-        .catch((error) => {
-          console.error("Error refetching assistants:", error);
-        });
+      queryClient.setQueryData(["assistants"], (oldAssistants) => {
+        const updatedAssistants = oldAssistants?.filter(
+          (assistant) => assistant.id !== id
+        );
+        if (updatedAssistants?.length > 0) {
+          // Select the latest assistant
+          const latestAssistant = updatedAssistants.reduce((latest, current) =>
+            current.created_at > latest.created_at ? current : latest
+          );
+          setAssistant(latestAssistant);
+        } else {
+          setAssistant(null);
+        }
+        return updatedAssistants;
+      });
     },
     onError: (error) => {
       console.log(error);

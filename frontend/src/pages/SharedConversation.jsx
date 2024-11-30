@@ -187,7 +187,7 @@ export default function SharedConversation() {
               >
                 <LightModeIcon fontSize="small" />
               </Box>
-              Light Theme
+              Light
             </MenuItem>
             <MenuItem
               selected={themePreference === "dark"}
@@ -214,7 +214,7 @@ export default function SharedConversation() {
               >
                 <DarkModeIcon fontSize="small" />
               </Box>
-              Dark Theme
+              Dark
             </MenuItem>
             <MenuItem
               selected={themePreference === "system"}
@@ -241,7 +241,7 @@ export default function SharedConversation() {
               >
                 <GrSystem size={17} />
               </Box>
-              System Theme
+              System
             </MenuItem>
           </Menu>
           <Typography

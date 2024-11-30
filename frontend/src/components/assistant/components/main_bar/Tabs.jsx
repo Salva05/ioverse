@@ -10,9 +10,20 @@ import { IoIosHelpCircleOutline } from "react-icons/io";
 import { VscRunAll } from "react-icons/vsc";
 import { GiHabitatDome } from "react-icons/gi";
 import { useAssistantContext } from "../../../../contexts/AssistantContext";
+import { IoMdAdd } from "react-icons/io";
 
 const Tabs = () => {
-  const { selectedEntity, setSelectedTab } = useAssistantContext();
+  const { assistants, threads } = useAssistantContext();
+  const { selectedEntity, setSelectedTab, selectedTab } = useAssistantContext();
+  const [hasItems, setHasItems] = useState(
+    selectedEntity === "Assistant" ? assistants.length : threads.length
+  );
+  useEffect(() => {
+    setHasItems(
+      selectedEntity === "Assistant" ? assistants.length : threads.length
+    );
+  }, [assistants, threads]);
+
   const { darkMode } = useDarkMode();
   const theme = useTheme();
 
@@ -20,13 +31,15 @@ const Tabs = () => {
     // To prevent the recreation of tabs and losing applied style
     () => [
       {
-        icon: (
+        icon: hasItems ? (
           <MdDisplaySettings
             size="1.5em"
-            style={{ marginRight: 7, marginBottom: 3 }}
+            style={{ marginRight: 6, marginBottom: 3 }}
           />
+        ) : (
+          <IoMdAdd size="1.5em" style={{ marginRight: 4, marginBottom: 3 }} />
         ),
-        label: "Settings",
+        label: hasItems ? "Settings" : "Create",
       },
       {
         icon:
@@ -68,13 +81,6 @@ const Tabs = () => {
     [selectedEntity]
   );
 
-  const [tabIndex, setTabIndex] = useState(0);
-
-  useEffect(() => {
-    setTabIndex(0);
-    setSelectedTab(tabs[0].label);
-  }, [tabs]);
-
   return (
     <Box sx={{ display: "flex", gap: 2 }}>
       <motion.div layout transition={{ duration: 0.4, ease: "easeInOut" }}>
@@ -83,19 +89,18 @@ const Tabs = () => {
             color="inherit"
             key={item.label}
             onClick={() => {
-              setTabIndex(index);
               setSelectedTab(item.label);
             }}
             sx={{
               backgroundColor:
-                index === tabIndex
+                selectedTab === item.label
                   ? theme.palette.action.selected
                   : "transparent",
             }}
           >
             {item.icon}
             {` ${item.label}`}
-            {index === tabIndex ? (
+            {selectedTab === item.label ? (
               <motion.div
                 className="underline"
                 layoutId="underline"

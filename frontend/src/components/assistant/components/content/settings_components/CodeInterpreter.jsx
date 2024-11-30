@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Divider,
   IconButton,
   List,
   ListItem,
@@ -24,7 +23,6 @@ import CodeInterpreterAddDialog from "./CodeInterpreterAddDialog";
 import { InsertDriveFileOutlined } from "@mui/icons-material";
 import { GoTrash } from "react-icons/go";
 import { toast } from "react-toastify";
-import { useDeleteFile } from "../../../../../hooks/assistant/useDeleteFile";
 import { useQueryClient } from "@tanstack/react-query";
 import { extractOpenAIError } from "../../../../../utils/extractOpenAIError";
 

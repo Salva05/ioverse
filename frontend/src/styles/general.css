@@ -1,4 +1,8 @@
 /* Already being imported. Any needed general style can be added here. */
+body {
+  height: 100%;
+}
+
 .underline {
   position: absolute;
   bottom: -1px;

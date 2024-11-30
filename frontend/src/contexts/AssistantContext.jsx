@@ -64,6 +64,11 @@ export const AssistantProvider = ({ children }) => {
     setVectorStore(null);
   }, [assistant, vectorStores]);
 
+  useEffect(() => {
+    const items = selectedEntity === "Assistant" ? assistants : threads;
+    if (!items.length) setSelectedTab("Create");
+  }, [assistants, threads]);
+  
   const contextValue = {
     selectedTab,
     setSelectedTab,

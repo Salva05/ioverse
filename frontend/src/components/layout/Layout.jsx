@@ -59,7 +59,7 @@ export default function Layout() {
     <AuthProvider>
       <DrawerContext.Provider value={{ open, isSmallScreen }}>
       <ThemeProvider theme={theme}>
-        <Box sx={{ display: "flex", width: "100%", height: '100vh' }}>
+        <Box sx={{ display: "flex", width: "100%"}}>
           <CssBaseline />
           <AppBar
             handleDrawerOpen={handleDrawerOpen}

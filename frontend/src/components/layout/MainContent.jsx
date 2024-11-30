@@ -3,7 +3,6 @@ import { styled } from "@mui/material/styles";
 import { DrawerContext } from "../../contexts/DrawerContext";
 
 const drawerWidth = 240;
-const smallScreenDrawerWidth = 230;
 
 const Main = styled("main", {
   shouldForwardProp: (prop) => prop !== "open" && prop !== "isSmallScreen",
@@ -12,7 +11,6 @@ const Main = styled("main", {
   display: "flex",
   flexDirection: "column",
   height: "100%",
-  minHeight: 0,
   transition: theme.transitions.create(["margin", "width"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,

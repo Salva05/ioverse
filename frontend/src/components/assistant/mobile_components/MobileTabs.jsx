@@ -13,7 +13,17 @@ import { useAssistantContext } from "../../../contexts/AssistantContext";
 import { SlSettings } from "react-icons/sl";
 
 const MobileTabs = () => {
+  const { assistants, threads } = useAssistantContext();
   const { selectedEntity, setSelectedTab } = useAssistantContext();
+  const [hasItems, setHasItems] = useState(
+    selectedEntity === "Assistant" ? assistants.length : threads.length
+  );
+  useEffect(() => {
+    setHasItems(
+      selectedEntity === "Assistant" ? assistants.length : threads.length
+    );
+  }, [assistants, threads]);
+  
   const { darkMode } = useDarkMode();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -24,7 +34,7 @@ const MobileTabs = () => {
     () => [
       {
         icon: <MdDisplaySettings size="1.5em" style={{ marginRight: 7 }} />,
-        label: "Settings",
+        label: hasItems ? "Settings" : "Create",
       },
       {
         icon:

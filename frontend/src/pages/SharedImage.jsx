@@ -100,7 +100,7 @@ export default function SharedImage() {
               >
                 <LightModeIcon fontSize="small" />
               </Box>
-              Light Theme
+              Light
             </MenuItem>
             <MenuItem
               selected={themePreference === "dark"}
@@ -127,7 +127,7 @@ export default function SharedImage() {
               >
                 <DarkModeIcon fontSize="small" />
               </Box>
-              Dark Theme
+              Dark
             </MenuItem>
             <MenuItem
               selected={themePreference === "system"}
@@ -154,7 +154,7 @@ export default function SharedImage() {
               >
                 <GrSystem size={17} />
               </Box>
-              System Theme
+              System
             </MenuItem>
           </Menu>
             <Typography
