@@ -1,8 +1,8 @@
 from typing import List, Dict
 
 class ChatLogicService:
-    def __init__(self):
-        self.default_system_message = {"role": "system", "content": "You are a helpful assistant responsible for fulfilling users' requests."}
+    def __init__(self, system_instructions = "You are a helpful assistant responsible for fulfilling users' requests."):
+        self.default_system_message = {"role": "system", "content": system_instructions}
 
     def prepare_initial_history(self) -> List[Dict[str, str]]:
         return [self.default_system_message]

@@ -43,6 +43,7 @@ from .views.file import (
 )
 from .views.run import RunAPIView , RunStepAPIView
 from .views.vectorstorebatch import VectorStoreBacthCreateView, VectorStoreBatchStatusStreamView
+from .views.generate import GenerateSystemInstruction
 
 urlpatterns = [
     # Assistant
@@ -87,4 +88,5 @@ urlpatterns = [
     path('run/<str:action>/', RunAPIView.as_view(), name='run-actions'),
     # RunSteps
     path('run_steps/<str:action>/', RunStepAPIView.as_view(), name='runstep-actions'),
+    path('generate/system_instructions/', GenerateSystemInstruction.as_view(), name='gen-system_instructions')
 ]
