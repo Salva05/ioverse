@@ -205,32 +205,23 @@ const SystemInstructions = () => {
                   borderRadius: 3,
                 }}
               >
-                <Skeleton
-                  variant="rectangular"
-                  sx={{
-                    width: "100%",
-                    height: "25%",
-                    borderRadius: 2,
-                  }}
-                />
-                <Skeleton
-                  variant="rectangular"
-                  animation="wave"
-                  sx={{
-                    width: "100%",
-                    height: "25%",
-                    borderRadius: 2,
-                  }}
-                />
-                <Skeleton
-                  variant="rectangular"
-                  animation={false}
-                  sx={{
-                    width: "100%",
-                    height: "25%",
-                    borderRadius: 2,
-                  }}
-                />
+                {Array.from({ length: 4 }).map((_, index) => {
+                  // Generate a random width between 80% and 100%
+                  const randomWidth = `${80 + Math.floor(Math.random() * 21)}%`;
+                  return (
+                    <Skeleton
+                      key={index}
+                      variant="rectangular"
+                      animation="wave"
+                      sx={{
+                        width: randomWidth,
+                        height: "20%",
+                        borderRadius: 2,
+                        marginBottom: index < 3 ? 1 : 0,
+                      }}
+                    />
+                  );
+                })}
               </Box>
             )}
             <TextField

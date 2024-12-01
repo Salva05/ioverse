@@ -153,5 +153,13 @@ export const generate = {
       message
     );
     return response.data;
+  },
+  // POST - Response Format
+  schema: async (message) => {
+    const response = await axiosInstance.post(
+      "/assistant/generate/schema/",
+      message
+    );
+    return response.data;
   }
 };

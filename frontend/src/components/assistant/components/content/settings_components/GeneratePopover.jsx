@@ -27,6 +27,7 @@ const GeneratePopover = ({
   const [prompt, setPrompt] = useState("");
 
   const handleSubmit = async () => {
+    if (!prompt.trim()) return;
     const sanitizedPrompt = encode(prompt);
     const message = {
       prompt: sanitizedPrompt,
@@ -42,6 +43,8 @@ const GeneratePopover = ({
         closeDialog();
       case "Function":
         mutate(message);
+      case "Response Format":
+        mutate(message);
     }
 
     setPrompt("");
@@ -53,7 +56,10 @@ const GeneratePopover = ({
       id="generate-popover"
       open={open}
       anchorEl={anchorEl}
-      onClose={handleClose}
+      onClose={() => {
+        handleClose();
+        setPrompt("");
+      }}
       sx={{
         "& .MuiPaper-root": {
           width: "350px",
@@ -117,7 +123,7 @@ const GeneratePopover = ({
               ? "What would you like the model to do?"
               : usage === "Function"
               ? "Describe what your function does (or past your code), and we'll generate a definition."
-              : "schema"
+              : "Describe how you want the model to respond, and we'll generate a JSON schema."
           }
         />
         <Box

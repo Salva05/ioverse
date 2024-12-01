@@ -74,6 +74,18 @@ const Name = () => {
     return true;
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleMutate();
+      e.target.blur();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setNameInput(assistant?.name || "");
+      e.target.blur();
+    }
+  };
+
   const handleMutate = () => {
     if (!validate()) {
       setNameInput(assistant?.name || "");
@@ -123,6 +135,7 @@ const Name = () => {
           value={nameInput}
           onChange={handleNameChange}
           onBlur={handleMutate}
+          onKeyDown={handleKeyPress}
           sx={{
             minWidth: isMobile ? "300px" : isTablet ? "375px" : "450px",
             "& .MuiOutlinedInput-root": {

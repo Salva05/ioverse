@@ -29,9 +29,10 @@ import { handleEditorKeyDown } from "../../../../../utils/codeFormatter";
 import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
 import { getFunctionToolErrorMessage } from "../../../../../utils/getFunctionToolErrorMessage";
 import { GoTrash } from "react-icons/go";
-import GeneratePopover from "./GeneratePopover";
 import { useGenerateFunctionTool } from "../../../../../hooks/assistant/useGenerateFunctionTool";
+import { useGenerateResponseFormat } from "../../../../../hooks/assistant/useGenerateResponseFormat";
 import { Skeleton } from "@mui/material";
+import GeneratePopover from "./GeneratePopover";
 
 // Remove default background of prism.css for semicolon
 // which was causing it to be white
@@ -71,7 +72,7 @@ const FunctionAddDialog = ({
 
   // Generation tool
   const [isGenerating, setIsGenerating] = useState(false);
-  // Handle Function Tool generation
+  // Handle Function Tool and Response Format generation
   const handleGenerateSuccess = (data) => {
     const jsonString = JSON.stringify(data.message, null, 2);
     setJsonContent(jsonString);
@@ -81,6 +82,10 @@ const FunctionAddDialog = ({
   // Mutation for generation tool
   const { mutate: functionGenMutate, isPending: isFunctionGenPending } =
     useGenerateFunctionTool(handleGenerateSuccess);
+
+  // Mutation for response format generation
+  const { mutate: responseFormatMutate, isPending: isResponseFormatPending } =
+    useGenerateResponseFormat(handleGenerateSuccess);
 
   // For generate dialog
   const [generateDialogAnchorEl, setGenerateAnchorEl] = useState(null);
@@ -331,6 +336,7 @@ const FunctionAddDialog = ({
               <Box>
                 <IconButton
                   onClick={handleGenDialOpen}
+                  disabled={isGenerating}
                   sx={{
                     gap: 0.5,
                     color: "inherit",
@@ -339,8 +345,14 @@ const FunctionAddDialog = ({
                   }}
                   aria-label="stars"
                 >
-                  <BsStars size="1rem" style={{ marginBottom: 2.5 }} />
-                  <Typography variant="body2">Generate</Typography>
+                  {isGenerating ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <>
+                      <BsStars size="1rem" style={{ marginBottom: 2.5 }} />
+                      <Typography variant="body2">Generate</Typography>
+                    </>
+                  )}
                 </IconButton>
               </Box>
               <Box>
@@ -433,7 +445,7 @@ const FunctionAddDialog = ({
               }}
             >
               {/* Skeleton Overlay */}
-              {isFunctionGenPending && (
+              {(isFunctionGenPending || isResponseFormatPending) && (
                 <Box
                   sx={{
                     position: "absolute",
@@ -474,7 +486,7 @@ const FunctionAddDialog = ({
               )}
               <Editor
                 placeholder={
-                  isFunctionGenPending
+                  isFunctionGenPending || isResponseFormatPending
                     ? ""
                     : isResponseFormat
                     ? exampleJSONs["placeholder_schema"]
@@ -493,12 +505,13 @@ const FunctionAddDialog = ({
                   fontSize: "0.85rem",
                   backgroundColor: "inherit",
                   color: "inherit",
-                  minHeight:
-                    jsonContent !== ""
-                      ? "27em"
-                      : isResponseFormat
-                      ? "56em"
-                      : "27em",
+                  minHeight: isGenerating
+                    ? "27em"
+                    : jsonContent !== ""
+                    ? "27em"
+                    : isResponseFormat
+                    ? "56em"
+                    : "27em",
                   overflow: "auto",
                   whiteSpace: "pre",
                 }}
@@ -639,10 +652,10 @@ const FunctionAddDialog = ({
         open={generateOpen}
         anchorEl={generateDialogAnchorEl}
         handleClose={handleGenDialClose}
-        mutate={functionGenMutate}
+        mutate={isResponseFormat ? responseFormatMutate : functionGenMutate}
         setIsGenerating={setIsGenerating}
         setContent={setJsonContent}
-        usage="Function"
+        usage={isResponseFormat ? "Response Format" : "Function"}
       />
     </>
   );
