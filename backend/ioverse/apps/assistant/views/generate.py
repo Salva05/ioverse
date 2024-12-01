@@ -35,3 +35,21 @@ class GenerateFunction(APIView):
                 {"error": "An unexpected error occurred.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+class GenerateSchema(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        task_gen_service = TaskGeneratorService()
+        try:
+            user_prompt = request.data.get("prompt", "")
+            sanitized_prompt = escape(user_prompt)
+            ai_response = task_gen_service.generate_schema(sanitized_prompt)
+            return Response({"message": ai_response}, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": "An unexpected error occurred.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
