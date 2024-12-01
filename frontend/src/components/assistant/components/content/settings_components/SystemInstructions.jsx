@@ -402,8 +402,9 @@ const SystemInstructions = () => {
         handleClose={handleGenDialClose}
         mutate={sysInstructionsMutate}
         setIsGenerating={setIsGenerating}
-        setInstructionsInput={setInstructionsInput}
+        setContent={setInstructionsInput}
         closeDialog={handleClose}
+        usage="System Instructions"
       />
     </>
   );

@@ -146,4 +146,12 @@ export const generate = {
     );
     return response.data;
   },
+  // POST - Function Tool
+  fn: async (message) => {
+    const response = await axiosInstance.post(
+      "/assistant/generate/function/",
+      message
+    );
+    return response.data;
+  }
 };

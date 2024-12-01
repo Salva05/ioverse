@@ -17,8 +17,9 @@ const GeneratePopover = ({
   handleClose,
   mutate,
   setIsGenerating,
-  setInstructionsInput,
-  closeDialog
+  setContent,
+  closeDialog,
+  usage,
 }) => {
   const theme = useTheme();
   const { isSmallScreen } = useContext(DrawerContext);
@@ -27,15 +28,24 @@ const GeneratePopover = ({
 
   const handleSubmit = async () => {
     const sanitizedPrompt = encode(prompt);
-    setInstructionsInput("");
-    setIsGenerating(true);
     const message = {
-      prompt: sanitizedPrompt
+      prompt: sanitizedPrompt,
+    };
+    setContent("");
+    setIsGenerating(true);
+
+    // Not strictly necessary, but for ease of customization
+    // for future needs
+    switch (usage) {
+      case "System Instructions":
+        mutate(message);
+        closeDialog();
+      case "Function":
+        mutate(message);
     }
-    mutate(message);
-    handleClose();
-    closeDialog();
+
     setPrompt("");
+    handleClose();
   };
 
   return (
@@ -102,7 +112,13 @@ const GeneratePopover = ({
             border: "none",
             boxSizing: "border-box",
           }}
-          placeholder="What would you like the model to do?"
+          placeholder={
+            usage === "System Instructions"
+              ? "What would you like the model to do?"
+              : usage === "Function"
+              ? "Describe what your function does (or past your code), and we'll generate a definition."
+              : "schema"
+          }
         />
         <Box
           sx={{

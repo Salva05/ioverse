@@ -29,6 +29,9 @@ import { handleEditorKeyDown } from "../../../../../utils/codeFormatter";
 import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
 import { getFunctionToolErrorMessage } from "../../../../../utils/getFunctionToolErrorMessage";
 import { GoTrash } from "react-icons/go";
+import GeneratePopover from "./GeneratePopover";
+import { useGenerateFunctionTool } from "../../../../../hooks/assistant/useGenerateFunctionTool";
+import { Skeleton } from "@mui/material";
 
 // Remove default background of prism.css for semicolon
 // which was causing it to be white
@@ -65,6 +68,31 @@ const FunctionAddDialog = ({
       env.attributes.style = `color: ${theme.palette.primary.main};`;
     }
   });
+
+  // Generation tool
+  const [isGenerating, setIsGenerating] = useState(false);
+  // Handle Function Tool generation
+  const handleGenerateSuccess = (data) => {
+    const jsonString = JSON.stringify(data.message, null, 2);
+    setJsonContent(jsonString);
+    setIsGenerating(false);
+  };
+
+  // Mutation for generation tool
+  const { mutate: functionGenMutate, isPending: isFunctionGenPending } =
+    useGenerateFunctionTool(handleGenerateSuccess);
+
+  // For generate dialog
+  const [generateDialogAnchorEl, setGenerateAnchorEl] = useState(null);
+  const generateOpen = Boolean(generateDialogAnchorEl);
+
+  const handleGenDialOpen = (e) => {
+    setGenerateAnchorEl(e.currentTarget);
+  };
+
+  const handleGenDialClose = () => {
+    setGenerateAnchorEl(null);
+  };
 
   // Examples List
   const [anchorEl, setAnchorEl] = useState(null);
@@ -198,365 +226,425 @@ const FunctionAddDialog = ({
   }, [isSuccess]);
 
   return (
-    <Dialog
-      open={openDialog}
-      onClose={handleClose}
-      fullScreen={fullScreen}
-      aria-labelledby="add-functions-title"
-      aria-describedby="add-functions-description"
-      maxWidth="md"
-      TransitionComponent={Transition}
-      sx={{
-        "& .MuiPaper-root": {
-          borderRadius: "12px",
-        },
-      }}
-    >
-      <DialogTitle id="add-functions-title">
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            fontFamily: "'Montserrat', serif",
-            fontWeight: "bold",
-            fontSize: isMobile ? "1rem" : "1.1rem",
-          }}
-        >
-          {isPending && (
-            <CircularProgress
-              color="inherit"
-              size={18}
-              sx={{ verticalAlign: "middle", mr: 2, mb: 0.5 }}
-            />
-          )}
-          {isResponseFormat ? "Add response format" : "Add Function"}
-        </Typography>
-      </DialogTitle>
-      <DialogContent
+    <>
+      <Dialog
+        open={openDialog}
+        onClose={handleClose}
+        fullScreen={fullScreen}
+        aria-labelledby="add-functions-title"
+        aria-describedby="add-functions-description"
+        maxWidth="md"
+        TransitionComponent={Transition}
         sx={{
-          px: 3,
-          pb: 2,
+          "& .MuiPaper-root": {
+            borderRadius: "12px",
+          },
         }}
       >
-        <Typography
-          variant="body2"
-          sx={{
-            fontFamily: "'Montserrat', serif",
-            mb: 2,
-            color: theme.palette.text.secondary,
-            fontSize: isMobile ? "0.8rem" : "0.85rem",
-          }}
-        >
-          {!isResponseFormat
-            ? "The model will intelligently decide to call functions based on input it receives from the user."
-            : "Use a JSON schema to define the structure of the model's response format."}{" "}
-          <Link
-            href={
-              isResponseFormat
-                ? "https://platform.openai.com/docs/guides/structured-outputs"
-                : "https://platform.openai.com/docs/guides/function-calling"
-            }
-            target="_blank"
-            rel="noopener"
+        <DialogTitle id="add-functions-title">
+          <Typography
+            variant="h6"
+            component="div"
             sx={{
-              fontSize: "inherit",
               fontFamily: "'Montserrat', serif",
-              textDecoration: "none",
-              color: theme.palette.primary.main,
-              "&:hover": {
-                textDecoration: "underline",
-              },
+              fontWeight: "bold",
+              fontSize: isMobile ? "1rem" : "1.1rem",
             }}
           >
-            Learn more.
-          </Link>
-        </Typography>
-        <Divider sx={{ my: 2 }} />
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "stretch",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              sx={{
-                fontFamily: "'Montserrat', serif",
-                mb: 1,
-                fontWeight: 600,
-              }}
-            >
-              Definition
-            </Typography>
-            <Box sx={{ flexGrow: 1 }} />
-            <Box>
-              <IconButton
-                sx={{
-                  gap: 0.5,
-                  color: "inherit",
-                  paddingY: 0.3,
-                  borderRadius: 2,
-                }}
-                aria-label="stars"
-              >
-                <BsStars size="1rem" style={{ marginBottom: 2.5 }} />
-                <Typography variant="body2">Generate</Typography>
-              </IconButton>
-            </Box>
-            <Box>
-              <IconButton
-                onClick={handleExamplesClick}
-                aria-controls={open ? "examples-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                sx={{
-                  gap: 0.5,
-                  color: "inherit",
-                  paddingY: 0.3,
-                  borderRadius: 2,
-                }}
-                aria-label="examples"
-              >
-                <Typography variant="body2" sx={{}}>
-                  Examples
-                </Typography>
-                <IoIosArrowDown size="1rem" style={{}} />
-              </IconButton>
-              <Menu
-                id="examples-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleCloseMenu}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                slotProps={{
-                  paper: {
-                    sx: {
-                      minWidth: 150,
-                      borderRadius: 3,
-                      boxShadow: 3,
-                      overflow: "hidden",
-                    },
-                  },
-                }}
-              >
-                {menuOptions.map((text, index) => (
-                  <MenuItem
-                    key={index}
-                    onClick={() => {
-                      handleCloseMenu();
-                      const functionName = text.replace("()", "");
-                      setJsonContent(exampleJSONs[functionName]);
-                    }}
-                    sx={{
-                      fontSize: "0.835rem",
-                      padding: "4px 8px",
-                      borderRadius: theme.shape.borderRadius,
-                      margin: "2px auto",
-                      "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
-                      },
-                    }}
-                  >
-                    {text}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              width: "100%",
-              border: `1px solid ${theme.palette.divider}`,
-              borderRadius: "8px",
-              fontFamily: "'Roboto Mono', monospace",
-              fontSize: "0.875rem",
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[900]
-                  : theme.palette.grey[100],
-              color:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[300]
-                  : theme.palette.text.primary,
-              minHeight: "16em",
-              overflow: "auto",
-              whiteSpace: "pre",
-              padding: "0",
-            }}
-          >
-            <Editor
-              placeholder={
-                isResponseFormat
-                  ? exampleJSONs["placeholder_schema"]
-                  : exampleJSONs["placeholder_function"]
-              }
-              value={jsonContent}
-              onValueChange={(code) => setJsonContent(code)} // Updates the content
-              onKeyDown={(event) =>
-                handleEditorKeyDown(event, jsonContent, setJsonContent)
-              }
-              highlight={highlightCode}
-              padding={12}
-              style={{
-                width: "100%",
-                fontFamily: "'Roboto Mono', monospace",
-                fontSize: "0.85rem",
-                backgroundColor: "inherit",
-                color: "inherit",
-                minHeight:
-                  jsonContent !== ""
-                    ? "27em"
-                    : isResponseFormat
-                    ? "56em"
-                    : "27em",
-                overflow: "auto",
-                whiteSpace: "pre",
-              }}
-            />
-          </Box>
-          {!isResponseFormat && (
-            <Typography
-              variant="caption"
-              sx={{
-                mt: 1,
-                color: theme.palette.text.secondary,
-                fontFamily: "'Montserrat', serif",
-              }}
-            >
-              Add{" "}
-              <Typography
-                sx={{
-                  fontFamily: "'Montserrat', serif",
-                  display: "inline",
-                  fontSize: "inherit",
-                  border: "1px solid",
-                  pl: 0.7,
-                  pr: 0.5,
-                  pt: 0.2,
-                  pb: 0.4,
-                  borderRadius: 1.8,
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.paper
-                      : theme.palette.grey[100],
-                  mr: 0.6,
-                }}
-              >
-                "strict": true{" "}
-              </Typography>
-              to ensure the model's response always follows this schema.
-            </Typography>
-          )}
-        </Box>
-      </DialogContent>
-      <DialogActions
-        sx={{
-          paddingX: theme.spacing(3),
-          paddingY: theme.spacing(2),
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        {activeFunction && !isResponseFormat && (
-          <Button
-            onClick={() => handleRemove(activeFunction.name, handleClose)}
-            variant="contained"
-            size="small"
-            sx={{
-              paddingX: 1,
-              paddingY: 0.8,
-              minWidth: "auto",
-              color: "inherit",
-              backgroundColor: (theme) => theme.palette.error.light,
-              "&:hover": {
-                backgroundColor: (theme) => theme.palette.error.dark,
-              },
-              textTransform: "none",
-            }}
-          >
-            {isRemovalPending ? (
+            {isPending && (
               <CircularProgress
                 color="inherit"
                 size={18}
-                sx={{ verticalAlign: "middle" }}
+                sx={{ verticalAlign: "middle", mr: 2, mb: 0.5 }}
               />
-            ) : (
-              <GoTrash size={18} />
             )}
-          </Button>
-        )}
-
-        <Box sx={{ flexGrow: 1 }} />
-        <Box
+            {isResponseFormat ? "Add response format" : "Add Function"}
+          </Typography>
+        </DialogTitle>
+        <DialogContent
+          className="drawer-scrollbar"
           sx={{
-            display: "flex",
-            gap: 1,
+            px: 3,
+            pb: 2,
+            mr: 0.5,
           }}
         >
-          <Button
-            onClick={handleClose}
-            disabled={isRemovalPending}
-            variant="outlined"
-            color="inherit"
-            size="small"
+          <Typography
+            variant="body2"
             sx={{
-              color:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[400]
-                  : theme.palette.text.primary,
-              borderColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[700]
-                  : theme.palette.grey[300],
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[700]
-                  : theme.palette.grey[300],
-              "&:hover": {
-                borderColor: theme.palette.grey[500],
-                backgroundColor: theme.palette.action.hover,
-              },
-              textTransform: "none",
+              fontFamily: "'Montserrat', serif",
+              mb: 2,
+              color: theme.palette.text.secondary,
+              fontSize: isMobile ? "0.8rem" : "0.85rem",
             }}
           >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isRemovalPending}
-            autoFocus
-            variant="contained"
-            size="small"
-            color="success"
+            {!isResponseFormat
+              ? "The model will intelligently decide to call functions based on input it receives from the user."
+              : "Use a JSON schema to define the structure of the model's response format."}{" "}
+            <Link
+              href={
+                isResponseFormat
+                  ? "https://platform.openai.com/docs/guides/structured-outputs"
+                  : "https://platform.openai.com/docs/guides/function-calling"
+              }
+              target="_blank"
+              rel="noopener"
+              sx={{
+                fontSize: "inherit",
+                fontFamily: "'Montserrat', serif",
+                textDecoration: "none",
+                color: theme.palette.primary.main,
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Learn more.
+            </Link>
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          <Box
             sx={{
-              color: theme.palette.getContrastText(theme.palette.success.main),
-              backgroundColor: theme.palette.success.main,
-              "&:hover": {
-                backgroundColor: theme.palette.success.dark,
-              },
-              textTransform: "none",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "stretch",
             }}
           >
-            Save
-          </Button>
-        </Box>
-      </DialogActions>
-    </Dialog>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontFamily: "'Montserrat', serif",
+                  mb: 1,
+                  fontWeight: 600,
+                }}
+              >
+                Definition
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Box>
+                <IconButton
+                  onClick={handleGenDialOpen}
+                  sx={{
+                    gap: 0.5,
+                    color: "inherit",
+                    paddingY: 0.3,
+                    borderRadius: 2,
+                  }}
+                  aria-label="stars"
+                >
+                  <BsStars size="1rem" style={{ marginBottom: 2.5 }} />
+                  <Typography variant="body2">Generate</Typography>
+                </IconButton>
+              </Box>
+              <Box>
+                <IconButton
+                  onClick={handleExamplesClick}
+                  aria-controls={open ? "examples-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? "true" : undefined}
+                  sx={{
+                    gap: 0.5,
+                    color: "inherit",
+                    paddingY: 0.3,
+                    borderRadius: 2,
+                  }}
+                  aria-label="examples"
+                >
+                  <Typography variant="body2" sx={{}}>
+                    Examples
+                  </Typography>
+                  <IoIosArrowDown size="1rem" style={{}} />
+                </IconButton>
+                <Menu
+                  id="examples-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleCloseMenu}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                  }}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        minWidth: 150,
+                        borderRadius: 3,
+                        boxShadow: 3,
+                        overflow: "hidden",
+                      },
+                    },
+                  }}
+                >
+                  {menuOptions.map((text, index) => (
+                    <MenuItem
+                      key={index}
+                      onClick={() => {
+                        handleCloseMenu();
+                        const functionName = text.replace("()", "");
+                        setJsonContent(exampleJSONs[functionName]);
+                      }}
+                      sx={{
+                        fontSize: "0.835rem",
+                        padding: "4px 8px",
+                        borderRadius: theme.shape.borderRadius,
+                        margin: "2px auto",
+                        "&:hover": {
+                          backgroundColor: theme.palette.action.hover,
+                        },
+                      }}
+                    >
+                      {text}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                position: "relative",
+                width: "100%",
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "8px",
+                fontFamily: "'Roboto Mono', monospace",
+                fontSize: "0.875rem",
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[900]
+                    : theme.palette.grey[100],
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[300]
+                    : theme.palette.text.primary,
+                minHeight: "16em",
+                overflow: "auto",
+                whiteSpace: "pre",
+                padding: "0",
+              }}
+            >
+              {/* Skeleton Overlay */}
+              {isFunctionGenPending && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-start",
+                    padding: 2,
+                    borderRadius: "8px",
+                    zIndex: 10,
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* 15 rows */}
+                  {Array.from({ length: 15 }).map((_, index) => {
+                    // Generate a random width between 80% and 100%
+                    const randomWidth = `${
+                      80 + Math.floor(Math.random() * 21)
+                    }%`;
+                    return (
+                      <Skeleton
+                        key={index}
+                        variant="rectangular"
+                        animation="wave"
+                        sx={{
+                          width: randomWidth,
+                          height: "1.2em",
+                          borderRadius: 1,
+                          marginBottom: 1,
+                        }}
+                      />
+                    );
+                  })}
+                </Box>
+              )}
+              <Editor
+                placeholder={
+                  isFunctionGenPending
+                    ? ""
+                    : isResponseFormat
+                    ? exampleJSONs["placeholder_schema"]
+                    : exampleJSONs["placeholder_function"]
+                }
+                value={jsonContent}
+                onValueChange={(code) => setJsonContent(code)} // Updates the content
+                onKeyDown={(event) =>
+                  handleEditorKeyDown(event, jsonContent, setJsonContent)
+                }
+                highlight={highlightCode}
+                padding={12}
+                style={{
+                  width: "100%",
+                  fontFamily: "'Roboto Mono', monospace",
+                  fontSize: "0.85rem",
+                  backgroundColor: "inherit",
+                  color: "inherit",
+                  minHeight:
+                    jsonContent !== ""
+                      ? "27em"
+                      : isResponseFormat
+                      ? "56em"
+                      : "27em",
+                  overflow: "auto",
+                  whiteSpace: "pre",
+                }}
+              />
+            </Box>
+            {!isResponseFormat && (
+              <Typography
+                variant="caption"
+                sx={{
+                  mt: 1,
+                  color: theme.palette.text.secondary,
+                  fontFamily: "'Montserrat', serif",
+                }}
+              >
+                Add{" "}
+                <Typography
+                  sx={{
+                    fontFamily: "'Montserrat', serif",
+                    display: "inline",
+                    fontSize: "inherit",
+                    border: "1px solid",
+                    pl: 0.7,
+                    pr: 0.5,
+                    pt: 0.2,
+                    pb: 0.4,
+                    borderRadius: 1.8,
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.background.paper
+                        : theme.palette.grey[100],
+                    mr: 0.6,
+                  }}
+                >
+                  "strict": true{" "}
+                </Typography>
+                to ensure the model's response always follows this schema.
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            paddingX: theme.spacing(3),
+            paddingY: theme.spacing(2),
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          {activeFunction && !isResponseFormat && (
+            <Button
+              onClick={() => handleRemove(activeFunction.name, handleClose)}
+              variant="contained"
+              size="small"
+              sx={{
+                paddingX: 1,
+                paddingY: 0.8,
+                minWidth: "auto",
+                color: "inherit",
+                backgroundColor: (theme) => theme.palette.error.light,
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.error.dark,
+                },
+                textTransform: "none",
+              }}
+            >
+              {isRemovalPending ? (
+                <CircularProgress
+                  color="inherit"
+                  size={18}
+                  sx={{ verticalAlign: "middle" }}
+                />
+              ) : (
+                <GoTrash size={18} />
+              )}
+            </Button>
+          )}
+
+          <Box sx={{ flexGrow: 1 }} />
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+            }}
+          >
+            <Button
+              onClick={handleClose}
+              disabled={isRemovalPending}
+              variant="outlined"
+              color="inherit"
+              size="small"
+              sx={{
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[400]
+                    : theme.palette.text.primary,
+                borderColor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[700]
+                    : theme.palette.grey[300],
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[700]
+                    : theme.palette.grey[300],
+                "&:hover": {
+                  borderColor: theme.palette.grey[500],
+                  backgroundColor: theme.palette.action.hover,
+                },
+                textTransform: "none",
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isRemovalPending}
+              autoFocus
+              variant="contained"
+              size="small"
+              color="success"
+              sx={{
+                color: theme.palette.getContrastText(
+                  theme.palette.success.main
+                ),
+                backgroundColor: theme.palette.success.main,
+                "&:hover": {
+                  backgroundColor: theme.palette.success.dark,
+                },
+                textTransform: "none",
+              }}
+            >
+              Save
+            </Button>
+          </Box>
+        </DialogActions>
+      </Dialog>
+      {/* Generate Dialog */}
+      <GeneratePopover
+        open={generateOpen}
+        anchorEl={generateDialogAnchorEl}
+        handleClose={handleGenDialClose}
+        mutate={functionGenMutate}
+        setIsGenerating={setIsGenerating}
+        setContent={setJsonContent}
+        usage="Function"
+      />
+    </>
   );
 };
 
