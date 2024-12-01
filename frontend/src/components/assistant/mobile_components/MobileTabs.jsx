@@ -11,29 +11,26 @@ import { VscRunAll } from "react-icons/vsc";
 import { GiHabitatDome } from "react-icons/gi";
 import { useAssistantContext } from "../../../contexts/AssistantContext";
 import { SlSettings } from "react-icons/sl";
+import { IoMdAdd } from "react-icons/io";
 
 const MobileTabs = () => {
-  const { assistants, threads } = useAssistantContext();
-  const { selectedEntity, setSelectedTab } = useAssistantContext();
-  const [hasItems, setHasItems] = useState(
-    selectedEntity === "Assistant" ? assistants.length : threads.length
-  );
-  useEffect(() => {
-    setHasItems(
-      selectedEntity === "Assistant" ? assistants.length : threads.length
-    );
-  }, [assistants, threads]);
-  
+  const { selectedEntity, setSelectedTab, selectedTab, hasItems } =
+    useAssistantContext();
+
+  const theme = useTheme();
   const { darkMode } = useDarkMode();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const theme = useTheme();
 
   const tabs = useMemo(
     // To prevent the recreation of tabs and losing applied style
     () => [
       {
-        icon: <MdDisplaySettings size="1.5em" style={{ marginRight: 7 }} />,
+        icon: hasItems ? (
+          <MdDisplaySettings size="1.5em" style={{ marginRight: 7 }} />
+        ) : (
+          <IoMdAdd size="1.5em" style={{ marginRight: 4, marginBottom: 3 }} />
+        ),
         label: hasItems ? "Settings" : "Create",
       },
       {
@@ -41,7 +38,7 @@ const MobileTabs = () => {
           selectedEntity === "Assistant" ? (
             <GrChat size="1.23em" style={{ marginRight: 9, marginLeft: 2.5 }} />
           ) : (
-            <VscRunAll size="1.3em" style={{ marginRight: 10, }} />
+            <VscRunAll size="1.3em" style={{ marginRight: 10 }} />
           ),
         label: selectedEntity === "Assistant" ? "Chat" : "Run",
       },
@@ -61,7 +58,7 @@ const MobileTabs = () => {
         label: "Help",
       },
     ],
-    [selectedEntity]
+    [hasItems, selectedEntity]
   );
 
   const [tabIndex, setTabIndex] = useState(0);
@@ -116,20 +113,18 @@ const MobileTabs = () => {
             key={item.label}
             onClick={() => {
               setSelectedTab(item.label);
-              setTabIndex(index);
-              setTimeout(handleClose, 250);
             }}
-            selected={index === tabIndex}
+            selected={selectedTab === item.label}
             sx={{
               backgroundColor:
-              index === tabIndex
+                selectedTab === item.label
                   ? theme.palette.action.selected
                   : "transparent",
             }}
           >
             {item.icon}
             {` ${item.label}`}
-            {index === tabIndex ? (
+            {selectedTab === item.label ? (
               <motion.div
                 className="underline-mobile"
                 layoutId="underline-mobile"

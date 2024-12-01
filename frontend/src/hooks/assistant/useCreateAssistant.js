@@ -5,7 +5,8 @@ import { useAssistantContext } from "../../contexts/AssistantContext";
 
 export const useCreateAssistant = () => {
   const queryClient = useQueryClient();
-  const { setAssistant } = useAssistantContext();
+  const { setAssistant, selectedTab, setSelectedTab, setHasItems } =
+    useAssistantContext();
 
   const mutation = useMutation({
     mutationFn: (assistantData) => assistant.create(assistantData),
@@ -15,8 +16,9 @@ export const useCreateAssistant = () => {
       });
       toast.success(`Assistant created successfully.`);
 
-      // Update the active assistant
       setAssistant(newAssistant);
+      setHasItems(true);
+      if (selectedTab === "Create") setSelectedTab("Settings");
     },
     onError: (error) => {
       const errorMessage =

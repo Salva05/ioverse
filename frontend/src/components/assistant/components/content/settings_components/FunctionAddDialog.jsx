@@ -147,7 +147,6 @@ const FunctionAddDialog = ({
           ...assistant,
           response_format: newSchema,
         };
-
       } else {
         // Function creation
         const newFunction = {
@@ -401,7 +400,11 @@ const FunctionAddDialog = ({
             }}
           >
             <Editor
-              placeholder={exampleJSONs["placeholder_function"]}
+              placeholder={
+                isResponseFormat
+                  ? exampleJSONs["placeholder_schema"]
+                  : exampleJSONs["placeholder_function"]
+              }
               value={jsonContent}
               onValueChange={(code) => setJsonContent(code)} // Updates the content
               onKeyDown={(event) =>
@@ -412,10 +415,15 @@ const FunctionAddDialog = ({
               style={{
                 width: "100%",
                 fontFamily: "'Roboto Mono', monospace",
-                fontSize: "0.875rem",
+                fontSize: "0.85rem",
                 backgroundColor: "inherit",
                 color: "inherit",
-                minHeight: "27em",
+                minHeight:
+                  jsonContent !== ""
+                    ? "27em"
+                    : isResponseFormat
+                    ? "56em"
+                    : "27em",
                 overflow: "auto",
                 whiteSpace: "pre",
               }}

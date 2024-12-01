@@ -64,16 +64,25 @@ export const AssistantProvider = ({ children }) => {
     setVectorStore(null);
   }, [assistant, vectorStores]);
 
+  // Track the presence of items for the given selected entity
+  const [hasItems, setHasItems] = useState(null);
   useEffect(() => {
     const items = selectedEntity === "Assistant" ? assistants : threads;
-    if (!items.length) setSelectedTab("Create");
-  }, [assistants, threads]);
+    const hasItemsNow = items.length > 0;
   
+    if (hasItems !== hasItemsNow) {
+      setHasItems(hasItemsNow);
+      setSelectedTab(hasItemsNow ? "Settings" : "Create");
+    }
+  }, [assistants, threads, selectedEntity]);
+
   const contextValue = {
     selectedTab,
     setSelectedTab,
     selectedEntity,
     setSelectedEntity,
+    hasItems,
+    setHasItems,
     assistant,
     setAssistant,
     assistants,

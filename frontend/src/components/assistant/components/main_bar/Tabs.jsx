@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 
 import { Box, Button, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
@@ -13,19 +13,11 @@ import { useAssistantContext } from "../../../../contexts/AssistantContext";
 import { IoMdAdd } from "react-icons/io";
 
 const Tabs = () => {
-  const { assistants, threads } = useAssistantContext();
-  const { selectedEntity, setSelectedTab, selectedTab } = useAssistantContext();
-  const [hasItems, setHasItems] = useState(
-    selectedEntity === "Assistant" ? assistants.length : threads.length
-  );
-  useEffect(() => {
-    setHasItems(
-      selectedEntity === "Assistant" ? assistants.length : threads.length
-    );
-  }, [assistants, threads]);
+  const { selectedEntity, setSelectedTab, selectedTab, hasItems } =
+    useAssistantContext();
 
-  const { darkMode } = useDarkMode();
   const theme = useTheme();
+  const { darkMode } = useDarkMode();
 
   const tabs = useMemo(
     // To prevent the recreation of tabs and losing applied style
@@ -78,7 +70,7 @@ const Tabs = () => {
         label: "Help",
       },
     ],
-    [selectedEntity]
+    [selectedEntity, hasItems]
   );
 
   return (

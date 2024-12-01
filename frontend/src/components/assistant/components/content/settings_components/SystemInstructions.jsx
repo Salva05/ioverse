@@ -13,12 +13,16 @@ import {
   useTheme,
   Slide,
   Tooltip,
+  Skeleton,
+  CircularProgress,
 } from "@mui/material";
 import { BiExpandAlt } from "react-icons/bi";
 import { BsStars } from "react-icons/bs";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 import { useUpdateAssistant } from "../../../../../hooks/assistant/useUpdateAssistant";
+import GeneratePopover from "./GeneratePopover";
+import { useGenerateSystemInstructions } from "../../../../../hooks/assistant/useGenerateSystemInstructions";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -27,15 +31,6 @@ const Transition = forwardRef(function Transition(props, ref) {
 const drawerWidth = 240;
 
 const SystemInstructions = () => {
-  const { mutate } = useUpdateAssistant();
-  const { assistant } = useAssistantContext();
-
-  // Local state for input
-  const [instructionsInput, setInstructionsInput] = useState();
-  useEffect(() => {
-    setInstructionsInput(assistant?.instructions || "");
-  }, [assistant]);
-
   const theme = useTheme();
   const [openAnchor, setOpen] = useState(false);
   const { open, isSmallScreen } = useContext(DrawerContext);
@@ -50,6 +45,43 @@ const SystemInstructions = () => {
       : `(max-width:${open ? 500 + drawerWidth : 500}px)`
   );
   const fullScreen = useMediaQuery("(max-width:600px)");
+
+  const { mutate } = useUpdateAssistant();
+  const { assistant } = useAssistantContext();
+
+  // Local state for input
+  const [instructionsInput, setInstructionsInput] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  useEffect(() => {
+    setInstructionsInput(assistant?.instructions || "");
+  }, [assistant]);
+
+  // Handle system instruction generation
+  const handleGenerateSuccess = (data) => {
+    // Update the assistant with the generated system instructions
+    const updatedAssistant = {
+      ...assistant,
+      instructions: data.message, // Update the instructions with the AI response
+    };
+    mutate({ id: assistant.id, assistantData: updatedAssistant });
+    setIsGenerating(false);
+  };
+
+  // Mutation for generation tool
+  const { mutate: sysInstructionsMutate, isPending: isSysPending } =
+    useGenerateSystemInstructions(handleGenerateSuccess);
+
+  // For generate dialog
+  const [generateDialogAnchorEl, setGenerateAnchorEl] = useState(null);
+  const generateOpen = Boolean(generateDialogAnchorEl);
+
+  const handleGenDialOpen = (e) => {
+    setGenerateAnchorEl(e.currentTarget);
+  };
+
+  const handleGenDialClose = () => {
+    setGenerateAnchorEl(null);
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -111,6 +143,7 @@ const SystemInstructions = () => {
           </Typography>
           <Tooltip title="Generate" placement="top">
             <IconButton
+              onClick={handleGenDialOpen}
               sx={{
                 position: "absolute",
                 right: 0,
@@ -125,8 +158,13 @@ const SystemInstructions = () => {
                 paddingX: 0.6,
               }}
               aria-label="icon"
+              disabled={isGenerating}
             >
-              <BsStars size="1rem" />
+              {isGenerating ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <BsStars size="1rem" />
+              )}
             </IconButton>
           </Tooltip>
         </Box>
@@ -145,28 +183,78 @@ const SystemInstructions = () => {
             },
           }}
         >
-          <TextField
-            id="outlined-basic"
-            value={instructionsInput}
-            onChange={handleInstructionsChange}
-            onBlur={handleMutate}
-            placeholder="You are a helpful assistant..."
-            variant="outlined"
-            multiline
-            rows={4}
-            slotProps={{
-              htmlInput: { className: "drawer-scrollbar" },
-            }}
+          <Box
             sx={{
-              minWidth: isMobile ? "300px" : isTablet ? "375px" : "450px",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
-              "& .MuiOutlinedInput-input": {
-                paddingY: 1.15,
-              },
+              position: "relative",
+              width: "100%",
             }}
-          />
+          >
+            {isSysPending && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 10,
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-evenly",
+                  padding: 1,
+                  borderRadius: 3,
+                }}
+              >
+                <Skeleton
+                  variant="rectangular"
+                  sx={{
+                    width: "100%",
+                    height: "25%",
+                    borderRadius: 2,
+                  }}
+                />
+                <Skeleton
+                  variant="rectangular"
+                  animation="wave"
+                  sx={{
+                    width: "100%",
+                    height: "25%",
+                    borderRadius: 2,
+                  }}
+                />
+                <Skeleton
+                  variant="rectangular"
+                  animation={false}
+                  sx={{
+                    width: "100%",
+                    height: "25%",
+                    borderRadius: 2,
+                  }}
+                />
+              </Box>
+            )}
+            <TextField
+              id="outlined-basic"
+              value={instructionsInput}
+              onChange={handleInstructionsChange}
+              onBlur={handleMutate}
+              placeholder={isSysPending ? "" : "You are a helpful assistant..."}
+              variant="outlined"
+              multiline
+              disabled={isSysPending}
+              minRows={4}
+              maxRows={8}
+              slotProps={{
+                htmlInput: { className: "drawer-scrollbar" },
+              }}
+              sx={{
+                minWidth: isMobile ? "300px" : isTablet ? "375px" : "450px",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                },
+              }}
+            />
+          </Box>
           <IconButton
             className="expand-icon"
             onClick={handleClickOpen}
@@ -220,6 +308,7 @@ const SystemInstructions = () => {
               Edit System Instructions
             </Typography>
             <IconButton
+              onClick={handleGenDialOpen}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -237,12 +326,13 @@ const SystemInstructions = () => {
         </DialogTitle>
         <DialogContent>
           <TextField
+            disabled={isSysPending}
             id="outlined-multiline-static"
             onChange={handleInstructionsChange}
             multiline
             minRows={6}
             maxRows={20}
-            placeholder="You are a helpful assistant..."
+            placeholder={isSysPending ? "" : "You are a helpful assistant..."}
             value={instructionsInput}
             variant="outlined"
             fullWidth
@@ -253,9 +343,6 @@ const SystemInstructions = () => {
               minWidth: isMobile ? "300px" : isTablet ? "470px" : "650px",
               "& .MuiOutlinedInput-root": {
                 borderRadius: 3,
-              },
-              "& .MuiOutlinedInput-input": {
-                paddingY: 1.15,
               },
             }}
           />
@@ -308,6 +395,16 @@ const SystemInstructions = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Generate Dialog */}
+      <GeneratePopover
+        open={generateOpen}
+        anchorEl={generateDialogAnchorEl}
+        handleClose={handleGenDialClose}
+        mutate={sysInstructionsMutate}
+        setIsGenerating={setIsGenerating}
+        setInstructionsInput={setInstructionsInput}
+        closeDialog={handleClose}
+      />
     </>
   );
 };

@@ -5,12 +5,11 @@ import { useAssistantContext } from "../../contexts/AssistantContext";
 
 export const useDeleteAssistant = () => {
   const queryClient = useQueryClient();
-  const { setAssistant } = useAssistantContext();
+  const { setAssistant, setHasItems, setSelectedTab } = useAssistantContext();
 
   return useMutation({
     mutationFn: ({ id }) => assistant.delete(id),
     onSuccess: (_, id) => {
-      // Invalidate the "assistants" query to refetch updated data
       queryClient.invalidateQueries(["assistants"]);
       toast.success("Assistant deleted successfully.");
 
@@ -27,6 +26,8 @@ export const useDeleteAssistant = () => {
           setAssistant(latestAssistant);
         } else {
           setAssistant(null);
+          setSelectedTab("Create");
+          setHasItems(false);
         }
         return updatedAssistants;
       });

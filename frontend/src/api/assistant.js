@@ -135,3 +135,15 @@ export const vectorStoreBatch = {
     return response.data;
   },
 };
+
+// Service for generations
+export const generate = {
+  // POST - System Instructions
+  sys: async (message) => {
+    const response = await axiosInstance.post(
+      "/assistant/generate/system_instructions/",
+      message
+    );
+    return response.data;
+  },
+};
