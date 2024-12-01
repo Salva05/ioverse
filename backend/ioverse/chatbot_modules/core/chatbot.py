@@ -1,6 +1,8 @@
 from ..services.abstract_ai_service import AbstractAIService
 from .chat_logic_service import ChatLogicService
 from tenacity import retry, stop_after_attempt, wait_exponential
+from typing import Any, Union, Type, Dict
+from pydantic import BaseModel
 import logging
 
 logger = logging.getLogger("chatbot_project")
@@ -35,9 +37,56 @@ class Chatbot:
         chat_logger.info(f"Assistant: {response}")
         return response
 
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    def get_structured_output(
+        self,
+        prompt: str, 
+        response_format: Union[Type[BaseModel], Dict[str, Any]],
+        model = "gpt-4o-2024-08-06",
+        **kwargs
+    ) -> Any:
+        """
+        Generates a single structured output and parses it into the receiving object before returning it.
+        """
+        self.chat_history = self.chat_logic.append_user_message(self.chat_history, prompt)
+        chat_logger.info(f"User: {prompt}")
+        try:
+            response = self.ai_service.structured_output(
+                model=model,
+                messages=self.chat_history,
+                response_format=response_format,
+                **kwargs
+            )
+        except Exception as e:
+            logger.error(f"Error during AI service call: {e}")
+            raise
+
+        chat_logger.info(f"Assistant: {response}")
+
+        # Extract the parsed structured output
+        assistant_message = response.choices[0].message
+
+        # Handle possible refusal
+        if hasattr(assistant_message, 'refusal') and assistant_message.refusal:
+            refusal_message = assistant_message.refusal
+            logger.warning(f"Assistant refused to respond: {refusal_message}")
+            return None
+        elif hasattr(assistant_message, 'parsed') and assistant_message.parsed:
+            parsed_output = assistant_message.parsed
+            return parsed_output
+        else:
+            logger.error("Unexpected response format received from the assistant.")
+            return None
+    
     def clear_history(self):
         """
         Clears the chat history, retaining only the system message.
         """
         self.chat_history = self.chat_logic.prepare_initial_history()
         logger.info("Chat history cleared.")
+        
+    def reset(self, system_instructions):
+        """
+        Reset the chat history and redefine the system instructions
+        """
+        self.chat_history = [{"role": "system", "content": system_instructions}]

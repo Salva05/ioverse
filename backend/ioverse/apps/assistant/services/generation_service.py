@@ -2,7 +2,40 @@ from chatbot_modules.core.chatbot import Chatbot
 from chatbot_modules.services.openai_service import OpenAIService
 from chatbot_modules.core.chat_logic_service import ChatLogicService
 from chatbot_modules.config.settings import get_settings
+from pydantic import BaseModel, Field
+from typing import Any, Dict, Optional, Union, List
+from typing_extensions import Literal
+import logging
 
+logger = logging.getLogger(__name__)
+
+class Properties(BaseModel):
+    type: Literal["string", "object", "number"]
+    description: Optional[str]
+    properties: Optional[Dict[str, "Properties"]]
+    required: Optional[List[str]]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+Properties.model_rebuild()
+    
+class Parameters(BaseModel):
+    type: Literal["object"]
+    properties: Optional[Dict[str, Properties]]
+    required: Optional[List[str]]
+    additionalProperties: Optional[bool]
+        
+class Function(BaseModel):
+    """
+    Represents the Function tool as the structured output the OpenAI 
+    model has to utilize for its response.
+    """
+    name: str
+    description: str
+    parameters: Parameters
+    strict: bool
+            
 class TaskGeneratorService:
     """
     AI-powered task generator.
@@ -21,6 +54,19 @@ class TaskGeneratorService:
         settings = get_settings()
         key = settings.openai_api_key
         openai_service = OpenAIService(api_key=key)
+        chat_logic_service = ChatLogicService()
+        
+        self.chatbot = Chatbot(
+            ai_service=openai_service,
+            chat_logic=chat_logic_service,
+            model="chatgpt-4o-latest",
+        )
+    
+    def generate_system_instructions(self, prompt):
+        """
+        Generates System Instructions for a OpenAI Assistant API / Chat Completions API-compatible 
+        model given an user prompt
+        """
         sys_instructions = (
             "You are an AI assistant specialized in generating system instructions for other AI assistants. "
             "Your task is to translate a user's high-level requirements into precise, machine-readable system instructions. "
@@ -34,20 +80,72 @@ class TaskGeneratorService:
             "- Respond in plain text, without using an type of formatting, and don't be too verbose."
             "Always prioritize direct, unambiguous language to make the instructions actionable and effective."
         )
-
-        chat_logic_service = ChatLogicService(system_instructions = sys_instructions)
-        msg_history = chat_logic_service.prepare_initial_history()  # not required, but for ease of access for future tasks
-        
-        self.chatbot = Chatbot(
-            ai_service=openai_service,
-            chat_logic=chat_logic_service,
-            model="chatgpt-4o-latest",
-            history=msg_history,
-        )
-    
-    def generate_system_instructions(self, prompt):
-        """
-        Generates System Instructions for a OpenAI Assistant API / Chat Completions API-compatible 
-        model given an user prompt
-        """
+        self.chatbot.reset(system_instructions=sys_instructions)
         return self.chatbot.get_response(prompt)
+
+    def generate_function_tool(self, prompt):
+        """
+        Generates a function definition for Assistant's tools 
+        according to OpenAI Assistant API, given a user prompt
+        and a Pydantic model representing the JSON schema the model has to output.
+        """
+        sys_instructions = (
+            "Given a user prompt describing the function, you should output a JSON object that defines the function. Extract information as the function's parameters and the return value."
+            "The object must include 'name', 'description', 'parameters', and 'strict' fields, with 'parameters' containing a valid JSON Schema object that defines the function's parameters. "
+            "If needed, make parameter field to be recursive."
+            "Here are examples of valid function definitions:\n\n"
+            "Example 1:\n"
+            "{\n"
+            '  "name": "get_weather",\n'
+            '  "description": "Fetches weather information for a specific location.",\n'
+            '  "parameters": {\n'
+            '    "type": "object",\n'
+            '    "properties": {\n'
+            '      "location": {\n'
+            '        "type": "string",\n'
+            '        "description": "The city and state, e.g., San Francisco, CA"\n'
+            '      },\n'
+            '      "unit": {\n'
+            '        "type": "string",\n'
+            '        "enum": ["c", "f"]\n'
+            '      }\n'
+            '    },\n'
+            '    "required": ["location", "unit"],\n'
+            '    "additionalProperties": false\n'
+            '  },\n'
+            '  "strict": true\n'
+            "}\n\n"
+            "Example 2:\n"
+            "{\n"
+            '  "name": "calculate_product",\n'
+            '  "description": "Calculates the product of two numbers.",\n'
+            '  "parameters": {\n'
+            '    "type": "object",\n'
+            '    "properties": {\n'
+            '      "number1": {\n'
+            '        "type": "number",\n'
+            '        "description": "The first number."\n'
+            '      },\n'
+            '      "number2": {\n'
+            '        "type": "number",\n'
+            '        "description": "The second number."\n'
+            '      }\n'
+            '    },\n'
+            '    "required": ["number1", "number2"],\n'
+            '    "additionalProperties": false\n'
+            '  },\n'
+            '  "strict": true\n'
+            "}\n\n"
+            "Please generate the function definition accordingly."
+        )
+        self.chatbot.reset(system_instructions=sys_instructions)
+        function_definition = self.chatbot.get_structured_output(
+            prompt=prompt,
+            response_format=Function
+        )
+        if function_definition:
+            return function_definition.model_dump(exclude_none=True)
+        else:
+            logger.error("Failed to generate function definition.")
+            return None
+        

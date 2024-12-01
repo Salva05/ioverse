@@ -9,7 +9,9 @@ class ChatLogicService:
 
     def append_user_message(self, history: List[Dict[str, str]], prompt: str) -> List[Dict[str, str]]:
         history.append({"role": "user", "content": prompt})
+        return history
 
     def append_assistant_message(self, history: List[Dict[str, str]], response: str) -> List[Dict[str, str]]:
         history.append({"role": "assistant", "content": response})
+        return history
         
