@@ -1,6 +1,7 @@
 from chatbot_modules.core.chatbot import Chatbot
 from chatbot_modules.services.openai_service import OpenAIService
 from chatbot_modules.core.chat_logic_service import ChatLogicService
+from chatbot_modules.exceptions import MessageLengthException
 from chatbot_modules.config.settings import get_settings
 from pydantic import BaseModel, Field
 from typing import Any, Dict, Optional, Union, List
@@ -19,7 +20,7 @@ class Schema(BaseModel):
     items: Optional[Union["Schema", List["Schema"]]]
     enum: Optional[List[str]]
     description: Optional[str]
-    required: Optional[List[str]]
+    required: List[str]
     additionalProperties: Optional[bool]
 
     class Config:
@@ -33,7 +34,7 @@ class ResponseFormat(BaseModel):
     """
     name: str
     description: Optional[str]
-    schema: Schema
+    schema: Schema = Field(default_factory=lambda: Schema(type="object"))
     strict: Optional[bool]
 
 #########################################
@@ -174,16 +175,22 @@ class TaskGeneratorService:
             "Generate the function definition accordingly."
         )
         self.chatbot.reset(system_instructions=sys_instructions)
-        function_definition = self.chatbot.get_structured_output(
-            prompt=prompt,
-            response_format=Function
-        )
-        if function_definition:
-            return function_definition.model_dump(exclude_none=True)
-        else:
-            logger.error("Failed to generate function definition.")
-            return None
-    
+        try:
+            function_definition = self.chatbot.get_structured_output(
+                prompt=prompt,
+                response_format=Function
+            )
+            if function_definition:
+                return function_definition.model_dump(exclude_none=True)
+            else:
+                logger.error("Failed to generate function definition.")
+                return None
+        except MessageLengthException as e:
+            logger.error(f"Error: {e}")
+            return "Token limit reached"
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            
     def generate_schema(self, prompt):
         """
         Generates a schema representing the model's response format
@@ -199,6 +206,7 @@ class TaskGeneratorService:
             "- 'strict': A boolean indicating whether strict schema adherence is required.\n"
             "Ensure the schema matches the user's requirements and adheres to OpenAI's Structured Outputs limitations.\n"
             "Use examples provided to guide your response."
+            "IMPORTANT: Every attribute defined in the 'properties' field MUST be included in the 'required' list of the schema. Even if the user specifies that some attributes are optional, the schema must still treat all attributes as required by default."
             "Here are examples of valid json schemas:\n\n"
             "Example 1:\n"
             "{\n"
@@ -276,12 +284,18 @@ class TaskGeneratorService:
             "Generate the schema definition accordingly."
         )
         self.chatbot.reset(system_instructions=sys_instructions)
-        schema_definition = self.chatbot.get_structured_output(
-            prompt=prompt,
-            response_format=ResponseFormat
-        )
-        if schema_definition:
-            return schema_definition.model_dump(exclude_none=True)
-        else:
-            logger.error("Failed to generate response format schema..")
-            return None
+        try:
+            schema_definition = self.chatbot.get_structured_output(
+                prompt=prompt,
+                response_format=ResponseFormat
+            )
+            if schema_definition:
+                return schema_definition.model_dump(exclude_none=True)
+            else:
+                logger.error("Failed to generate response format schema..")
+                return None
+        except MessageLengthException as e:
+            logger.error(f"Error: {e}")
+            return "Token limit reached"
+        except Exception as e:
+            logger.error(f"Error: {e}")

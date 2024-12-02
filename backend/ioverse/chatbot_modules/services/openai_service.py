@@ -28,6 +28,7 @@ class OpenAIService(AbstractAIService):
         completion = openai.beta.chat.completions.parse(
             model=model,
             messages=messages,
+            max_completion_tokens=2000,
             response_format=response_format
         )
         return completion

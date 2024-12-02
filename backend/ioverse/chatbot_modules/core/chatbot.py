@@ -1,9 +1,11 @@
 from ..services.abstract_ai_service import AbstractAIService
+from ..exceptions import MessageLengthException
 from .chat_logic_service import ChatLogicService
 from tenacity import retry, stop_after_attempt, wait_exponential
 from typing import Any, Union, Type, Dict
 from pydantic import BaseModel
 import logging
+import openai
 
 logger = logging.getLogger("chatbot_project")
 chat_logger = logging.getLogger("chat_log")
@@ -37,7 +39,7 @@ class Chatbot:
         chat_logger.info(f"Assistant: {response}")
         return response
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    @retry(stop=stop_after_attempt(1), wait=wait_exponential(multiplier=1, min=4, max=10))
     def get_structured_output(
         self,
         prompt: str, 
@@ -57,6 +59,14 @@ class Chatbot:
                 response_format=response_format,
                 **kwargs
             )
+        except openai.APIError as e:
+            # Check for token limit reached
+            error_message = str(e)
+            if "Could not parse response content as the length limit was reached" in error_message:
+                raise MessageLengthException(message=f"Generation interrupted due to finished tokens.")
+            else:
+                print("OpenAI API error occurred:", error_message)
+            raise
         except Exception as e:
             logger.error(f"Error during AI service call: {e}")
             raise
@@ -66,8 +76,12 @@ class Chatbot:
         # Extract the parsed structured output
         assistant_message = response.choices[0].message
 
+        # Handle generation interruption for token limit
+        if hasattr(assistant_message, 'finish_reason') and assistant_message.finish_reason == "length":
+            finished_tokens = getattr(assistant_message, 'finished_tokens', 'unknown')
+            raise MessageLengthException(message=f"Generation interrupted due to finished tokens.")
         # Handle possible refusal
-        if hasattr(assistant_message, 'refusal') and assistant_message.refusal:
+        elif hasattr(assistant_message, 'refusal') and assistant_message.refusal:
             refusal_message = assistant_message.refusal
             logger.warning(f"Assistant refused to respond: {refusal_message}")
             return None
