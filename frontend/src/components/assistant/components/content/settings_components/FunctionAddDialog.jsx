@@ -63,17 +63,28 @@ const FunctionAddDialog = ({
 
   const { mutate, isPending, isSuccess } = useUpdateAssistant();
 
-  // highlight boolean values
-  Prism.hooks.add("wrap", function (env) {
-    if (env.type === "boolean") {
-      env.attributes.style = `color: ${theme.palette.primary.main};`;
-    }
-  });
+  useEffect(() => {
+    Prism.hooks.add("wrap", function (env) {
+      if (env.type === "boolean") {
+        env.attributes.style = `color: ${theme.palette.primary.main};`;
+      }
+    });
+  }, [theme.palette.primary.main]);
 
   // Generation tool
   const [isGenerating, setIsGenerating] = useState(false);
   // Handle Function Tool and Response Format generation
   const handleGenerateSuccess = (data) => {
+    // Check for generation interruption due to token limit reached
+    if (
+      typeof data.message === "string" &&
+      data.message.includes("Token limit reached")
+    ) {
+      handleClose();
+      setIsGenerating(false);
+      toast.error("Error generating the schema: Token limit reached.");
+      return; // Exit early since we've handled the error
+    }
     const jsonString = JSON.stringify(data.message, null, 2);
     setJsonContent(jsonString);
     setIsGenerating(false);
@@ -229,6 +240,13 @@ const FunctionAddDialog = ({
       handleClose();
     }
   }, [isSuccess]);
+
+  // Clear jsonContent when dialog opens and mutation is pending
+  useEffect(() => {
+    if (openDialog && (isFunctionGenPending || isResponseFormatPending)) {
+      setJsonContent("");
+    }
+  }, [openDialog, isFunctionGenPending, isResponseFormatPending]);
 
   return (
     <>
@@ -485,6 +503,7 @@ const FunctionAddDialog = ({
                 </Box>
               )}
               <Editor
+                disabled={isFunctionGenPending || isResponseFormatPending}
                 placeholder={
                   isFunctionGenPending || isResponseFormatPending
                     ? ""

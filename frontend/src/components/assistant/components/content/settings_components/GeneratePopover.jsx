@@ -37,14 +37,21 @@ const GeneratePopover = ({
 
     // Not strictly necessary, but for ease of customization
     // for future needs
+    // Add break statements to prevent fall-through
     switch (usage) {
       case "System Instructions":
         mutate(message);
         closeDialog();
+        break;
       case "Function":
         mutate(message);
+        break;
       case "Response Format":
         mutate(message);
+        break;
+      default:
+        console.warn(`Unhandled usage type: ${usage}`);
+        break;
     }
 
     setPrompt("");
