@@ -1,10 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
 import CssBaseline from "@mui/material/CssBaseline";
-import Divider from "@mui/material/Divider";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
@@ -13,15 +10,17 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
-import {
-  GoogleIcon,
-  FacebookIcon,
-  SitemarkIcon,
-} from "../components/signup/CustomIcons";
 import { useNavigate } from "react-router-dom";
 import register from "../api/registration";
 import { AuthContext } from "../contexts/AuthContext";
 import { Alert, Toolbar } from "@mui/material";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import Check from "@mui/icons-material/Check";
+import StepConnector, {
+  stepConnectorClasses,
+} from "@mui/material/StepConnector";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -62,6 +61,75 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
+const QontoConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 10,
+    left: "calc(-50% + 16px)",
+    right: "calc(50% + 16px)",
+  },
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: "#784af4",
+    },
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: "#784af4",
+    },
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    borderColor: "#eaeaf0",
+    borderTopWidth: 3,
+    borderRadius: 1,
+    ...theme.applyStyles("dark", {
+      borderColor: theme.palette.grey[800],
+    }),
+  },
+}));
+
+const QontoStepIconRoot = styled("div")(({ theme }) => ({
+  color: "#eaeaf0",
+  display: "flex",
+  height: 22,
+  alignItems: "center",
+  "& .QontoStepIcon-completedIcon": {
+    color: "#784af4",
+    zIndex: 1,
+    fontSize: 18,
+  },
+  "& .QontoStepIcon-circle": {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    backgroundColor: "currentColor",
+  },
+  ...theme.applyStyles("dark", {
+    color: theme.palette.grey[700],
+  }),
+  variants: [
+    {
+      props: ({ ownerState }) => ownerState.active,
+      style: {
+        color: "#784af4",
+      },
+    },
+  ],
+}));
+
+function QontoStepIcon(props) {
+  const { active, completed, className } = props;
+
+  return (
+    <QontoStepIconRoot ownerState={{ active }} className={className}>
+      {completed ? (
+        <Check className="QontoStepIcon-completedIcon" />
+      ) : (
+        <div className="QontoStepIcon-circle" />
+      )}
+    </QontoStepIconRoot>
+  );
+}
+
 export default function SignUp(props) {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
@@ -71,6 +139,22 @@ export default function SignUp(props) {
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState("");
   const navigate = useNavigate();
+
+  const [activeStep, setActiveStep] = React.useState(0);
+  const [completedSteps, setCompletedSteps] = React.useState(new Set());
+  const steps = ["Credentials", "Key", "Sign-up"];
+  const handleNext = () => {
+    setCompletedSteps((prev) => new Set([...prev, activeStep])); // Mark current step as completed
+    if (activeStep < steps.length - 1) {
+      setActiveStep((prev) => prev + 1);
+    }
+  };
+  const handlePrevious = () => {
+    if (activeStep > 0) {
+      setActiveStep((prev) => prev - 1);
+    }
+  };
+  const isStepCompleted = (step) => completedSteps.has(step);
 
   const { authenticate } = React.useContext(AuthContext);
 
@@ -194,14 +278,52 @@ export default function SignUp(props) {
       <Toolbar />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <SitemarkIcon />
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+          <Stepper
+            alternativeLabel
+            activeStep={activeStep}
+            connector={<QontoConnector />}
           >
-            Register
-          </Typography>
+            {steps.map((label, index) => (
+              <Step key={label} completed={isStepCompleted(index)}>
+                <StepLabel slots={{ stepIcon: QontoStepIcon }}>
+                  {label}
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              component="h1"
+              variant="h4"
+              sx={{ fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+            >
+              Register
+            </Typography>
+            {activeStep > 0 && (
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={handlePrevious}
+                sx={{
+                  fontSize: "0.875rem",
+                  fontFamily: "'Montserrat', serif",
+                  px: 0,
+                  py: 0,
+                  borderRadius: "8px",
+                  textTransform: "none",
+                }}
+              >
+                Back
+              </Button>
+            )}
+          </Box>
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -272,17 +394,15 @@ export default function SignUp(props) {
                 color={passwordError ? "error" : "primary"}
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="allowExtraEmails" color="primary" />}
-              label="I want to receive updates via email."
-            />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              onClick={
+                activeStep === steps.length - 1 ? validateInputs : handleNext
+              }
             >
-              Sign up
+              {activeStep === steps.length - 1 ? "Sign Up" : "Next"}
             </Button>
             <Typography sx={{ textAlign: "center" }}>
               Already have an account?{" "}
@@ -296,27 +416,6 @@ export default function SignUp(props) {
                 </Link>
               </span>
             </Typography>
-          </Box>
-          <Divider>
-            <Typography sx={{ color: "text.secondary" }}>or</Typography>
-          </Divider>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert("Sign up with Google")}
-              startIcon={<GoogleIcon />}
-            >
-              Sign up with Google
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert("Sign up with Facebook")}
-              startIcon={<FacebookIcon />}
-            >
-              Sign up with Facebook
-            </Button>
           </Box>
         </Card>
       </SignUpContainer>
