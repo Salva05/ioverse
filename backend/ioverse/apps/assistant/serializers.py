@@ -1,5 +1,6 @@
 import os
 from rest_framework import serializers
+from django.core.validators import MaxLengthValidator
 from .validators import (
     validate_purpose,
     validate_metadata,
@@ -54,6 +55,29 @@ class ThreadSerializer(serializers.ModelSerializer):
             'metadata',
         ]
         read_only_fields = ['id', 'object', 'created_at']
+
+# ======================
+# Thread Creation
+# ======================
+class ThreadCreationSerializer(serializers.Serializer):
+    messages = serializers.ListField(
+        child=serializers.DictField(),
+        required=False
+    )
+    tool_resources = serializers.DictField(
+        child=serializers.ListField(
+            child=serializers.CharField()
+        ),
+        required=False,
+        allow_null=True
+    )
+    metadata = serializers.DictField(
+        child=serializers.CharField(max_length=512),
+        required=False,
+        validators=[
+            MaxLengthValidator(16, message="Maximum of 16 key-value pairs allowed.")
+        ]
+    )
 
 # ======================
 # Message

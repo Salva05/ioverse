@@ -228,9 +228,6 @@ class MessageIntegrationService:
                         'metadata': msg_pydantic.metadata,
                         'assistant_id': msg_pydantic.assistant_id,
                         'run_id': msg_pydantic.run_id,
-                        'incomplete_details': msg_pydantic.incomplete_details,
-                        'completed_at': msg_pydantic.completed_at,
-                        'incomplete_at': msg_pydantic.incomplete_at,
                         'owner': user
                     }
                 )

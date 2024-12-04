@@ -10,11 +10,11 @@ from assistant_modules.common.models import (
 )
 
 class ThreadCreateParams(BaseModel):
-    messages: Optional[List[Message]] = Field(
+    messages: Optional[List[Dict[str, Any]]] = Field(
         default=None,
         description="A list of messages to start the thread with."
     )
-    tool_resources: Optional[ToolResources] = Field(
+    tool_resources: Optional[Dict[str, Any]] = Field(
         default=None,
         description="Resources made available to the assistant's tools in this thread."
     )

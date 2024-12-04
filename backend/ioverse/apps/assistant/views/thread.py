@@ -1,7 +1,7 @@
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from apps.assistant.serializers import ThreadSerializer
+from apps.assistant.serializers import ThreadSerializer, ThreadCreationSerializer
 from apps.assistant.services.thread_services import ThreadIntegrationService
 from pydantic import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
@@ -10,7 +10,7 @@ class ThreadCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request):
-        serializer = ThreadSerializer(data=request.data)
+        serializer = ThreadCreationSerializer(data=request.data)
         if serializer.is_valid():
             service = ThreadIntegrationService()
             try:
