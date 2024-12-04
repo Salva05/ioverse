@@ -4,13 +4,11 @@ import { Box, Button, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import { useDarkMode } from "../../../../contexts/DarkModeContext";
 import { MdDisplaySettings } from "react-icons/md";
-import { GrChat } from "react-icons/gr";
-import { MdModelTraining } from "react-icons/md";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import { VscRunAll } from "react-icons/vsc";
-import { GiHabitatDome } from "react-icons/gi";
 import { useAssistantContext } from "../../../../contexts/AssistantContext";
 import { IoMdAdd } from "react-icons/io";
+import { GrStorage } from "react-icons/gr";
 
 const Tabs = () => {
   const { selectedEntity, setSelectedTab, selectedTab, hasItems } =
@@ -34,31 +32,19 @@ const Tabs = () => {
         label: hasItems ? "Settings" : "Create",
       },
       {
-        icon:
-          selectedEntity === "Assistant" ? (
-            <GrChat size="1.23em" style={{ marginRight: 7, marginBottom: 3 }} />
-          ) : (
-            <VscRunAll
-              size="1.3em"
-              style={{ marginRight: 7, marginBottom: 3 }}
-            />
-          ),
-        label: selectedEntity === "Assistant" ? "Chat" : "Run",
+        icon: (
+          <VscRunAll size="1.3em" style={{ marginRight: 7, marginBottom: 3 }} />
+        ),
+        label: "Run",
       },
       {
-        icon:
-          selectedEntity === "Assistant" ? (
-            <MdModelTraining
-              size="1.6em"
-              style={{ marginRight: 7, marginBottom: 3 }}
-            />
-          ) : (
-            <GiHabitatDome
-              size="1.5em"
+        icon:(
+            <GrStorage
+              size="1.4em"
               style={{ marginRight: 7, marginBottom: 3 }}
             />
           ),
-        label: selectedEntity === "Assistant" ? "Train" : "Context",
+        label: "Storage",
       },
       {
         icon: (

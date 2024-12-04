@@ -161,5 +161,19 @@ export const generate = {
       message
     );
     return response.data;
-  }
+  },
+};
+
+// Service for Messages-related API calls
+export const messages = {
+  // GET
+  get: async (threadId) => {
+    const response = await axiosInstance.get(
+      `/assistant/message/${threadId}/list/`,
+      {
+        params: { limit: 100, order: "asc" },
+      }
+    );
+    return response.data;
+  },
 };

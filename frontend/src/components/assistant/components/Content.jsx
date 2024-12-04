@@ -5,6 +5,7 @@ import Settings from "./content/Settings";
 import { useAssistantContext } from "../../../contexts/AssistantContext";
 import Create from "./content/Create";
 import Help from "./content/Help";
+import Run from "./content/Run";
 
 const Content = () => {
   const isMobile = useMediaQuery("(max-width:815px)");
@@ -16,6 +17,8 @@ const Content = () => {
         return <Settings />;
       case "Create":
         return <Create />;
+      case "Run":
+        return <Run />;
       default:
         return <Help />;
     }

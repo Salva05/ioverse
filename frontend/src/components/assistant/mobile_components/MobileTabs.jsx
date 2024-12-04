@@ -1,14 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import { Button, Menu, MenuItem, useTheme } from "@mui/material";
+import { Box, Button, Menu, MenuItem, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import { useDarkMode } from "../../../contexts/DarkModeContext";
 import { MdDisplaySettings } from "react-icons/md";
-import { GrChat } from "react-icons/gr";
-import { MdModelTraining } from "react-icons/md";
+import { GrStorage } from "react-icons/gr";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import { VscRunAll } from "react-icons/vsc";
-import { GiHabitatDome } from "react-icons/gi";
 import { useAssistantContext } from "../../../contexts/AssistantContext";
 import { SlSettings } from "react-icons/sl";
 import { IoMdAdd } from "react-icons/io";
@@ -27,33 +25,27 @@ const MobileTabs = () => {
     () => [
       {
         icon: hasItems ? (
-          <MdDisplaySettings size="1.5em" style={{ marginRight: 7 }} />
+          <MdDisplaySettings size="1.5em" />
         ) : (
-          <IoMdAdd size="1.5em" style={{ marginRight: 4, marginBottom: 3 }} />
+          <IoMdAdd size="1.5em" />
         ),
         label: hasItems ? "Settings" : "Create",
       },
       {
-        icon:
-          selectedEntity === "Assistant" ? (
-            <GrChat size="1.23em" style={{ marginRight: 9, marginLeft: 2.5 }} />
-          ) : (
-            <VscRunAll size="1.3em" style={{ marginRight: 10 }} />
-          ),
-        label: selectedEntity === "Assistant" ? "Chat" : "Run",
-      },
-      {
-        icon:
-          selectedEntity === "Assistant" ? (
-            <MdModelTraining size="1.6em" style={{ marginRight: 7 }} />
-          ) : (
-            <GiHabitatDome size="1.5em" style={{ marginRight: 7 }} />
-          ),
-        label: selectedEntity === "Assistant" ? "Train" : "Context",
+        icon: <VscRunAll size="1.3em"  />,
+        label: "Run",
       },
       {
         icon: (
-          <IoIosHelpCircleOutline size="1.6em" style={{ marginRight: 7 }} />
+          <GrStorage size="1.3rem" />
+        ),
+        label: "Storage",
+      },
+      {
+        icon: (
+          <IoIosHelpCircleOutline
+            size="1em"
+          />
         ),
         label: "Help",
       },
@@ -61,21 +53,9 @@ const MobileTabs = () => {
     [hasItems, selectedEntity]
   );
 
-  const [tabIndex, setTabIndex] = useState(0);
-
-  useEffect(() => {
-    setTabIndex(0);
-    setSelectedTab(tabs[0].label);
-  }, [tabs]);
-
   // Handle opening the menu
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
-  };
-
-  // Handle element creation
-  const handleCreate = () => {
-    // will be defined later
   };
 
   // Handle closing the menu
@@ -120,10 +100,25 @@ const MobileTabs = () => {
                 selectedTab === item.label
                   ? theme.palette.action.selected
                   : "transparent",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
             }}
           >
-            {item.icon}
-            {` ${item.label}`}
+            <Box
+              component="span"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 24,
+                height: 24,
+                fontSize: "1.5rem",
+              }}
+            >
+              {item.icon}
+            </Box>
+            {item.label}
             {selectedTab === item.label ? (
               <motion.div
                 className="underline-mobile"

@@ -46,6 +46,23 @@ export const AssistantProvider = ({ children }) => {
   // Current Vector Store for the active Assistant (as Object)
   const [vectorStore, setVectorStore] = useState(null);
 
+  // Monitor when entity is changed to set the active entity state
+  useEffect(() => {
+    if (selectedEntity === "Assistant") {
+      // Handle Assistant selection logic
+      const newestAssistant = [...assistants]
+        .sort((a, b) => b.created_at - a.created_at)
+        .at(0);
+      setAssistant(newestAssistant || null);
+    } else if (selectedEntity === "Thread") {
+      // Handle Thread selection logic
+      const newestThread = [...threads]
+        .sort((a, b) => b.created_at - a.created_at)
+        .at(0);
+      setThread(newestThread || null);
+    }
+  }, [selectedEntity, assistants, threads]);
+
   // Vector Store Update
   useEffect(() => {
     if (!assistant || !vectorStores) {
@@ -69,7 +86,7 @@ export const AssistantProvider = ({ children }) => {
   useEffect(() => {
     const items = selectedEntity === "Assistant" ? assistants : threads;
     const hasItemsNow = items.length > 0;
-  
+
     if (hasItems !== hasItemsNow) {
       setHasItems(hasItemsNow);
       setSelectedTab(hasItemsNow ? "Settings" : "Create");
