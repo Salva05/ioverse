@@ -21,8 +21,8 @@ from django.conf.urls.static import static
 
 from rest_framework_simplejwt import views as jwt_views
 
-from apps.chatbot.views import UserRegistrationView
-from apps.text_to_image.views import CurrentUserView
+from apps.account.views import UserRegistrationView
+from apps.account.views import CurrentUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),

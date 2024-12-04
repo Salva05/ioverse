@@ -3,7 +3,7 @@ from django.db import models
 
 class Account(AbstractUser):
     api_key = models.CharField(
-        max_length=100,   
+        max_length=255,   
         help_text="The API key of openai"
     )
 

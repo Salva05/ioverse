@@ -82,6 +82,7 @@ REST_FRAMEWORK = {
         'images': '10/minute',
         'user': '60/minute',
     },
+    'EXCEPTION_HANDLER': 'ioverse.exception_handler.custom_exception_handler',
 }
 
 AUTH_USER_MODEL = 'account.Account'

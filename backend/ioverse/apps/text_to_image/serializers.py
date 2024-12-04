@@ -3,7 +3,6 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 from .models import ImageGeneration
-from ..chatbot.models import Conversation
 
 import logging
 
@@ -215,28 +214,3 @@ class SharedImageSerializer(serializers.ModelSerializer):
             return self.context['request'].build_absolute_uri(obj.image_file.url)
         return None
     
-class UserSerializer(serializers.ModelSerializer):
-    joined_date = serializers.DateTimeField(source='date_joined', format='%B %d, %Y')
-    chats = serializers.SerializerMethodField()
-    images = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = [
-            'id',
-            'username',
-            'email',
-            'api_key',
-            'first_name',
-            'last_name',
-            'date_joined',
-            'joined_date',
-            'chats',
-            'images'
-        ]
-
-    def get_chats(self, obj):
-        return Conversation.objects.filter(user=obj).count()
-
-    def get_images(self, obj):
-        return ImageGeneration.objects.filter(user=obj).count()
