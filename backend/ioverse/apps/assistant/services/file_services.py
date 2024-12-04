@@ -1,5 +1,4 @@
 import logging
-from io import BytesIO
 from typing import Any, Dict, List
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
@@ -12,8 +11,8 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 class FileIntegrationService:
-    def __init__(self):
-        self.file_service = FileService()
+    def __init__(self, api_key: str):
+        self.file_service = FileService(api_key=api_key)
 
     @transaction.atomic
     def create_file(self, data: Dict[str, Any], user) -> DjangoFile:

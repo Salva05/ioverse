@@ -8,16 +8,31 @@ import json
 
 from apps.assistant.serializers import VectorStoreBatchCreateSerializer, VectorStoreBatchSerializer
 from apps.assistant.services.vectorstorebatch_services import VectorStoreBatchIntegrationService
+
+from ioverse.exceptions import MissingApiKeyException
 from ..renderers import SSEEventRenderer
 from ..permissions import IsAuthenticatedWithQueryToken
 
-class VectorStoreBacthCreateView(APIView):
+class VectorStoreBatchBaseView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+
+    def get_api_key(self):
+        """
+        Method to retrieve API key for a given user.
+        """
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        return api_key
+
+class VectorStoreBacthCreateView(VectorStoreBatchBaseView):
     def post(self, request):
         input_serializer = VectorStoreBatchCreateSerializer(data=request.data)
         if input_serializer.is_valid():
-            service = VectorStoreBatchIntegrationService()
+            # Retrieve OpenAI API key
+            api_key = self.get_api_key()
+            service = VectorStoreBatchIntegrationService(api_key=api_key)
+            
             try:
                 vector_store_id = input_serializer.validated_data.get("vector_store_id")
                 response = service.create_vector_store_batch(vector_store_id, input_serializer.validated_data)
@@ -41,7 +56,13 @@ class VectorStoreBatchStatusStreamView(APIView):
     def get(self, request, *args, **kwargs):
         vector_store_id = kwargs.get("vector_store_id")
         batch_id = kwargs.get("batch_id")
-        service = VectorStoreBatchIntegrationService()
+        
+        # Retrieve OpenAI API key
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        
+        service = VectorStoreBatchIntegrationService(api_key=api_key)
 
         def event_stream():
             for update in service.poll_vector_store_batch_status(

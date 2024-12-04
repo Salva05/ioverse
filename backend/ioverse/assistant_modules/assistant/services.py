@@ -33,8 +33,8 @@ def remove_none_values(data):
         return data
             
 class AssistantService:
-    def __init__(self):
-        self.client = AssistantClient()
+    def __init__(self, api_key: str):
+        self.client = AssistantClient(api_key=api_key)
 
     def create_assistant(self, params: AssistantParams) -> Assistant:
         try:

@@ -6,7 +6,7 @@ from assistant_modules.thread.services import ThreadService, ThreadObject
 
 class TestThreadService(unittest.TestCase):
     def setUp(self):
-        self.service = ThreadService()
+        self.service = ThreadService(api_key="mock_api_key")
         self.service.client = MagicMock()
 
     def test_create_thread(self):

@@ -3,7 +3,6 @@ from django.utils import timezone
 from .models import Conversation
 import logging
 
-# Set up a logger for this module
 logger = logging.getLogger('celery')
 
 @shared_task

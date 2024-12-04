@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
-class TextToImageConfig(AppConfig):
+
+class AccountConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.text_to_image'
+    name = 'apps.account'

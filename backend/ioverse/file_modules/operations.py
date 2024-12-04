@@ -5,8 +5,8 @@ class FileClient:
     Represents the bridge between the application and OpenAI API File operations.
     """
     
-    def __init__(self):
-        self.client = OpenAI()
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
 
     def upload_file(self, file, purpose):
         """

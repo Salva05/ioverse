@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 class VectorStoreClient:
-    def __init__(self):
-        self.client = OpenAI()
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
     
     # Vector Stores
     def create_vector_store(self, **kwargs):

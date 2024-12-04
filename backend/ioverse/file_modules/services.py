@@ -1,15 +1,15 @@
 import logging
 from pydantic import ValidationError
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 from .operations import FileClient
-from .parameters import FileUploadParams, FileRetrieveDeleteParams
+from .parameters import FileUploadParams
 from .core import FileObject
 
 logger = logging.getLogger('file_service')
 
 class FileService:
-    def __init__(self):
-        self.client = FileClient()
+    def __init__(self, api_key: str):
+        self.client = FileClient(api_key=api_key)
 
     def upload_file(self, params: FileUploadParams) -> FileObject:
         """

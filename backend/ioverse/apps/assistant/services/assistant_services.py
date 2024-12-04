@@ -21,8 +21,8 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 class AssistantIntegrationService:
-    def __init__(self):
-        self.assistant_service = AssistantService()
+    def __init__(self, api_key: str):
+        self.assistant_service = AssistantService(api_key=api_key)
 
     @transaction.atomic
     def create_assistant(self, data: Dict[str, Any], user) -> DjangoAssistant:

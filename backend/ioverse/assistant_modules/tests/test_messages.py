@@ -6,7 +6,7 @@ from assistant_modules.common.models import TextContentPart, TextContent, Messag
 
 class TestMessageService(unittest.TestCase):
     def setUp(self):
-        self.service = MessageService()
+        self.service = MessageService(api_key="mock_api_key")
         self.service.client = MagicMock()
 
     def test_create_message(self):

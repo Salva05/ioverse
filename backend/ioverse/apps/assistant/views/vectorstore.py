@@ -4,25 +4,41 @@ from rest_framework.response import Response
 
 from apps.assistant.serializers import VectorStoreSerializer, VectorStoreCreateSerializer, VectorStoreUpdateSerializer
 from apps.assistant.services.vectorstore_services import VectorStoreIntegrationService
+
+from ioverse.exceptions import MissingApiKeyException
 from ..renderers import SSEEventRenderer
 from ..permissions import IsAuthenticatedWithQueryToken
 
 from pydantic import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import StreamingHttpResponse
-import time
 import logging
 import json
 
 logger = logging.getLogger(__name__)
 
-class VectorStoreCreateView(APIView):
+class VectorStoreBaseView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_api_key(self):
+        """
+        Method to retrieve API key for a given user.
+        """
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        return api_key
+    
+class VectorStoreCreateView(VectorStoreBaseView):
     def post(self, request):
         input_serializer = VectorStoreCreateSerializer(data=request.data)
+
+        # Retrieve OpenAI API Key
+        api_key = self.get_api_key()
+        service = VectorStoreIntegrationService(api_key=api_key)
+        
         if input_serializer.is_valid():
-            service = VectorStoreIntegrationService()
+            
             try:
                 result = service.create_vector_store(input_serializer.validated_data, request.user)
                 # Check if SSE URL is included
@@ -52,11 +68,12 @@ class VectorStoreCreateView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class VectorStoreRetrieveView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    
+class VectorStoreRetrieveView(VectorStoreBaseView):
     def get(self, request, vector_store_id):
-        service = VectorStoreIntegrationService()
+        # Retrieve OpenAI API Key
+        api_key = self.get_api_key()
+        service = VectorStoreIntegrationService(api_key=api_key)
+        
         try:
             django_vector_store = service.retrieve_vector_store(vector_store_id, request.user)
             return Response(VectorStoreSerializer(django_vector_store).data, status=status.HTTP_200_OK)
@@ -67,11 +84,12 @@ class VectorStoreRetrieveView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class VectorStoreListView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    
+class VectorStoreListView(VectorStoreBaseView):
     def get(self, request):
-        service = VectorStoreIntegrationService()
+        # Retrieve OpenAI API Key
+        api_key = self.get_api_key()
+        service = VectorStoreIntegrationService(api_key=api_key)
+            
         try:
             # Extract query parameters
             params = {
@@ -105,13 +123,15 @@ class VectorStoreListView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class VectorStoreUpdateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
+class VectorStoreUpdateView(VectorStoreBaseView):
     def put(self, request, vector_store_id):
         input_serializer = VectorStoreUpdateSerializer(data=request.data, partial=True)
+        
+        # Retrieve OpenAI API Key
+        api_key = self.get_api_key()
+        service = VectorStoreIntegrationService(api_key=api_key)
+            
         if input_serializer.is_valid():
-            service = VectorStoreIntegrationService()
             try:
                 django_vector_store = service.update_vector_store(vector_store_id, input_serializer.validated_data, request.user)
                 
@@ -127,11 +147,12 @@ class VectorStoreUpdateView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class VectorStoreDeleteView(APIView):
-    permission_classes = [permissions.IsAuthenticated] 
-
+class VectorStoreDeleteView(VectorStoreBaseView):
     def delete(self, request, vector_store_id):
-        service = VectorStoreIntegrationService()
+        # Retrieve OpenAI API Key
+        api_key = self.get_api_key()
+        service = VectorStoreIntegrationService(api_key=api_key)
+        
         try:
             response = service.delete_vector_store(vector_store_id, request.user)
             return Response(response, status=status.HTTP_204_NO_CONTENT)
@@ -149,7 +170,13 @@ class VectorStoreStatusStreamView(APIView):
     def get(self, request, *args, **kwargs):
         vector_store_id = kwargs.get("vector_store_id")
         user = request.user
-        service = VectorStoreIntegrationService()
+    
+        # Retrieve OpenAI API key
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+
+        service = VectorStoreIntegrationService(api_key=api_key)
 
         def event_stream():
             for update in service.poll_vector_store_status(

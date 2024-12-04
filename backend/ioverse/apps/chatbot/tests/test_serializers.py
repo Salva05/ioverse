@@ -1,10 +1,10 @@
-# apps/chatbot/tests/test_serializer.py
-
 from django.test import TestCase
-from django.contrib.auth.models import User
 from rest_framework.test import APIRequestFactory
 from ..models import Conversation, Message
 from ..serializers import MessageSerializer, ReadOnlyConversationSerializer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class SerializerTestCase(TestCase):
     @classmethod

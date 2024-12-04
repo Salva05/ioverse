@@ -1,18 +1,19 @@
 from django.db import transaction
-from django.apps import apps
 from ..models import Conversation, Message
 from chatbot_modules.core.chatbot import Chatbot
+from chatbot_modules.services.openai_service import OpenAIService
+from chatbot_modules.core.chat_logic_service import ChatLogicService
 import logging
-import openai
+
+from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
 class ChatService:
-    def __init__(self):
-        # Access shared components from AppConfig
-        chatbot_app_config = apps.get_app_config('chatbot')
-        self.ai_service = chatbot_app_config.ai_service
-        self.chat_logic = chatbot_app_config.chat_logic
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
+        self.ai_service = OpenAIService(api_key=api_key)
+        self.chat_logic = ChatLogicService()
 
     def process_user_message(self, user, message_body, conversation_id=None):
         """
@@ -103,7 +104,7 @@ class ChatService:
         user_prompt = f"User Message: \"{first_message}\"\n\nTitle:"
         
         try:
-            response = openai.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
                     {"role": "system", "content": system_prompt},

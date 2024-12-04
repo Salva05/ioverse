@@ -78,7 +78,6 @@ class Chatbot:
 
         # Handle generation interruption for token limit
         if hasattr(assistant_message, 'finish_reason') and assistant_message.finish_reason == "length":
-            finished_tokens = getattr(assistant_message, 'finished_tokens', 'unknown')
             raise MessageLengthException(message=f"Generation interrupted due to finished tokens.")
         # Handle possible refusal
         elif hasattr(assistant_message, 'refusal') and assistant_message.refusal:

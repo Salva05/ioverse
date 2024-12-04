@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 class AssistantClient:
-    def __init__(self):
-        self.client = OpenAI()
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
 
     def create_assistant(self, **kwargs):
         return self.client.beta.assistants.create(**kwargs)

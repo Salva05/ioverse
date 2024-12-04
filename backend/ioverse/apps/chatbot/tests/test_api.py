@@ -1,10 +1,11 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
-from django.contrib.auth.models import User
 from ..models import Conversation, Message
 from unittest.mock import patch
-from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class MessageCreateViewTests(APITestCase):
     def setUp(self):

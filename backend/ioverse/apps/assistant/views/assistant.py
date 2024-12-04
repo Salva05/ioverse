@@ -6,11 +6,26 @@ from apps.assistant.services.assistant_services import AssistantIntegrationServi
 from pydantic import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
-class AssistantCreateView(APIView):
+from ioverse.exceptions import MissingApiKeyException
+
+class AssistantBaseView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_api_key(self):
+        """
+        Method to retrieve API key for a given user.
+        """
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        return api_key
     
+class AssistantCreateView(AssistantBaseView):
     def post(self, request):
-        service = AssistantIntegrationService()
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = AssistantIntegrationService(api_key=api_key)
+        
         try:
             django_assistant = service.create_assistant(request.data, request.user)
             return Response(
@@ -22,11 +37,12 @@ class AssistantCreateView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class AssistantRetrieveView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    
+class AssistantRetrieveView(AssistantBaseView):
     def get(self, request, assistant_id):
-        service = AssistantIntegrationService()
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = AssistantIntegrationService(api_key=api_key)
+        
         try:
             django_assistant = service.retrieve_assistant(assistant_id, request.user)
             if django_assistant:
@@ -37,11 +53,12 @@ class AssistantRetrieveView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class AssistantListView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    
+class AssistantListView(AssistantBaseView):
     def get(self, request):
-        service = AssistantIntegrationService()  
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = AssistantIntegrationService(api_key=api_key)
+        
         try:
             # Pass query parameters to Pydantic model for validation
             params = request.query_params.dict()  # Convert QueryDict to a standard dict
@@ -56,13 +73,14 @@ class AssistantListView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class AssistantUpdateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
+class AssistantUpdateView(AssistantBaseView):
     def put(self, request, assistant_id):
         serializer = AssistantSerializer(data=request.data, partial=True)
         if serializer.is_valid():
-            service = AssistantIntegrationService()
+            # Retrieve OpenAI API key
+            api_key = self.get_api_key()
+            service = AssistantIntegrationService(api_key=api_key)
+            
             try:
                 django_assistant = service.update_assistant(assistant_id, serializer.validated_data, request.user)
                 return Response(AssistantSerializer(django_assistant).data, status=status.HTTP_200_OK)
@@ -74,11 +92,12 @@ class AssistantUpdateView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class AssistantDeleteView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
+class AssistantDeleteView(AssistantBaseView):
     def delete(self, request, assistant_id):
-        service = AssistantIntegrationService()
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = AssistantIntegrationService(api_key=api_key)
+        
         try:
             service.delete_assistant(assistant_id, request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)

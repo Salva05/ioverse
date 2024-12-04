@@ -17,6 +17,7 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.platypus.flowables import HRFlowable
 
+from ioverse.exceptions import MissingApiKeyException
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ReadOnlyConversationSerializer, SharedConversationSerializer, UserRegistrationSerializer
 from .services.chat_service import ChatService
@@ -36,6 +37,12 @@ class MessageViewSet(viewsets.ModelViewSet):
     # Override create method to use ChatService
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        
+        # Retrieve the OpenAI api key for the user
+        api_key = getattr(request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        
         if serializer.is_valid():
             try:
                 # Extract validated data
@@ -43,7 +50,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                 conversation_id = serializer.validated_data.get('conversation_id')
                 
                 # Process the message through ChatService
-                chat_service = ChatService()
+                chat_service = ChatService(api_key=api_key)
                 user_message, ai_message = chat_service.process_user_message(
                     user=request.user,
                     message_body=message_body,

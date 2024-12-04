@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Union, Literal
 from pydantic import BaseModel, Field, field_validator
 
 from assistant_modules.common.models import (
-    Message,
     ContentPartType,
     Attachment,
     validate_metadata,

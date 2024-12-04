@@ -15,11 +15,11 @@ class ImageGenerationService:
     Utilizes OpenAIService and TextToImageLogicService to interact with the AI model.
     """
 
-    def __init__(self):
+    def __init__(self, api_key: str):
         """
         Initialize the ImageGenerationService with necessary AI and logic services.
         """
-        self.ai_service = OpenAIService()
+        self.ai_service = OpenAIService(api_key=api_key)
         self.logic_service = TextToImageLogicService()
 
     def generate_images(self, data):

@@ -16,8 +16,8 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 class MessageIntegrationService:
-    def __init__(self):
-        self.message_service = MessageService()
+    def __init__(self, api_key: str):
+        self.message_service = MessageService(api_key=api_key)
     
     @transaction.atomic
     def create_message(self, thread_id: str, data: Dict[str, Any], user) -> DjangoMessage:

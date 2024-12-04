@@ -11,7 +11,7 @@ from assistant_modules.common.models import ExpiresAfter, ChunkingStrategy
 
 class TestVectorStoreService(unittest.TestCase):
     def setUp(self):
-        self.service = VectorStoreService()
+        self.service = VectorStoreService(api_key="mock_api_key")
         # Mock the client methods to avoid actual API calls
         self.service.client = MagicMock()
 

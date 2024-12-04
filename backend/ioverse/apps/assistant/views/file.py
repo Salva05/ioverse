@@ -7,14 +7,27 @@ from apps.assistant.services.file_services import FileIntegrationService
 from pydantic import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
+from ioverse.exceptions import MissingApiKeyException
 
-class FileCreateView(APIView):
+class FileBaseView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_api_key(self):
+        """
+        Method to retrieve API key for a given user.
+        """
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        return api_key
+    
+class FileCreateView(FileBaseView):
     def post(self, request):
         input_serializer = FileCreateSerializer(data=request.data)
         if input_serializer.is_valid():
-            service = FileIntegrationService()
+            # Retrieve OpenAI API key
+            api_key = self.get_api_key()
+            service = FileIntegrationService(api_key=api_key)
             try:
                 django_file = service.create_file(input_serializer.validated_data, request.user)
                 
@@ -29,11 +42,12 @@ class FileCreateView(APIView):
         return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class FileRetrieveView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
+class FileRetrieveView(FileBaseView):
     def get(self, request, file_id):
-        service = FileIntegrationService()
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = FileIntegrationService(api_key=api_key)
+        
         try:
             django_file = service.retrieve_file(file_id, request.user)
             return Response(FileSerializer(django_file).data, status=status.HTTP_200_OK)
@@ -45,11 +59,12 @@ class FileRetrieveView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class FileListView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
+class FileListView(FileBaseView):
     def get(self, request):
-        service = FileIntegrationService()
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = FileIntegrationService(api_key=api_key)
+        
         try:   
             django_files = service.list_files(request.user)
             
@@ -63,11 +78,12 @@ class FileListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class FileDeleteView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
+class FileDeleteView(FileBaseView):
     def delete(self, request, file_id):
-        service = FileIntegrationService()
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = FileIntegrationService(api_key=api_key)
+        
         try:
             response = service.delete_file(file_id, request.user)
             return Response(response, status=status.HTTP_204_NO_CONTENT)

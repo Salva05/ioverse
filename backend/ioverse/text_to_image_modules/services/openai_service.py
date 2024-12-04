@@ -2,16 +2,13 @@ import openai
 from openai import OpenAI
 from typing import Dict, Any
 from .abstract_ai_service import AbstractAIService
-from ..config.settings import get_settings
 import logging
 
 logger = logging.getLogger('text_to_image_log')
 
 class OpenAIService(AbstractAIService):
-    def __init__(self, api_key: str = None):
-        settings = get_settings()
-        # openai.api_key = api_key or settings.openai_api_key
-        self.client = OpenAI()
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
 
     def generate_image(self, prompt: str, **kwargs) -> Dict[str, Any]:
         # Remove any items with None values from kwargs

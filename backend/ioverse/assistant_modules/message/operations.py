@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 class MessageClient:
-    def __init__(self):
-        self.client = OpenAI()
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
 
     def create_message(self, thread_id, **kwargs):
         return self.client.beta.threads.messages.create(thread_id, **kwargs)

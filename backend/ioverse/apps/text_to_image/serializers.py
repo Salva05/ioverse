@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from django.contrib.auth.models import User
-from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 from .models import ImageGeneration
 from ..chatbot.models import Conversation
@@ -9,6 +8,8 @@ from ..chatbot.models import Conversation
 import logging
 
 logger = logging.getLogger('text_to_image_project')
+
+User = get_user_model()
 
 class ImageGenerationSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField( # Defaults to the current authenticated user
@@ -225,6 +226,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id',
             'username',
             'email',
+            'api_key',
             'first_name',
             'last_name',
             'date_joined',

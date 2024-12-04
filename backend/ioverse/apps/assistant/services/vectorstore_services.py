@@ -18,8 +18,8 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 class VectorStoreIntegrationService:
-    def __init__(self):
-        self.vector_store_service = VectorStoreService()
+    def __init__(self, api_key: str):
+        self.vector_store_service = VectorStoreService(api_key=api_key)
     
     @transaction.atomic
     def create_vector_store(self, data: Dict[str, Any], user) -> DjangoVectorStore:

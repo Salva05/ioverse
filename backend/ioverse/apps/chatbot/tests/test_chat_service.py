@@ -1,11 +1,13 @@
 from django.test import TestCase
-from django.contrib.auth.models import User
 from apps.chatbot.services.chat_service import ChatService
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class ChatServiceTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpass')
-        self.chat_service = ChatService()
+        self.chat_service = ChatService(api_key="test_api_key")
 
     def test_process_user_message_new_conversation(self):
         message_body = "Hello, AI!"

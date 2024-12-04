@@ -11,8 +11,8 @@ from pydantic import ValidationError
 logger = logging.getLogger('thread_service')
 
 class ThreadService:
-    def __init__(self):
-        self.client = ThreadClient()
+    def __init__(self, api_key: str):
+        self.client = ThreadClient(api_key=api_key)
         
     def create_thread(self, params: ThreadCreateParams) -> ThreadObject:
         try:

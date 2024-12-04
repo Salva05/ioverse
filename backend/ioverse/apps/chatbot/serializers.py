@@ -1,6 +1,6 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.models import User
 
 from .models import Message, Conversation
 
@@ -8,6 +8,8 @@ import logging
 import bleach
 
 logger = logging.getLogger(__name__)
+
+User = get_user_model()
 
 class MessageSerializer(serializers.ModelSerializer):
     conversation_id = serializers.IntegerField(required=False, allow_null=True)
@@ -74,7 +76,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username', 'password', 'password_confirm', 'email']
+        fields = ['username', 'password', 'api_key', 'password_confirm', 'email']
         
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -91,6 +93,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
+            api_key=validated_data['api_key'],
             password=validated_data['password']
         )
         return user

@@ -3,9 +3,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 from assistant_modules.common.models import (
-    ThreadToolType as ToolType,
     ToolResources,
-    Message,
     validate_metadata,
 )
 

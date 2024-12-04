@@ -6,7 +6,7 @@ from assistant_modules.common.models import Assistant
 
 class TestAssistantService(unittest.TestCase):
     def setUp(self):
-        self.service = AssistantService()
+        self.service = AssistantService(api_key="mock_api_key")
         self.params = AssistantParams(
             model=AllowedModels.GPT_3_5_TURBO,
             name="Test Assistant",

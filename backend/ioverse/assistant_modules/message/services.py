@@ -9,8 +9,8 @@ from pydantic import ValidationError
 logger = logging.getLogger('message_service')
 
 class MessageService:
-    def __init__(self):
-        self.client = MessageClient()
+    def __init__(self, api_key: str):
+        self.client = MessageClient(api_key=api_key)
 
     def create_message(self, thread_id: str, params: MessageCreateParams) -> MessageObject:
         try:

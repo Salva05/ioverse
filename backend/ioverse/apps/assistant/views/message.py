@@ -9,15 +9,31 @@ from apps.assistant.services.message_services import MessageIntegrationService
 from pydantic import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
+from ioverse.exceptions import MissingApiKeyException
+
 logger = logging.getLogger(__name__)
 
-class MessageCreateView(APIView):
+class MessageBaseView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_api_key(self):
+        """
+        Method to retrieve API key for a given user.
+        """
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        return api_key
     
+class MessageCreateView(MessageBaseView):
     def post(self, request, thread_id):
         input_serializer = MessageCreationSerializer(data=request.data)
+        
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = MessageIntegrationService(api_key=api_key)
+        
         if input_serializer.is_valid():
-            service = MessageIntegrationService()
             try:
                 django_message = service.create_message(thread_id, input_serializer.validated_data, request.user)
                 output_serializer = MessageSerializer(django_message)
@@ -30,11 +46,12 @@ class MessageCreateView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class MessageRetrieveView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    
+class MessageRetrieveView(MessageBaseView):
     def get(self, request, thread_id, message_id):
-        service = MessageIntegrationService()
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = MessageIntegrationService(api_key=api_key)
+        
         try:
             django_message = service.retrieve_message(thread_id, message_id, request.user)
             if django_message:
@@ -50,13 +67,15 @@ class MessageRetrieveView(APIView):
             logger.error(f"Error retrieving message: {e}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class MessageUpdateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
+class MessageUpdateView(MessageBaseView):
     def put(self, request, thread_id, message_id):
         input_serializer = MessageUpdateSerializer(data=request.data, partial=True)
+         
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = MessageIntegrationService(api_key=api_key)
+        
         if input_serializer.is_valid():
-            service = MessageIntegrationService()
             try:
                 django_message = service.update_message(thread_id, message_id, input_serializer.validated_data, request.user)
                 output_serializer = MessageSerializer(django_message)
@@ -72,11 +91,12 @@ class MessageUpdateView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class MessageDeleteView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, thread_id, message_id):
-        service = MessageIntegrationService()
+class MessageDeleteView(MessageBaseView):
+    def delete(self, request, thread_id, message_id):        
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = MessageIntegrationService(api_key=api_key)
+        
         try:
             response = service.delete_message(thread_id, message_id, request.user)
             return Response(response, status=status.HTTP_204_NO_CONTENT)
@@ -87,11 +107,12 @@ class MessageDeleteView(APIView):
             logger.error(f"Error deleting message: {e}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class MessageListView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    
-    def get(self, request, thread_id):
-        service = MessageIntegrationService()
+class MessageListView(MessageBaseView):
+    def get(self, request, thread_id):                
+        # Retrieve OpenAI API key
+        api_key = self.get_api_key()
+        service = MessageIntegrationService(api_key=api_key)
+        
         limit = request.query_params.get('limit', 20)
         order = request.query_params.get('order', 'desc')
         after = request.query_params.get('after', None)

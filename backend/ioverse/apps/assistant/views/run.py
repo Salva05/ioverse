@@ -1,18 +1,30 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+
+from ioverse.exceptions import MissingApiKeyException
 from ..serializers import GenericJSONSerializer
-from ..services.run_services import RunService, RunStepService
+from ..services.run_services import RunService
 import logging
 
 logger = logging.getLogger(__name__)
 
-class RunAPIView(APIView):
+class RunBaseView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_api_key(self):
+        """
+        Method to retrieve API key for a given user.
+        """
+        api_key = getattr(self.request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        return api_key
+    
+class RunAPIView(RunBaseView):
     """
     Handles all Run-related operations.
     """
-    permission_classes = [permissions.IsAuthenticated]
-    
     def post(self, request, action):
         """
         Handles POST requests for creating runs, submitting tool outputs, etc.
@@ -21,7 +33,10 @@ class RunAPIView(APIView):
         if serializer.is_valid():
             data = serializer.validated_data['data']
             try:
-                service = RunService()
+                # Retrieve OpenAI API Key
+                api_key = self.get_api_key()
+                service = RunService(api_key=api_key)
+                
                 if action == 'create':
                     result = service.create_run(**data)
                     return Response(result, status=status.HTTP_201_CREATED)
@@ -58,7 +73,10 @@ class RunAPIView(APIView):
             return Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            service = RunService()
+            # Retrieve OpenAI API Key
+            api_key = self.get_api_key()
+            service = RunService(api_key=api_key)
+            
             if action == 'list_runs':
                 result = service.list_runs(**data)
                 return Response(result, status=status.HTTP_200_OK)
@@ -77,7 +95,10 @@ class RunAPIView(APIView):
         if serializer.is_valid():
             data = serializer.validated_data['data']
             try:
-                service = RunService()
+                # Retrieve OpenAI API Key
+                api_key = self.get_api_key()
+                service = RunService(api_key=api_key)
+                
                 if action == 'update_run':
                     result = service.update_run(**data)
                     return Response(result, status=status.HTTP_200_OK)
@@ -88,12 +109,10 @@ class RunAPIView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class RunStepAPIView(APIView):
+class RunStepAPIView(RunBaseView):
     """
     Handles all RunStep-related operations.
     """
-    permission_classes = [permissions.IsAuthenticated]
-    
     def get(self, request, action):
         """
         Handles GET requests for listing run steps and retrieving a run step.
@@ -110,7 +129,10 @@ class RunStepAPIView(APIView):
             return Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            service = RunStepService()
+            # Retrieve OpenAI API Key
+            api_key = self.get_api_key()
+            service = RunService(api_key=api_key)
+            
             if action == 'list_run_steps':
                 result = service.list_run_steps(**data)
                 return Response(result, status=status.HTTP_200_OK)

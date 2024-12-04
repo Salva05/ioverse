@@ -6,7 +6,7 @@ from assistant_modules.assistant.services import AssistantService
 
 class TestAssistantService(unittest.TestCase):
     def setUp(self):
-        self.service = AssistantService()
+        self.service = AssistantService(api_key="mock_api_key")
         self.service.client = MagicMock()
 
     def test_create_assistant(self):

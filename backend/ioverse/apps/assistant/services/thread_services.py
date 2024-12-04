@@ -14,8 +14,8 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 class ThreadIntegrationService:
-    def __init__(self):
-        self.thread_service = ThreadService()
+    def __init__(self, api_key: str):
+        self.thread_service = ThreadService(api_key=api_key)
 
     @transaction.atomic
     def create_thread(self, data: Dict[str, Any], user) -> DjangoThread:

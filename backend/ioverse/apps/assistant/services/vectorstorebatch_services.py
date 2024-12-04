@@ -13,8 +13,8 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 class VectorStoreBatchIntegrationService:
-    def __init__(self):
-        self.vector_store_service = VectorStoreService()
+    def __init__(self, api_key: str):
+        self.vector_store_service = VectorStoreService(api_key=api_key)
         
     def create_vector_store_batch(self, vector_store_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """

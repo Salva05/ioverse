@@ -2,9 +2,8 @@ from chatbot_modules.core.chatbot import Chatbot
 from chatbot_modules.services.openai_service import OpenAIService
 from chatbot_modules.core.chat_logic_service import ChatLogicService
 from chatbot_modules.exceptions import MessageLengthException
-from chatbot_modules.config.settings import get_settings
 from pydantic import BaseModel, Field
-from typing import Any, Dict, Optional, Union, List
+from typing import Dict, Optional, Union, List
 from typing_extensions import Literal
 import logging
 
@@ -81,15 +80,13 @@ class TaskGeneratorService:
     - Function tool for Assistant API ( compatible also with Chat Completions API )
     - Json Schema response format for Assistant API ( compatible also with Chat Completions API )
     """
-    def __init__(self) -> None:
+    def __init__(self, api_key: str) -> None:
         """
         Initializes a Chatbot instance for task generation.
         
         - Default model: chatgpt-4o-latest
         """
-        settings = get_settings()
-        key = settings.openai_api_key
-        openai_service = OpenAIService(api_key=key)
+        openai_service = OpenAIService(api_key=api_key)
         chat_logic_service = ChatLogicService()
         
         self.chatbot = Chatbot(

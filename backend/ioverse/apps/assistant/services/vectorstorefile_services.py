@@ -14,8 +14,8 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 class VectorStoreFileIntegrationService:
-    def __init__(self):
-        self.vector_store_file_service = VectorStoreService()
+    def __init__(self, api_key: str):
+        self.vector_store_file_service = VectorStoreService(api_key=api_key)
     
     @transaction.atomic
     def create_vector_store_file(self, data: Dict[str, Any], user) -> DjangoVectorStoreFile:

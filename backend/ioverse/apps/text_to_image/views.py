@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q
 
+from ioverse.exceptions import MissingApiKeyException
 from .models import ImageGeneration
 from .serializers import (
     ImageGenerationSerializer,
@@ -32,10 +33,7 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
     queryset = ImageGeneration.objects.all()
     serializer_class = ImageGenerationSerializer  # Default serializer
     throttle_scope = 'images'
-    
-    # Initialize the ImageGenerationService
-    image_generation_service = ImageGenerationService()
-
+        
     def get_queryset(self):
         """
         Retrieve ImageGeneration objects for the authenticated user,
@@ -99,7 +97,14 @@ class ImageGenerationViewSet(viewsets.ModelViewSet):
         Generate images based on the prompt and options provided in the request.
         Returns the image data (URLs or Base64 data) to the frontend without saving them in the database.
         """
-        response = self.image_generation_service.generate_images(request.data)
+        # Retrieve the OpenAI api key for the user
+        api_key = getattr(request.user, 'api_key', None)
+        if not api_key:
+            raise MissingApiKeyException()
+        
+        image_generation_service = ImageGenerationService(api_key=api_key)
+        response = image_generation_service.generate_images(request.data)
+        
         return response
     
     @action(detail=True, methods=['post'])
