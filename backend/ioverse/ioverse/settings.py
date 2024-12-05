@@ -137,6 +137,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://192.168.1.14:5173',
     'http://192.168.1.12:5173',
+    'http://172.20.10.11:5173',
     'http://127.0.0.1:5173',
     'http://localhost:5173',
 ]
@@ -316,3 +317,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Base url of the front end
 FRONTEND_URL = env('FRONTEND_URL')
+
+# SMTP Configuration for email sending
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

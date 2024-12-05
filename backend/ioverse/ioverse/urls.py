@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/chatbot/', include('apps.chatbot.urls')),
     path('api/text-to-image/', include('apps.text_to_image.urls')),
     path('api/assistant/', include('apps.assistant.urls')),
+    path('account/', include('apps.account.urls')),
     path('register/', UserRegistrationView.as_view(), name='user-register'),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
