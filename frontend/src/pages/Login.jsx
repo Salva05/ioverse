@@ -63,9 +63,9 @@ export default function SignIn(props) {
   const [open, setOpen] = React.useState(false);
   const [rememberMe, setRememberMe] = React.useState(false);
   const [error, setError] = React.useState("");
-  
+
   const { authenticate } = React.useContext(AuthContext);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -162,7 +162,10 @@ export default function SignIn(props) {
           }}
         >
           {message && (
-            <Alert severity="info" sx={{ marginBottom: "1rem" }}>
+            <Alert
+              severity="info"
+              sx={{ marginBottom: "1rem", fontFamily: "'Montserrat', serif" }}
+            >
               {message}
             </Alert>
           )}
@@ -170,12 +173,19 @@ export default function SignIn(props) {
             <Typography
               component="h1"
               variant="h4"
-              sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+              sx={{
+                width: "100%",
+                fontSize: "clamp(2rem, 10vw, 2.15rem)",
+                fontFamily: "'Montserrat', serif",
+              }}
             >
               Sign in
             </Typography>
             {error && (
-              <Alert severity="error" sx={{ width: "100%" }}>
+              <Alert
+                severity="error"
+                sx={{ width: "100%", fontFamily: "'Montserrat', serif" }}
+              >
                 {error}
               </Alert>
             )}
@@ -191,7 +201,14 @@ export default function SignIn(props) {
               }}
             >
               <FormControl>
-                <FormLabel htmlFor="email">Username</FormLabel>
+                <FormLabel
+                  htmlFor="email"
+                  sx={{
+                    fontFamily: "'Montserrat', serif",
+                  }}
+                >
+                  Username
+                </FormLabel>
                 <TextField
                   error={emailError}
                   helperText={emailErrorMessage}
@@ -204,18 +221,41 @@ export default function SignIn(props) {
                   fullWidth
                   variant="outlined"
                   color={emailError ? "error" : "primary"}
+                  slotProps={{
+                    input: {
+                      sx: {
+                        fontFamily: "'Montserrat', serif",
+                        "::placeholder": {
+                          fontFamily: "'Montserrat', serif",
+                        },
+                      },
+                    },
+                    formHelperText: {
+                      sx: { fontFamily: "'Montserrat', serif" },
+                    },
+                  }}
                   sx={{ ariaLabel: "username" }}
                 />
               </FormControl>
               <FormControl>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <FormLabel htmlFor="password">Password</FormLabel>
+                  <FormLabel
+                    htmlFor="password"
+                    sx={{
+                      fontFamily: "'Montserrat', serif",
+                    }}
+                  >
+                    Password
+                  </FormLabel>
                   <Link
                     component="button"
                     type="button"
                     onClick={handleClickOpen}
                     variant="body2"
-                    sx={{ alignSelf: "baseline" }}
+                    sx={{
+                      alignSelf: "baseline",
+                      fontFamily: "'Montserrat', serif",
+                    }}
                   >
                     Forgot your password?
                   </Link>
@@ -233,6 +273,19 @@ export default function SignIn(props) {
                   fullWidth
                   variant="outlined"
                   color={passwordError ? "error" : "primary"}
+                  slotProps={{
+                    input: {
+                      sx: {
+                        fontFamily: "'Montserrat', serif",
+                        "::placeholder": {
+                          fontFamily: "'Montserrat', serif",
+                        },
+                      },
+                    },
+                    formHelperText: {
+                      sx: { fontFamily: "'Montserrat', serif" },
+                    },
+                  }}
                 />
               </FormControl>
               <FormControlLabel
@@ -244,23 +297,37 @@ export default function SignIn(props) {
                     color="primary"
                   />
                 }
-                label="Remember me"
+                label={
+                  <span style={{ fontFamily: "Montserrat, sans-serif" }}>
+                    Remember me
+                  </span>
+                }
               />
               <ForgotPassword open={open} handleClose={handleClose} />
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
+                sx={{ fontFamily: "Montserrat, sans-serif" }}
               >
                 Sign in
               </Button>
-              <Typography sx={{ textAlign: "center" }}>
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  fontFamily: "Montserrat, sans-serif",
+                }}
+              >
                 Don&apos;t have an account?{" "}
                 <span>
                   <Link
                     onClick={() => navigate("/register")}
                     variant="body2"
-                    sx={{ alignSelf: "center", cursor: "pointer" }}
+                    sx={{
+                      alignSelf: "center",
+                      cursor: "pointer",
+                      fontFamily: "Montserrat, sans-serif",
+                    }}
                   >
                     Sign up
                   </Link>

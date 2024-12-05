@@ -270,18 +270,26 @@ export default function ChatSystem() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleSend(input)}
-                    disabled={input.trim() === ""}
-                  >
-                    <SendIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleSend(input)}
+                      disabled={input.trim() === ""}
+                    >
+                      <SendIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  fontFamily: "'Montserrat', serif",
+                  "::placeholder": {
+                    fontFamily: "'Montserrat', serif",
+                  },
+                },
+              },
             }}
           />
         </Box>

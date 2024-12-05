@@ -230,7 +230,12 @@ export default function DrawerMenu({ handleDrawerClose }) {
                 onClick={() => handlePageClick(page)}
               >
                 <ListItemIcon>{page.icon}</ListItemIcon>
-                <ListItemText primary={page.display} />
+                <ListItemText
+                  primary={page.display}
+                  primaryTypographyProps={{
+                    sx: { fontFamily: "'Montserrat', serif" },
+                  }}
+                />
                 {!isAuthenticated && page.protected && (
                   <Tooltip title="Login required">
                     <IconButton>
@@ -287,6 +292,19 @@ export default function DrawerMenu({ handleDrawerClose }) {
                               fullWidth
                               name="conversationTitle"
                               onFocus={(e) => e.stopPropagation()}
+                              slotProps={{
+                                input: {
+                                  sx: {
+                                    fontFamily: "'Montserrat', serif",
+                                    "::placeholder": {
+                                      fontFamily: "'Montserrat', serif",
+                                    },
+                                  },
+                                },
+                                formHelperText: {
+                                  sx: { fontFamily: "'Montserrat', serif" },
+                                },
+                              }}
                             />
                           ) : (
                             <Typography
@@ -295,6 +313,7 @@ export default function DrawerMenu({ handleDrawerClose }) {
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
+                                fontFamily: "'Montserrat', serif",
                               }}
                             >
                               {conversation.title}

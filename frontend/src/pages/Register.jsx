@@ -471,7 +471,12 @@ export default function SignUp(props) {
                     onChange={handleChange}
                     slotProps={{
                       input: {
-                        sx: { fontFamily: "'Montserrat', serif" },
+                        sx: {
+                          fontFamily: "'Montserrat', serif",
+                          '::placeholder': {
+                            fontFamily: "'Montserrat', serif",
+                          },
+                        },
                       },
                       formHelperText: {
                         sx: { fontFamily: "'Montserrat', serif" },
@@ -500,7 +505,12 @@ export default function SignUp(props) {
                     onChange={handleChange}
                     slotProps={{
                       input: {
-                        sx: { fontFamily: "'Montserrat', serif" },
+                        sx: {
+                          fontFamily: "'Montserrat', serif",
+                          '::placeholder': {
+                            fontFamily: "'Montserrat', serif",
+                          },
+                        },
                       },
                       formHelperText: {
                         sx: { fontFamily: "'Montserrat', serif" },
@@ -530,7 +540,12 @@ export default function SignUp(props) {
                     onChange={handleChange}
                     slotProps={{
                       input: {
-                        sx: { fontFamily: "'Montserrat', serif" },
+                        sx: {
+                          fontFamily: "'Montserrat', serif",
+                          '::placeholder': {
+                            fontFamily: "'Montserrat', serif",
+                          },
+                        },
                       },
                       formHelperText: {
                         sx: { fontFamily: "'Montserrat', serif !important" },
@@ -560,7 +575,12 @@ export default function SignUp(props) {
                     onChange={handleChange}
                     slotProps={{
                       input: {
-                        sx: { fontFamily: "'Montserrat', serif" },
+                        sx: {
+                          fontFamily: "'Montserrat', serif",
+                          '::placeholder': {
+                            fontFamily: "'Montserrat', serif",
+                          },
+                        },
                       },
                       formHelperText: {
                         sx: { fontFamily: "'Montserrat', serif !important" },
@@ -614,7 +634,12 @@ export default function SignUp(props) {
                     variant="outlined"
                     slotProps={{
                       input: {
-                        sx: { fontFamily: "'Montserrat', serif" },
+                        sx: {
+                          fontFamily: "'Montserrat', serif",
+                          '::placeholder': {
+                            fontFamily: "'Montserrat', serif",
+                          },
+                        },
                         endAdornment: (
                           <InputAdornment position="end">
                             <Tooltip

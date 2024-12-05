@@ -9,11 +9,15 @@ const MessageItem = ({ sender, message, isOptimistic }) => {
   const isUser = sender === "user";
   const theme = useTheme();
 
-  const backgroundColorUser = theme.palette.mode === "dark" 
-        ? theme.palette.grey[800] : theme.palette.grey[200];
+  const backgroundColorUser =
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[800]
+      : theme.palette.grey[200];
 
-  const backgroundColorAi = theme.palette.mode === "dark" 
-  ? theme.palette.grey[800] : theme.palette.grey[200];
+  const backgroundColorAi =
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[800]
+      : theme.palette.grey[200];
 
   return (
     <ListItem
@@ -30,18 +34,16 @@ const MessageItem = ({ sender, message, isOptimistic }) => {
           marginY: "8px",
           padding: { xs: "8px 12px", sm: "10px 15px", md: "12px 18px" },
           backgroundColor: isUser
-          ? theme.palette.mode === "dark"
-            ? theme.palette.grey[300]
-            : theme.palette.primary.main
-          : theme.palette.mode === "dark"
+            ? theme.palette.mode === "dark"
+              ? theme.palette.grey[300]
+              : theme.palette.primary.main
+            : theme.palette.mode === "dark"
             ? theme.palette.grey[800]
             : theme.palette.grey[300],
           color: isUser
             ? theme.palette.primary.contrastText
             : theme.palette.text.primary,
-          borderRadius: isUser
-            ? "15px 0 15px 15px"
-            : "0 15px 15px 15px",
+          borderRadius: isUser ? "15px 0 15px 15px" : "0 15px 15px 15px",
           maxWidth: "560px",
           width: "auto",
           wordBreak: "break-word",
@@ -50,7 +52,11 @@ const MessageItem = ({ sender, message, isOptimistic }) => {
       >
         <ListItemText
           sx={{
+            fontFamily: "'Montserrat', serif",
             whiteSpace: "pre-wrap",
+            "& *": {
+              fontFamily: "'Montserrat', serif !important",
+            },
             "& code": {
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
