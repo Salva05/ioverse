@@ -5,12 +5,12 @@ import { jwtDecode } from 'jwt-decode';
 const TokenManager = {
   // Retrieve the access token from localStorage
   getAccessToken() {
-    return localStorage.getItem("accessToken");
+    return localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
   },
 
   // Retrieve the refresh token from localStorage
   getRefreshToken() {
-    return localStorage.getItem("refreshToken");
+    return localStorage.getItem("refreshToken") || sessionStorage.getItem("refreshToken");
   },
 
   // Check if the access token is missing or expired
@@ -48,16 +48,24 @@ const TokenManager = {
   },
 
   // Update the access token in localStorage
-  setAccessToken(accessToken) {
-    if (accessToken) {
+  setAccessToken(accessToken, rememberMe) {
+    if (rememberMe) {
       localStorage.setItem("accessToken", accessToken);
+      sessionStorage.removeItem("accessToken");
+    } else {
+      sessionStorage.setItem("accessToken", accessToken);
+      localStorage.removeItem("accessToken");
     }
   },
 
   // Update the refresh token in localStorage
-  setRefreshToken(refreshToken) {
-    if (refreshToken) {
+  setRefreshToken(refreshToken, rememberMe) {
+    if (rememberMe) {
       localStorage.setItem("refreshToken", refreshToken);
+      sessionStorage.removeItem("refreshToken");
+    } else {
+      sessionStorage.setItem("refreshToken", refreshToken);
+      localStorage.removeItem("refreshToken");
     }
   },
 
@@ -86,7 +94,7 @@ const TokenManager = {
     if (!token) return null;
     try {
       const decoded = jwtDecode(token);
-      return decoded.exp * 1000; // Convert to milliseconds
+      return decoded.exp * 1000;
     } catch (err) {
       console.error("Failed to decode refresh token:", err);
       return null;

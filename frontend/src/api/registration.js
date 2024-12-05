@@ -7,11 +7,15 @@ const register = async (userData) => {
   try {
     const response = await axios.post(
       config.VITE_BASE_DOMAIN_URL + "/register/",
-      userData
+      userData,
     );
+    console.log("Triggered")
     return response;
   } catch (error) {
     console.error("Registration failed:", error);
+    if (error.code === 'ECONNABORTED') {
+      throw new Error("A network error occurred. Please try again.");
+    }
     throw error; // Re-throw error for handling in the component
   }
 };

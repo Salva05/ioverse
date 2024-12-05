@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }) => {
   }, [isAuthenticated, navigate]);
 
   const authenticate = useCallback(
-    async (username, password) => {
+    async (username, password, rememberMe) => {
       setLoading(true);
       setError(null);
       try {
@@ -114,8 +114,8 @@ export const AuthProvider = ({ children }) => {
         const { access, refresh } = response;
 
         if (access && refresh) {
-          TokenManager.setAccessToken(access);
-          TokenManager.setRefreshToken(refresh);
+          TokenManager.setAccessToken(access, rememberMe);
+          TokenManager.setRefreshToken(refresh, rememberMe);
           setIsAuthenticated(true);
           scheduleLogout(); // Schedule logout based on refresh token
         } else {

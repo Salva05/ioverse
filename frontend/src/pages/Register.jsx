@@ -13,7 +13,15 @@ import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import register from "../api/registration";
 import { AuthContext } from "../contexts/AuthContext";
-import { Alert, Toolbar } from "@mui/material";
+import {
+  Alert,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  Toolbar,
+  Tooltip,
+  useTheme,
+} from "@mui/material";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -21,6 +29,8 @@ import Check from "@mui/icons-material/Check";
 import StepConnector, {
   stepConnectorClasses,
 } from "@mui/material/StepConnector";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import CloseIcon from "@mui/icons-material/Close";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -131,96 +141,157 @@ function QontoStepIcon(props) {
 }
 
 export default function SignUp(props) {
+  const theme = useTheme();
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
   const [error, setError] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
+  const [passwordConfirmError, setPasswordConfirmError] = React.useState(false);
+  const [passwordConfirmErrorMessage, setPasswordConfirmErrorMessage] =
+    React.useState("");
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState("");
+  const [keyError, setKeyError] = React.useState(false);
+  const [keyErrorMessage, setKeyErrorMessage] = React.useState("");
   const navigate = useNavigate();
+
+  const [formData, setFormData] = React.useState({
+    username: "",
+    email: "",
+    password: "",
+    password_confirm: "",
+    api_key: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  
+    // Reset the specific error state
+    switch (name) {
+      case 'username':
+        setNameError(false);
+        setNameErrorMessage('');
+        break;
+      case 'email':
+        setEmailError(false);
+        setEmailErrorMessage('');
+        break;
+      case 'password':
+        setPasswordError(false);
+        setPasswordErrorMessage('');
+        break;
+      case 'password_confirm':
+        setPasswordConfirmError(false);
+        setPasswordConfirmErrorMessage('');
+        break;
+      case 'api_key':
+        setKeyError(false);
+        setKeyErrorMessage('');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const { authenticate } = React.useContext(AuthContext);
 
   const [activeStep, setActiveStep] = React.useState(0);
   const [completedSteps, setCompletedSteps] = React.useState(new Set());
   const steps = ["Credentials", "Key", "Sign-up"];
   const handleNext = () => {
-    setCompletedSteps((prev) => new Set([...prev, activeStep])); // Mark current step as completed
-    if (activeStep < steps.length - 1) {
-      setActiveStep((prev) => prev + 1);
+    if (validateInputs(activeStep)) {
+      setCompletedSteps((prev) => new Set([...prev, activeStep])); // Mark step as completed
+      if (activeStep < steps.length - 1) {
+        setActiveStep((prev) => prev + 1);
+      }
     }
   };
+
   const handlePrevious = () => {
     if (activeStep > 0) {
+      setCompletedSteps((prev) => {
+        const newCompleted = new Set(prev);
+        newCompleted.delete(activeStep);
+        return newCompleted;
+      });
       setActiveStep((prev) => prev - 1);
     }
   };
+  
   const isStepCompleted = (step) => completedSteps.has(step);
 
-  const { authenticate } = React.useContext(AuthContext);
+  const validateInputs = (step) => {
+    let valid = true;
 
-  const validateInputs = () => {
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
-    const password_confirm = document.getElementById("password_confirm");
-    const username = document.getElementById("username");
+    if (step === 0) {
+      const { email, password, password_confirm, username } = formData;
 
-    let isValid = true;
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        setEmailError(true);
+        setEmailErrorMessage("Please enter a valid email address.");
+        valid = false;
+      } else {
+        setEmailError(false);
+        setEmailErrorMessage("");
+      }
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
+      if (!password || password.length < 8) {
+        setPasswordError(true);
+        setPasswordErrorMessage("Password must be at least 8 characters long.");
+        valid = false;
+      } else {
+        setPasswordError(false);
+        setPasswordErrorMessage("");
+      }
+
+      if (password_confirm !== password) {
+        setPasswordConfirmError(true);
+        setPasswordConfirmErrorMessage("Passwords do not match.");
+        valid = false;
+      } else {
+        setPasswordConfirmError(false);
+        setPasswordConfirmErrorMessage("");
+      }
+
+      if (!username.trim()) {
+        setNameError(true);
+        setNameErrorMessage("Name is required.");
+        valid = false;
+      } else {
+        setNameError(false);
+        setNameErrorMessage("");
+      }
+    } else if (step === 1) {
+      const { api_key } = formData;
+      if (!api_key.trim()) {
+        setKeyError(true);
+        setKeyErrorMessage("API Key is required.");
+        valid = false;
+      } else {
+        setKeyError(false);
+        setKeyErrorMessage("");
+      }
     }
 
-    if (!password.value || password.value.length < 8) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 8 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    if (password_confirm.value !== password.value) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Passwords do not match.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    if (!username.value || username.value.length < 1) {
-      setNameError(true);
-      setNameErrorMessage("Name is required.");
-      isValid = false;
-    } else {
-      setNameError(false);
-      setNameErrorMessage("");
-    }
-
-    return isValid;
+    return valid;
   };
 
   const handleSubmit = async (event) => {
     setError("");
-
     event.preventDefault();
-    if (nameError || emailError || passwordError) {
-      return;
-    }
+    // Reset error states
+    setNameError(false);
+    setEmailError(false);
+    setPasswordError(false);
+    setPasswordConfirmError(false);
+    setKeyError(false);
 
-    const data = new FormData(event.currentTarget);
-    const userData = {
-      username: data.get("username"),
-      email: data.get("email"),
-      password: data.get("password"),
-      password_confirm: data.get("password_confirm"),
-    };
-
+    const userData = { ...formData };
     try {
       const response = await register(userData);
 
@@ -237,37 +308,70 @@ export default function SignUp(props) {
         }
       } else {
         console.error("Unexpected response status:", response.status);
-        setError("Unexpected response status:", response.status);
+        setError(`Unexpected response status: ${response.status}`);
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        // Access the error messages returned by the backend
         const errorDetails = error.response.data.errors;
         console.log("Registration failed:", errorDetails);
 
-        // Set the specific errors to display in the form
+        const stepsWithErrors = [];
+        setNameError(false);
+        setEmailError(false);
+        setPasswordError(false);
+        setPasswordConfirmError(false);
+        setKeyError(false);
+        setNameErrorMessage("");
+        setEmailErrorMessage("");
+        setPasswordErrorMessage("");
+        setPasswordConfirmErrorMessage("");
+        setKeyErrorMessage("");
+
+        // Set errors and track affected steps
         if (errorDetails.username) {
           setNameError(true);
           setNameErrorMessage(errorDetails.username[0]);
+          stepsWithErrors.push(0);
         }
         if (errorDetails.email) {
           setEmailError(true);
           setEmailErrorMessage(errorDetails.email[0]);
+          stepsWithErrors.push(0);
         }
-        if (errorDetails.password) {
+        if (errorDetails.password || errorDetails.password_confirm) {
           setPasswordError(true);
-          setPasswordErrorMessage(errorDetails.password[0]);
+          setPasswordErrorMessage(
+            errorDetails.password_confirm
+              ? errorDetails.password_confirm[0]
+              : errorDetails.password[0]
+          );
+          stepsWithErrors.push(0);
         }
-        if (errorDetails.password_confirm) {
-          setPasswordError(true);
-          setPasswordErrorMessage(errorDetails.password_confirm[0]);
+        if (errorDetails.api_key) {
+          setKeyError(true);
+          setKeyErrorMessage(errorDetails.api_key[0]);
+          stepsWithErrors.push(1);
+        }
+
+        // Remove steps with errors from completedSteps
+        setCompletedSteps((prev) => {
+          const newCompleted = new Set(prev);
+          stepsWithErrors.forEach((step) => newCompleted.delete(step));
+          return newCompleted;
+        });
+
+        // Determine the first step that has an error
+        if (stepsWithErrors.length > 0) {
+          const firstErrorStep = Math.min(...stepsWithErrors);
+          setActiveStep(firstErrorStep);
         }
       } else {
         console.log("Registration error:", error);
         const errorMessage =
+          error?.message ||
           error.response?.data?.detail ||
           "An error occurred while registering.";
-        setError("Error: " + errorMessage);
+        setError(errorMessage);
       }
     }
   };
@@ -285,7 +389,14 @@ export default function SignUp(props) {
           >
             {steps.map((label, index) => (
               <Step key={label} completed={isStepCompleted(index)}>
-                <StepLabel slots={{ stepIcon: QontoStepIcon }}>
+                <StepLabel
+                  slots={{ stepIcon: QontoStepIcon }}
+                  sx={{
+                    "& .MuiStepLabel-label": {
+                      fontFamily: "'Montserrat', serif",
+                    },
+                  }}
+                >
                   {label}
                 </StepLabel>
               </Step>
@@ -302,7 +413,10 @@ export default function SignUp(props) {
             <Typography
               component="h1"
               variant="h4"
-              sx={{ fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+              sx={{
+                fontSize: "clamp(2rem, 10vw, 2.15rem)",
+                fontFamily: "'Montserrat', serif",
+              }}
             >
               Register
             </Typography>
@@ -310,6 +424,7 @@ export default function SignUp(props) {
               <Button
                 variant="contained"
                 color="warning"
+                /* disabled={activeStep === 2 && !error} */
                 onClick={handlePrevious}
                 sx={{
                   fontSize: "0.875rem",
@@ -324,93 +439,282 @@ export default function SignUp(props) {
               </Button>
             )}
           </Box>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {error && (
-              <Alert severity="error" sx={{ width: "100%" }}>
+              <Alert
+                severity="error"
+                sx={{ width: "100%", fontFamily: "'Montserrat', serif" }}
+              >
                 {error}
               </Alert>
             )}
-            <FormControl>
-              <FormLabel htmlFor="name">Username</FormLabel>
-              <TextField
-                name="username"
-                required
-                fullWidth
-                id="username"
-                placeholder="JohnDoe"
-                error={nameError}
-                helperText={nameErrorMessage}
-                color={nameError ? "error" : "primary"}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                placeholder="your@email.com"
-                name="email"
-                autoComplete="email"
-                variant="outlined"
-                error={emailError}
-                helperText={emailErrorMessage}
-                color={passwordError ? "error" : "primary"}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <TextField
-                required
-                fullWidth
-                name="password"
-                placeholder="••••••"
-                autoComplete="new-password"
-                type="password"
-                id="password"
-                variant="outlined"
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                color={passwordError ? "error" : "primary"}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="password">Confirm Password</FormLabel>
-              <TextField
-                required
-                fullWidth
-                name="password_confirm"
-                placeholder="••••••"
-                autoComplete="new-password"
-                type="password"
-                id="password_confirm"
-                variant="outlined"
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                color={passwordError ? "error" : "primary"}
-              />
-            </FormControl>
+            {activeStep === 0 && (
+              <>
+                <FormControl>
+                  <FormLabel
+                    htmlFor="username"
+                    sx={{
+                      fontFamily: "'Montserrat', serif",
+                    }}
+                  >
+                    Username
+                  </FormLabel>
+                  <TextField
+                    name="username"
+                    required
+                    fullWidth
+                    id="username"
+                    placeholder="JohnDoe"
+                    error={nameError}
+                    helperText={nameErrorMessage}
+                    value={formData.username}
+                    onChange={handleChange}
+                    slotProps={{
+                      input: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                      },
+                      formHelperText: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel
+                    htmlFor="email"
+                    sx={{
+                      fontFamily: "'Montserrat', serif",
+                    }}
+                  >
+                    Email
+                  </FormLabel>
+                  <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    placeholder="your@email.com"
+                    name="email"
+                    error={emailError}
+                    helperText={emailErrorMessage}
+                    value={formData.email}
+                    onChange={handleChange}
+                    slotProps={{
+                      input: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                      },
+                      formHelperText: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel
+                    htmlFor="password"
+                    sx={{
+                      fontFamily: "'Montserrat', serif",
+                    }}
+                  >
+                    Password
+                  </FormLabel>
+                  <TextField
+                    required
+                    fullWidth
+                    name="password"
+                    placeholder="••••••"
+                    type="password"
+                    id="password"
+                    error={passwordError}
+                    helperText={passwordErrorMessage}
+                    value={formData.password}
+                    onChange={handleChange}
+                    slotProps={{
+                      input: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                      },
+                      formHelperText: {
+                        sx: { fontFamily: "'Montserrat', serif !important" },
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel
+                    htmlFor="password_confirm"
+                    sx={{
+                      fontFamily: "'Montserrat', serif",
+                    }}
+                  >
+                    Confirm Password
+                  </FormLabel>
+                  <TextField
+                    required
+                    fullWidth
+                    name="password_confirm"
+                    placeholder="••••••"
+                    type="password"
+                    id="password_confirm"
+                    error={passwordConfirmError}
+                    helperText={passwordConfirmErrorMessage}
+                    value={formData.password_confirm}
+                    onChange={handleChange}
+                    slotProps={{
+                      input: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                      },
+                      formHelperText: {
+                        sx: { fontFamily: "'Montserrat', serif !important" },
+                      },
+                    }}
+                  />
+                </FormControl>
+              </>
+            )}
+            {activeStep === 1 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography
+                  variant="body1"
+                  color="textSecondary"
+                  gutterBottom
+                  sx={{
+                    fontSize: "0.875rem",
+                    fontFamily: "'Montserrat', serif",
+                    mb: 3,
+                  }}
+                >
+                  Our platform utilizes OpenAI API services at its core. Please
+                  enter your valid OpenAI-issued API Key below. This key is
+                  essential for enabling the AI functionalities within your
+                  account.
+                </Typography>
+                <FormControl fullWidth>
+                  <FormLabel
+                    htmlFor="api_key"
+                    sx={{
+                      mb: 1,
+                      fontWeight: "bold",
+                      fontFamily: "'Montserrat', serif",
+                    }}
+                  >
+                    API Key
+                  </FormLabel>
+                  <TextField
+                    name="api_key"
+                    required
+                    fullWidth
+                    id="api_key"
+                    placeholder="Enter your OpenAI API Key"
+                    error={keyError}
+                    helperText={
+                      keyErrorMessage ||
+                      "Your API Key will be securely stored and used to authenticate requests to OpenAI services."
+                    }
+                    value={formData.api_key}
+                    onChange={handleChange}
+                    variant="outlined"
+                    slotProps={{
+                      input: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip
+                              title="Need an API Key? Get one from OpenAI"
+                              slotProps={{
+                                tooltip: {
+                                  sx: {
+                                    fontFamily: "'Montserrat', serif",
+                                  },
+                                },
+                              }}
+                            >
+                              <IconButton
+                                aria-label="help"
+                                onClick={() =>
+                                  window.open(
+                                    "https://platform.openai.com/account/api-keys",
+                                    "_blank"
+                                  )
+                                }
+                                edge="end"
+                                disableRipple
+                                disableFocusRipple
+                              >
+                                <HelpOutlineIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      },
+                      formHelperText: {
+                        sx: { fontFamily: "'Montserrat', serif" },
+                      },
+                    }}
+                  />
+                </FormControl>
+              </Box>
+            )}
+            {activeStep === 2 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: "200px",
+                  gap: 2,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  align="center"
+                  sx={{ fontFamily: "'Montserrat', serif" }}
+                >
+                  {error
+                    ? "Something went wrong..."
+                    : "Completing your registration, please wait..."}
+                </Typography>
+                {error ? (
+                  <CloseIcon
+                    sx={{ fontSize: 100, color: theme.palette.error.light }}
+                  />
+                ) : (
+                  <CircularProgress size={60} />
+                )}
+              </Box>
+            )}
             <Button
-              type="submit"
               fullWidth
               variant="contained"
-              onClick={
-                activeStep === steps.length - 1 ? validateInputs : handleNext
-              }
+              disabled={activeStep === 2}
+              onClick={(e) => {
+                if (activeStep === 1) {
+                  handleNext();
+                  handleSubmit(e);
+                } else {
+                  handleNext();
+                }
+              }}
+              sx={{ textTransform: "none", fontFamily: "'Montserrat', serif" }}
             >
-              {activeStep === steps.length - 1 ? "Sign Up" : "Next"}
+              {activeStep > 0 ? "Sign Up" : "Next"}
             </Button>
-            <Typography sx={{ textAlign: "center" }}>
+            <Typography
+              sx={{
+                textAlign: "center",
+                fontFamily: "'Montserrat', serif",
+                fontSize: "0.9rem",
+              }}
+            >
               Already have an account?{" "}
               <span>
                 <Link
                   onClick={() => navigate("/login")}
                   variant="body2"
-                  sx={{ alignSelf: "center", cursor: "pointer" }}
+                  sx={{
+                    alignSelf: "center",
+                    cursor: "pointer",
+                    fontFamily: "'Montserrat', serif",
+                  }}
                 >
                   Sign in
                 </Link>

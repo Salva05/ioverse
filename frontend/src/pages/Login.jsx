@@ -4,7 +4,6 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import CssBaseline from "@mui/material/CssBaseline";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
@@ -15,11 +14,6 @@ import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import ForgotPassword from "../components/login/ForgotPassword";
 import Alert from "@mui/material/Alert";
-import {
-  GoogleIcon,
-  FacebookIcon,
-  SitemarkIcon,
-} from "../components/login/CustomIcons";
 import { AuthContext } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Toolbar } from "@mui/material";
@@ -66,9 +60,12 @@ export default function SignIn(props) {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
-  const [error, setError] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [rememberMe, setRememberMe] = React.useState(false);
+  const [error, setError] = React.useState("");
+  
   const { authenticate } = React.useContext(AuthContext);
+  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -95,7 +92,8 @@ export default function SignIn(props) {
     try {
       const errorMessage = await authenticate(
         data.get("username"),
-        data.get("password")
+        data.get("password"),
+        rememberMe
       );
 
       if (errorMessage) {
@@ -169,7 +167,6 @@ export default function SignIn(props) {
             </Alert>
           )}
           <Card variant="outlined">
-            <SitemarkIcon />
             <Typography
               component="h1"
               variant="h4"
@@ -239,7 +236,14 @@ export default function SignIn(props) {
                 />
               </FormControl>
               <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
+                control={
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    name="remember"
+                    color="primary"
+                  />
+                }
                 label="Remember me"
               />
               <ForgotPassword open={open} handleClose={handleClose} />
@@ -247,7 +251,6 @@ export default function SignIn(props) {
                 type="submit"
                 fullWidth
                 variant="contained"
-                onClick={validateInputs}
               >
                 Sign in
               </Button>
@@ -263,25 +266,6 @@ export default function SignIn(props) {
                   </Link>
                 </span>
               </Typography>
-            </Box>
-            <Divider>or</Divider>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Button
-                fullWidth
-                variant="outlined"
-                onClick={() => alert("Sign in with Google")}
-                startIcon={<GoogleIcon />}
-              >
-                Sign in with Google
-              </Button>
-              <Button
-                fullWidth
-                variant="outlined"
-                onClick={() => alert("Sign in with Facebook")}
-                startIcon={<FacebookIcon />}
-              >
-                Sign in with Facebook
-              </Button>
             </Box>
           </Card>
         </Box>

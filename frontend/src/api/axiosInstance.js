@@ -5,11 +5,16 @@ const axiosInstance = axios.create({
   baseURL: config.API_BASE_URL,
 });
 
+// Helper to retrieve tokens from both storages
+const getToken = (key) => {
+  return localStorage.getItem(key) || sessionStorage.getItem(key);
+};
+
 // Request interceptor to add the JWT token
 axiosInstance.interceptors.request.use(
   (config) => {
     // Authorization token into header
-    const token = localStorage.getItem("accessToken");
+    const token = getToken("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -39,7 +44,14 @@ axiosInstance.interceptors.response.use(
             refresh: refreshToken,
           }
         );
-        localStorage.setItem("accessToken", response.data.access);
+        
+        // Save the new access token in the appropriate storage
+        if (localStorage.getItem("refreshToken")) {
+          localStorage.setItem("accessToken", accessToken);
+        } else {
+          sessionStorage.setItem("accessToken", accessToken);
+        }
+        
         axiosInstance.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${response.data.access}`;
@@ -49,6 +61,11 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (err) {
         console.error("Refresh token failed", err);
+        
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("refreshToken");
       }
     }
     return Promise.reject(error);
