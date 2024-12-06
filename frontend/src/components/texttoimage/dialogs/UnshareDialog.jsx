@@ -67,12 +67,22 @@ export default function UnshareDialog({
       fullWidth
       onClick={(e) => e.stopPropagation()}
     >
-      <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
+      <DialogTitle
+        sx={{
+          textAlign: "center",
+          fontWeight: "bold",
+          fontFamily: "Montserrat, serif",
+        }}
+      >
         Sharing Details
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom>
+          <Typography
+            variant="body1"
+            gutterBottom
+            sx={{ fontFamily: "Montserrat, serif" }}
+          >
             This image will be available for the next{" "}
             <Typography
               component="span"
@@ -80,13 +90,17 @@ export default function UnshareDialog({
               sx={{
                 fontWeight: "bold",
                 fontSize: "1.2rem",
+                fontFamily: "Montserrat, serif",
               }}
             >
               {remainingHours} hour(s)
             </Typography>
             .
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{ mb: 2, fontFamily: "Montserrat, serif" }}
+          >
             You can view and share this link:
           </Typography>
           <Box
@@ -99,8 +113,18 @@ export default function UnshareDialog({
             <TextField
               value={sharedUrl}
               fullWidth
-              InputProps={{
-                readOnly: true,
+              slotProps={{
+                input: {
+                  readOnly: true,
+                  sx: {
+                    fontFamily: "Montserrat, serif",
+                  },
+                },
+              }}
+              sx={{
+                "& .MuiInputBase-root": {
+                  fontFamily: "Montserrat, serif",
+                },
               }}
               variant="outlined"
               size="small"
@@ -133,6 +157,7 @@ export default function UnshareDialog({
           variant="contained"
           color="primary"
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Close
         </Button>
@@ -141,6 +166,7 @@ export default function UnshareDialog({
           variant="contained"
           color="error"
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Stop Sharing
         </Button>

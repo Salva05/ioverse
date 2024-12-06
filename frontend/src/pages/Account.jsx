@@ -186,10 +186,17 @@ const Account = () => {
       <Box
         sx={{
           padding: isSmallScreen ? 2 : 4,
+          "& *": {
+            fontFamily: "'Montserrat', serif",
+          },
         }}
       >
         {/* Title Section */}
-        <Typography variant="h4" gutterBottom>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ fontFamily: "'Montserrat', serif" }}
+        >
           Account
         </Typography>
 
@@ -283,12 +290,17 @@ const Account = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               size="small"
               fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    fontFamily: 'Montserrat',
+                  },
+                },
               }}
             />
 

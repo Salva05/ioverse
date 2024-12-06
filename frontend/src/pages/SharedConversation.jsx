@@ -84,6 +84,11 @@ const MessageItem = ({ sender, message }) => {
       >
         <ListItemText
           sx={{
+            fontFamily: "'Montserrat', serif",
+            whiteSpace: "pre-wrap",
+            "& *": {
+              fontFamily: "'Montserrat', serif !important",
+            },
             "& code": {
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
@@ -175,6 +180,7 @@ export default function SharedConversation() {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif"
               }}
             >
               <Box
@@ -202,6 +208,7 @@ export default function SharedConversation() {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif"
               }}
             >
               <Box
@@ -229,6 +236,7 @@ export default function SharedConversation() {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif"
               }}
             >
               <Box
@@ -248,7 +256,7 @@ export default function SharedConversation() {
             variant="h6"
             noWrap
             component="div"
-            sx={{ flexGrow: 1, textAlign: "center" }}
+            sx={{ flexGrow: 1, textAlign: "center", fontFamily: "'Montserrat', serif" }}
           >
             IOverse
           </Typography>

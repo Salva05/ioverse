@@ -1,16 +1,22 @@
 import axiosInstance from "../api/axiosInstance";
 import isJwtExpired from "../utils/isJwtExpired";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 
 const TokenManager = {
   // Retrieve the access token from localStorage
   getAccessToken() {
-    return localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+    return (
+      localStorage.getItem("accessToken") ||
+      sessionStorage.getItem("accessToken")
+    );
   },
 
   // Retrieve the refresh token from localStorage
   getRefreshToken() {
-    return localStorage.getItem("refreshToken") || sessionStorage.getItem("refreshToken");
+    return (
+      localStorage.getItem("refreshToken") ||
+      sessionStorage.getItem("refreshToken")
+    );
   },
 
   // Check if the access token is missing or expired
@@ -38,7 +44,8 @@ const TokenManager = {
       const response = await axiosInstance.post("/token/refresh/", {
         refresh: refreshToken,
       });
-      this.setAccessToken(response.data.access);
+      const rememberMe = !!localStorage.getItem("refreshToken");
+      this.setAccessToken(response.data.access, rememberMe);
       return true;
     } catch (error) {
       console.error("Failed to refresh access token:", error);
@@ -73,6 +80,8 @@ const TokenManager = {
   clearTokens() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
   },
 
   // Decode JWT to get expiry time of accessToken

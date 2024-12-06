@@ -12,6 +12,9 @@ const UserInfo = ({ user }) => {
           flexDirection: isSmallScreen ? "column" : "row",
           alignItems: "center",
           gap: isSmallScreen ? 2 : 3,
+          "& *": {
+            fontFamily: "'Montserrat', serif"
+          }
         }}
       >
         <Avatar

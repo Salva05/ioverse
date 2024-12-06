@@ -72,12 +72,22 @@ export default function ShareDialog({
       fullWidth
       onClick={(e) => e.stopPropagation()}
     >
-      <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
+      <DialogTitle
+        sx={{
+          textAlign: "center",
+          fontWeight: "bold",
+          fontFamily: "'Montserrat', serif",
+        }}
+      >
         Share Link Duration
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom>
+          <Typography
+            variant="body1"
+            gutterBottom
+            sx={{ fontFamily: "'Montserrat', serif" }}
+          >
             Select the duration (in hours)
           </Typography>
         </Box>
@@ -96,7 +106,13 @@ export default function ShareDialog({
               { value: 72, label: "72h" },
             ]}
             sx={{
-              mb: 2,
+              mb: 3,
+              "& .MuiSlider-markLabel": {
+                fontFamily: "Montserrat, serif",
+              },
+              "& .MuiSlider-valueLabel": {
+                fontFamily: "Montserrat, serif",
+              },
             }}
           />
           <TextField
@@ -108,10 +124,18 @@ export default function ShareDialog({
             size="small"
             sx={{
               mb: 1,
+              "& .MuiInputLabel-root": {
+                fontFamily: "Montserrat, serif",
+              },
+              "& .MuiInputBase-input": {
+                fontFamily: "Montserrat, serif",
+              },
             }}
-            inputProps={{
-              min: 1,
-              max: 72,
+            slotProps={{
+              input: {
+                min: 1,
+                max: 72,
+              },
             }}
           />
         </Box>
@@ -124,6 +148,7 @@ export default function ShareDialog({
           variant="contained"
           color="secondary"
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Cancel
         </Button>
@@ -132,6 +157,7 @@ export default function ShareDialog({
           variant="contained"
           color="primary"
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Share
         </Button>

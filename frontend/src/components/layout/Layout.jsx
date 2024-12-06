@@ -11,6 +11,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DrawerContext } from "../../contexts/DrawerContext";
 import { useDarkMode } from "../../contexts/DarkModeContext";
+import { ConversationProvider } from "../../contexts/ConversationContext";
 
 export default function Layout() {
   const { darkMode } = useDarkMode();
@@ -19,27 +20,26 @@ export default function Layout() {
       mode: darkMode ? "dark" : "light",
       ...(darkMode
         ? {
-          background: {
-            default: "#1e1e1e",
-            paper: "#2c2c2c",
+            background: {
+              default: "#1e1e1e",
+              paper: "#2c2c2c",
+            },
           }
-        }
         : {
-          background: {
-            default: "#f5f5f5",
-            paper: "#f9f9f9"
-          }
-        }
-      )
+            background: {
+              default: "#f5f5f5",
+              paper: "#f9f9f9",
+            },
+          }),
     },
   });
 
   // Changes the custom scrollbar's palette
   React.useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add('dark-mode');
+      document.documentElement.classList.add("dark-mode");
     } else {
-      document.documentElement.classList.remove('dark-mode');
+      document.documentElement.classList.remove("dark-mode");
     }
   }, [darkMode]);
 
@@ -58,31 +58,30 @@ export default function Layout() {
   return (
     <AuthProvider>
       <DrawerContext.Provider value={{ open, isSmallScreen }}>
-      <ThemeProvider theme={theme}>
-        <Box sx={{ display: "flex", width: "100%"}}>
-          <CssBaseline />
-          <AppBar
-            handleDrawerOpen={handleDrawerOpen}
-          />
-          <DrawerMenu
-            handleDrawerClose={handleDrawerClose}
-          />
-          <MainContent>
-            <Outlet />
-          </MainContent>
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
-        </Box>
+        <ThemeProvider theme={theme}>
+          <ConversationProvider>
+            <Box sx={{ display: "flex", width: "100%" }}>
+              <CssBaseline />
+              <AppBar handleDrawerOpen={handleDrawerOpen} />
+              <DrawerMenu handleDrawerClose={handleDrawerClose} />
+              <MainContent>
+                <Outlet />
+              </MainContent>
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+                bodyClassName="montserrat-toast-body"
+              />
+            </Box>
+          </ConversationProvider>
         </ThemeProvider>
       </DrawerContext.Provider>
     </AuthProvider>

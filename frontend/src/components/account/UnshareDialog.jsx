@@ -69,14 +69,25 @@ export default function UnshareDialog({
       maxWidth="xs"
       fullWidth
       onClick={(e) => e.stopPropagation()}
+      sx={{
+        "& *": {
+          fontFamily: "'Montserrat', serif",
+        },
+      }}
     >
-      <DialogTitle
-        sx={{ textAlign: "center", fontWeight: "bold" }}
-      >
+      <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
         Sharing Details
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
-        <Box sx={{ textAlign: "center", mb: 2 }}>
+        <Box
+          sx={{
+            textAlign: "center",
+            mb: 2,
+            "& *": {
+              fontFamily: "'Montserrat', serif",
+            },
+          }}
+        >
           <Typography variant="body1" gutterBottom>
             This image will be available for the next{" "}
             <Typography
@@ -133,10 +144,22 @@ export default function UnshareDialog({
       <DialogActions
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
-        <Button onClick={handleClose} variant="contained" color="primary" size="small">
+        <Button
+          onClick={handleClose}
+          variant="contained"
+          color="primary"
+          size="small"
+          sx={{ fontFamily: "'Montserrat', serif", textTransform: "none" }}
+        >
           Close
         </Button>
-        <Button onClick={handleConfirm} variant="contained" color="error" size="small">
+        <Button
+          onClick={handleConfirm}
+          variant="contained"
+          color="error"
+          size="small"
+          sx={{ fontFamily: "'Montserrat', serif", textTransform: "none" }}
+        >
           Stop Sharing
         </Button>
       </DialogActions>

@@ -86,9 +86,20 @@ const GeneratedImageCard = ({ image, onViewDetails, onViewFullscreen }) => {
           flexDirection: "column",
           justifyContent: "space-between",
           height: "auto",
+          "& *": {
+            fontFamily: "'Montserrat', serif",
+          },
         }}
       >
-        <Box sx={{ position: "relative", height: 256 }}>
+        <Box
+          sx={{
+            position: "relative",
+            height: 256,
+            "& *": {
+              fontFamily: "'Montserrat', serif",
+            },
+          }}
+        >
           {isLoading && (
             <Box
               sx={{
@@ -134,10 +145,7 @@ const GeneratedImageCard = ({ image, onViewDetails, onViewFullscreen }) => {
 
         <CardActions disableSpacing>
           <Tooltip title="Delete">
-            <IconButton
-              aria-label="delete"
-              onClick={handleDelete}
-            >
+            <IconButton aria-label="delete" onClick={handleDelete}>
               <DeleteIcon />
             </IconButton>
           </Tooltip>
@@ -158,7 +166,9 @@ const GeneratedImageCard = ({ image, onViewDetails, onViewFullscreen }) => {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <DialogTitle>Are you sure you want to delete?</DialogTitle>
+        <DialogTitle sx={{ fontFamily: "'Montserrat', serif" }}>
+          Are you sure you want to delete?
+        </DialogTitle>
         <DialogActions>
           <Button
             onClick={(e) => {
@@ -166,6 +176,7 @@ const GeneratedImageCard = ({ image, onViewDetails, onViewFullscreen }) => {
               setConfirmOpen(false);
             }}
             color="primary"
+            sx={{ fontFamily: "'Montserrat', serif" }}
           >
             Cancel
           </Button>
@@ -175,6 +186,7 @@ const GeneratedImageCard = ({ image, onViewDetails, onViewFullscreen }) => {
               handleConfirmDelete();
             }}
             color="error"
+            sx={{ fontFamily: "'Montserrat', serif" }}
           >
             Delete
           </Button>

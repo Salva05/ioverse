@@ -30,6 +30,9 @@ const ConversationGroup = ({
           "&:hover": {
             backgroundColor: alpha(theme.palette.primary.main, 0.1),
           },
+          "& *": {
+            fontFamily: "'Montserrat', serif",
+          },
         }}
       >
         <ListItemText

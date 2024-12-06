@@ -18,3 +18,7 @@ body {
   bottom: 0;
   width: 2px;
 }
+
+.montserrat-toast-body {
+  font-family: 'Montserrat', sans-serif;
+}

@@ -11,7 +11,6 @@ const shareImage = async (imageId, hours) => {
     if (response.data.error) {
       throw new Error(response.data.error);
     }
-
     return response.data;
   } catch (error) {
     console.error(

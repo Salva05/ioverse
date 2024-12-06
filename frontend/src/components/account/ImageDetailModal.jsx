@@ -113,6 +113,9 @@ const ImageDetailModal = ({ open, handleClose, image }) => {
         sx: {
           borderRadius: 3,
           overflow: "hidden",
+          "& *": {
+            fontFamily: "'Montserrat', serif",
+          },
         },
       }}
     >
@@ -224,6 +227,7 @@ const ImageDetailModal = ({ open, handleClose, image }) => {
             paddingX: 4,
             paddingY: 1.2,
             fontSize: "1rem",
+            textTransform: "none"
           }}
         >
           Close

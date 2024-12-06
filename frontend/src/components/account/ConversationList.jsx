@@ -24,7 +24,11 @@ const ConversationList = ({
           <LinearProgress />
         </Box>
       ) : Object.keys(groupedConversations).length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ fontFamily: "'Montserrat', serif" }}
+        >
           No conversations found.
         </Typography>
       ) : (

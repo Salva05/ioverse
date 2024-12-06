@@ -30,13 +30,15 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const refreshToken =
+      localStorage.getItem("refreshToken") ||
+      sessionStorage.getItem("refreshToken");
     if (
       error.response.status === 401 &&
       !originalRequest._retry &&
-      localStorage.getItem("refreshToken")
+      refreshToken
     ) {
       originalRequest._retry = true;
-      const refreshToken = localStorage.getItem("refreshToken");
       try {
         const response = await axios.post(
           `${config.API_BASE_URL}/token/refresh/`,
@@ -44,14 +46,15 @@ axiosInstance.interceptors.response.use(
             refresh: refreshToken,
           }
         );
-        
+
         // Save the new access token in the appropriate storage
+        const newAccessToken = response.data.access;
         if (localStorage.getItem("refreshToken")) {
-          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("accessToken", newAccessToken);
         } else {
-          sessionStorage.setItem("accessToken", accessToken);
+          sessionStorage.setItem("accessToken", newAccessToken);
         }
-        
+
         axiosInstance.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${response.data.access}`;
@@ -61,7 +64,7 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (err) {
         console.error("Refresh token failed", err);
-        
+
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         sessionStorage.removeItem("accessToken");

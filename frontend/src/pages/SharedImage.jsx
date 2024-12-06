@@ -88,6 +88,7 @@ export default function SharedImage() {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif"
               }}
             >
               <Box
@@ -115,6 +116,7 @@ export default function SharedImage() {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif"
               }}
             >
               <Box
@@ -142,6 +144,7 @@ export default function SharedImage() {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif"
               }}
             >
               <Box
@@ -161,7 +164,7 @@ export default function SharedImage() {
               variant="h6"
               noWrap
               component="div"
-              sx={{ flexGrow: 1, textAlign: "center" }}
+              sx={{ flexGrow: 1, textAlign: "center", fontFamily: "'Montserrat', serif" }}
             >
               IOverse
             </Typography>

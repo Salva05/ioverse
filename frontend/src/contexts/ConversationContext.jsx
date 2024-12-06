@@ -1,13 +1,14 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import chat from "../api/chat";
 import { useQueryClient } from "@tanstack/react-query";
+import { AuthContext } from "./AuthContext";
 
 export const ConversationContext = createContext();
 
 export const ConversationProvider = ({ children }) => {
   const [activeConversationId, setActiveConversationId] = useState(null);
   const queryClient = useQueryClient();
-
+  const { isAuthenticated } = useContext(AuthContext);
   const activateConversation = async (id) => {
     setActiveConversationId(id);
 
@@ -24,13 +25,17 @@ export const ConversationProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    if (!isAuthenticated) setActiveConversationId(null);
+  }, [isAuthenticated]);
+
   return (
     <ConversationContext.Provider
-    value={{
-      activeConversationId,
-      activateConversation,
-      setActiveConversationId,
-    }}
+      value={{
+        activeConversationId,
+        activateConversation,
+        setActiveConversationId,
+      }}
     >
       {children}
     </ConversationContext.Provider>

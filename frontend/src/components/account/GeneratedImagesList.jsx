@@ -54,7 +54,9 @@ const GeneratedImagesList = () => {
 
   useEffect(() => {
     if (isError) {
-      toast.error("Error loading images: " + (error?.message || "Unknown error"));
+      toast.error(
+        "Error loading images: " + (error?.message || "Unknown error")
+      );
     }
   }, [isError, error]);
 
@@ -82,7 +84,11 @@ const GeneratedImagesList = () => {
 
   if (imagesWithInfo.length === 0) {
     return (
-      <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+      <Typography
+        variant="h6"
+        align="center"
+        sx={{ mt: 4, fontFamily: "'Montserrat', serif" }}
+      >
         No images generated yet.
       </Typography>
     );
@@ -96,7 +102,10 @@ const GeneratedImagesList = () => {
           gridTemplateColumns: "repeat(auto-fit, minmax(256px, 256px))",
           gap: 2,
           justifyContent: "center",
-          paddingBottom: '50px',
+          paddingBottom: "50px",
+          "& *": {
+            fontFamily: "'Montserrat', serif",
+          },
         }}
       >
         {imagesWithInfo.map((image) => (

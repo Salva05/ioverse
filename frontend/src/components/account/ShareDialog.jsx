@@ -55,20 +55,45 @@ export default function ShareDialog({ open, onShare, setOpenState }) {
       maxWidth="xs"
       fullWidth
       onClick={(e) => e.stopPropagation()}
+      sx={{
+        "& *": {
+          fontFamily: "'Montserrat', serif",
+        },
+      }}
     >
       <DialogTitle
-        sx={{ textAlign: "center", fontWeight: "bold" }}
+        sx={{
+          textAlign: "center",
+          fontWeight: "bold",
+          fontFamily: "'Montserrat', serif",
+        }}
       >
         Share Link Duration
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
-        <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom >
+        <Box
+          sx={{
+            textAlign: "center",
+            mb: 2,
+            "& *": {
+              fontFamily: "'Montserrat', serif",
+            },
+          }}
+        >
+          <Typography variant="body1" gutterBottom>
             Select the duration (in hours)
           </Typography>
         </Box>
 
-        <Box sx={{ px: 2, py: 1 }}>
+        <Box
+          sx={{
+            px: 2,
+            py: 1,
+            "& *": {
+              fontFamily: "'Montserrat', serif",
+            },
+          }}
+        >
           <Slider
             value={typeof duration === "number" ? duration : 0}
             onChange={handleSliderChange}
@@ -82,7 +107,8 @@ export default function ShareDialog({ open, onShare, setOpenState }) {
               { value: 72, label: "72h" },
             ]}
             sx={{
-              mb: 2}}
+              mb: 3,
+            }}
           />
           <TextField
             label="Duration (hours)"
@@ -104,10 +130,22 @@ export default function ShareDialog({ open, onShare, setOpenState }) {
       <DialogActions
         sx={{ justifyContent: "space-between", padding: "0 24px 16px 24px" }}
       >
-        <Button onClick={handleCancel} variant="contained" color="secondary" size="small">
+        <Button
+          onClick={handleCancel}
+          variant="contained"
+          color="secondary"
+          size="small"
+          sx={{ fontFamily: "'Montserrat', serif", textTransform: "none" }}
+        >
           Cancel
         </Button>
-        <Button onClick={handleConfirm} variant="contained" color="primary" size="small">
+        <Button
+          onClick={handleConfirm}
+          variant="contained"
+          color="primary"
+          size="small"
+          sx={{ fontFamily: "'Montserrat', serif", textTransform: "none" }}
+        >
           Share
         </Button>
       </DialogActions>

@@ -213,6 +213,20 @@ const TextToImage = () => {
             multiline
             rows={4}
             required
+            sx={{
+              "& .MuiInputBase-input": {
+                fontFamily: "'Montserrat', serif",
+                "&::placeholder": {
+                  fontFamily: "'Montserrat', serif",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                fontFamily: "'Montserrat', serif",
+              },
+              "& .MuiFormHelperText-root": {
+                fontFamily: "'Montserrat', serif",
+              },
+            }}
           />
 
           {/* Model Selection */}
@@ -224,9 +238,29 @@ const TextToImage = () => {
               value={modelUsed}
               onChange={(e) => setModelUsed(e.target.value)}
               label="Model Used"
+              sx={{
+                "& .MuiInputBase-input": {
+                  fontFamily: "'Montserrat', serif",
+                  "&::placeholder": {
+                    fontFamily: "'Montserrat', serif",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+                "& .MuiFormHelperText-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+              }}
             >
               {modelOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                  sx={{
+                    fontFamily: "'Montserrat', serif",
+                  }}
+                >
                   {option.label}
                 </MenuItem>
               ))}
@@ -255,6 +289,20 @@ const TextToImage = () => {
               helperText={errors.n}
               inputProps={{ min: 1, max: 10 }}
               required
+              sx={{
+                "& .MuiInputBase-input": {
+                  fontFamily: "'Montserrat', serif",
+                  "&::placeholder": {
+                    fontFamily: "'Montserrat', serif",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+                "& .MuiFormHelperText-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+              }}
             />
           )}
 
@@ -289,14 +337,34 @@ const TextToImage = () => {
                   value={style}
                   onChange={(e) => setStyle(e.target.value)}
                   label="Style"
+                  sx={{
+                    "& .MuiInputBase-input": {
+                      fontFamily: "'Montserrat', serif",
+                      "&::placeholder": {
+                        fontFamily: "'Montserrat', serif",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: "'Montserrat', serif",
+                    },
+                    "& .MuiFormHelperText-root": {
+                      fontFamily: "'Montserrat', serif",
+                    },
+                  }}
                 >
                   {styleOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <MenuItem
+                      key={option.value}
+                      value={option.value}
+                      sx={{ fontFamily: "'Montserrat', serif" }}
+                    >
                       {option.label}
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>Only supported for DALL-E 3</FormHelperText>
+                <FormHelperText sx={{ fontFamily: "'Montserrat', serif" }}>
+                  Only supported for DALL-E 3
+                </FormHelperText>
               </FormControl>
             </>
           )}
@@ -310,12 +378,35 @@ const TextToImage = () => {
               value={size}
               onChange={(e) => setSize(e.target.value)}
               label="Image Size"
+              sx={{
+                "& .MuiInputBase-input": {
+                  fontFamily: "'Montserrat', serif",
+                  "&::placeholder": {
+                    fontFamily: "'Montserrat', serif",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+                "& .MuiFormHelperText-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+              }}
             >
               {(modelUsed === "dall-e-2"
                 ? sizeOptionsDalle2
                 : sizeOptionsDalle3
               ).map((option) => (
-                <MenuItem key={option} value={option}>
+                <MenuItem
+                  key={option}
+                  value={option}
+                  sx={{
+                    fontFamily: "'Montserrat', serif",
+                    "& *": {
+                      fontFamily: "'Montserrat', serif",
+                    },
+                  }}
+                >
                   {option}
                 </MenuItem>
               ))}
@@ -333,9 +424,27 @@ const TextToImage = () => {
               value={responseFormat}
               onChange={(e) => setResponseFormat(e.target.value)}
               label="Response Format"
+              sx={{
+                "& .MuiInputBase-input": {
+                  fontFamily: "'Montserrat', serif",
+                  "&::placeholder": {
+                    fontFamily: "'Montserrat', serif",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+                "& .MuiFormHelperText-root": {
+                  fontFamily: "'Montserrat', serif",
+                },
+              }}
             >
               {responseFormatOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                  sx={{ fontFamily: "'Montserrat', serif" }}
+                >
                   {option.label}
                 </MenuItem>
               ))}
@@ -377,6 +486,7 @@ const TextToImage = () => {
                   fontWeight: "700",
                   fontFamily: "Arial, sans-serif",
                   letterSpacing: "0.05em",
+                  fontFamily: "'Montserrat', serif",
                 }}
               >
                 Generated Image{generatedImages.length > 1 ? "s" : ""}

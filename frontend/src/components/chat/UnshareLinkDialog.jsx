@@ -68,12 +68,22 @@ export default function UnshareDetailsDialog({
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
+      <DialogTitle
+        sx={{
+          textAlign: "center",
+          fontWeight: "bold",
+          fontFamily: "Montserrat, serif",
+        }}
+      >
         Sharing Details
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom>
+          <Typography
+            variant="body1"
+            gutterBottom
+            sx={{ fontFamily: "Montserrat, serif" }}
+          >
             This conversation will be available for the next{" "}
             <Typography
               component="span"
@@ -81,13 +91,17 @@ export default function UnshareDetailsDialog({
               sx={{
                 fontWeight: "bold",
                 fontSize: "1.2rem",
+                fontFamily: "Montserrat, serif",
               }}
             >
               {remainingHours} hour(s)
             </Typography>
             .
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{ mb: 2, fontFamily: "Montserrat, serif" }}
+          >
             You can view and share this link:
           </Typography>
           <Box
@@ -100,11 +114,21 @@ export default function UnshareDetailsDialog({
             <TextField
               value={sharedLink}
               fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
               variant="outlined"
               size="small"
+              slotProps={{
+                input: {
+                  readOnly: true,
+                  sx: {
+                    fontFamily: "Montserrat, serif",
+                  },
+                },
+              }}
+              sx={{
+                "& .MuiInputBase-root": {
+                  fontFamily: "Montserrat, serif",
+                },
+              }}
             />
             <CopyToClipboard
               text={sharedLink}
@@ -135,6 +159,7 @@ export default function UnshareDetailsDialog({
           color="primary"
           disabled={isUnsharing}
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Close
         </Button>
@@ -144,6 +169,7 @@ export default function UnshareDetailsDialog({
           disabled={isUnsharing}
           color="error"
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Stop Sharing
         </Button>

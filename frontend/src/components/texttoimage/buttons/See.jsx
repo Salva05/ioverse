@@ -20,7 +20,7 @@ const modalStyle = {
 };
 
 const See = ({ src }) => {
-  const [href, setHref] = useState("");
+  const [href, setHref] = useState(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -43,6 +43,10 @@ const See = ({ src }) => {
       }
     };
   }, [src]);
+
+  if (href === null) {
+    return null;
+  }
 
   if (!href) {
     console.error("No valid source provided for the image.");

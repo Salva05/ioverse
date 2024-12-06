@@ -9,7 +9,6 @@ const register = async (userData) => {
       config.VITE_BASE_DOMAIN_URL + "/register/",
       userData,
     );
-    console.log("Triggered")
     return response;
   } catch (error) {
     console.error("Registration failed:", error);

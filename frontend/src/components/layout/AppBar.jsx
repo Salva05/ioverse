@@ -99,6 +99,7 @@ export default function AppBar({ handleDrawerOpen }) {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif",
               }}
             >
               <Box
@@ -126,6 +127,7 @@ export default function AppBar({ handleDrawerOpen }) {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif",
               }}
             >
               <Box
@@ -153,6 +155,7 @@ export default function AppBar({ handleDrawerOpen }) {
                 borderRadius: "10px",
                 padding: "4px 16px",
                 minWidth: "150px",
+                fontFamily: "'Montserrat', serif",
               }}
             >
               <Box
@@ -181,7 +184,13 @@ export default function AppBar({ handleDrawerOpen }) {
           )}
         </Box>
         <Typography variant="h6" noWrap component="div">
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              fontFamily: "'Montserrat', serif",
+            }}
+          >
             <SiCircuitverse style={{ marginRight: 10, position: "relative" }} />
             IOverse
           </Box>

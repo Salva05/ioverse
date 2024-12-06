@@ -3,8 +3,6 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ConversationProvider } from "./contexts/ConversationContext";
-import { ThemeProvider } from "@mui/material";
 import SignUp from "./pages/Register";
 import Login from "./pages/Login";
 import SharedConversation from "./pages/SharedConversation";
@@ -87,14 +85,12 @@ const router = createBrowserRouter(
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ConversationProvider>
-        <DarkModeProvider>
-          <RouterProvider
-            future={{ v7_startTransition: true }} // Enables React's startTransition API
-            router={router}
-          />
-        </DarkModeProvider>
-      </ConversationProvider>
+      <DarkModeProvider>
+        <RouterProvider
+          future={{ v7_startTransition: true }} // Enables React's startTransition API
+          router={router}
+        />
+      </DarkModeProvider>
     </QueryClientProvider>
   </StrictMode>
 );

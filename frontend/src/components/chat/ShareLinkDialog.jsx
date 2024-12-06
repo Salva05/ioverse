@@ -65,12 +65,22 @@ export default function ShareLinkDialog({
       <Backdrop open={isSharing} sx={{ position: "absolute", zIndex: 1301 }}>
         <CircularProgress color="inherit" />
       </Backdrop>
-      <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
+      <DialogTitle
+        sx={{
+          textAlign: "center",
+          fontWeight: "bold",
+          fontFamily: "'Montserrat', serif",
+        }}
+      >
         Share Link Duration
       </DialogTitle>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="body1" gutterBottom>
+          <Typography
+            variant="body1"
+            gutterBottom
+            sx={{ fontFamily: "'Montserrat', serif" }}
+          >
             Select the duration (in hours)
           </Typography>
         </Box>
@@ -89,7 +99,13 @@ export default function ShareLinkDialog({
               { value: 72, label: "72h" },
             ]}
             sx={{
-              mb: 2,
+              mb: 3,
+              "& .MuiSlider-markLabel": {
+                fontFamily: "Montserrat, serif",
+              },
+              "& .MuiSlider-valueLabel": {
+                fontFamily: "Montserrat, serif",
+              },
             }}
           />
           <TextField
@@ -101,10 +117,18 @@ export default function ShareLinkDialog({
             size="small"
             sx={{
               mb: 1,
+              "& .MuiInputLabel-root": {
+                fontFamily: "Montserrat, serif",
+              },
+              "& .MuiInputBase-input": {
+                fontFamily: "Montserrat, serif",
+              },
             }}
-            inputProps={{
-              min: 1,
-              max: 72,
+            slotProps={{
+              input: {
+                min: 1,
+                max: 72,
+              },
             }}
           />
         </Box>
@@ -118,6 +142,7 @@ export default function ShareLinkDialog({
           color="secondary"
           disabled={isSharing}
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Cancel
         </Button>
@@ -127,6 +152,7 @@ export default function ShareLinkDialog({
           color="primary"
           disabled={isSharing}
           size="small"
+          sx={{ fontFamily: "Montserrat, serif", textTransform: "none" }}
         >
           Share
         </Button>
