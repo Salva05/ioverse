@@ -43,6 +43,7 @@ from .views.file import (
 from .views.run import RunAPIView , RunStepAPIView
 from .views.vectorstorebatch import VectorStoreBacthCreateView, VectorStoreBatchStatusStreamView
 from .views.generate import GenerateSystemInstruction, GenerateFunction, GenerateSchema
+from .views.image_retrieve import ImageRetrieveView
 
 urlpatterns = [
     # Assistant
@@ -91,4 +92,6 @@ urlpatterns = [
     path('generate/system_instructions/', GenerateSystemInstruction.as_view(), name='gen-system_instructions'),
     path('generate/function/', GenerateFunction.as_view(), name='gen-function'),
     path('generate/schema/', GenerateSchema.as_view(), name='gen-schema'),
+    # File-related images
+    path('file_image/<str:id>/retrieve/', ImageRetrieveView.as_view(), name='file_image-retrieve')
 ]

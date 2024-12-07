@@ -304,12 +304,6 @@ def validate_image_file(item, index):
         raise ValidationError(
             f"'file_id' in 'image_file' must be a non-empty string in content item at index {index}."
         )
-    
-    detail = item.get('detail')
-    if detail not in ['low', 'high']:
-        raise ValidationError(
-            f"'detail' in 'image_file' must be either 'low' or 'high' in content item at index {index}."
-        )
 
 
 # =========================
@@ -365,14 +359,6 @@ def validate_text_content(item, index):
     text = item.get('text')
     if text is None:
         raise ValidationError(f"Missing 'text' in content item at index {index}.")
-    if not isinstance(text, dict):
-        raise ValidationError(f"'text' must be a dictionary in content item at index {index}.")
-    
-    value = text.get('value')
-    if not value or not isinstance(value, str):
-        raise ValidationError(
-            f"'value' in 'text' must be a non-empty string in content item at index {index}."
-        )
     
     annotations = item.get('annotations', [])
     if not isinstance(annotations, list):

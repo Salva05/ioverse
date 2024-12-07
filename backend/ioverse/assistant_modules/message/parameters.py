@@ -14,7 +14,7 @@ class MessageCreateParams(BaseModel):
         ...,
         description="The role of the entity that is creating the message."
     )
-    content: Union[str, List[ContentPartType]] = Field(
+    content: Union[str, List[Any]] = Field(
         ...,
         description="Content of the message."
     )

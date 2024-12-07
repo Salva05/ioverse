@@ -20,6 +20,9 @@ class FileIntegrationService:
         Creates a File both in OpenAI and Django database.
         """
         try:
+            # extract image_file and / or image_url if are provided
+            image_file = data.pop('image_file', None)
+            image_url = data.pop('image_url', None)
             
             # Pass the file as a (filename, file_object) tuple
             if isinstance(data['file'], InMemoryUploadedFile):
@@ -39,6 +42,17 @@ class FileIntegrationService:
                 purpose=file_pydantic.purpose,
                 owner=user
             )
+            
+            try:
+                if image_file and isinstance(image_file, InMemoryUploadedFile):
+                    django_file.image_file = image_file
+                if image_url:
+                    django_file.image_url = image_url
+                django_file.save()
+            except Exception as e:
+                logger.error(f"Error saving image: {e}")
+                raise e
+                
             logger.info(f"File created in Django DB: {django_file.id}")
             return django_file
 

@@ -15,7 +15,6 @@ class MessageService:
     def create_message(self, thread_id: str, params: MessageCreateParams) -> MessageObject:
         try:
             message_data = params.model_dump(exclude_unset=True)
-            print(message_data)
             response = self.client.create_message(thread_id, **message_data)
             
             # Convert OpenAI Message instance to dict

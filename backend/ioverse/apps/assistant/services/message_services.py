@@ -50,9 +50,6 @@ class MessageIntegrationService:
                 owner=user,
                 assistant_id=message_pydantic.assistant_id,
                 run_id=message_pydantic.run_id,
-                incomplete_details=message_pydantic.incomplete_details,
-                completed_at=message_pydantic.completed_at,
-                incomplete_at=message_pydantic.incomplete_at
             )
             logger.info(f"Message created in Django DB: {django_message.id}")
             return django_message
@@ -90,9 +87,6 @@ class MessageIntegrationService:
             django_message.metadata = message_pydantic.metadata
             django_message.assistant_id = message_pydantic.assistant_id
             django_message.run_id = message_pydantic.run_id
-            django_message.incomplete_details = message_pydantic.incomplete_details
-            django_message.completed_at = message_pydantic.completed_at
-            django_message.incomplete_at = message_pydantic.incomplete_at
             django_message.save()
             
             logger.info(f"Message retrieved and updated in Django DB: {django_message.id}")
@@ -138,9 +132,6 @@ class MessageIntegrationService:
             django_message.metadata = message_pydantic.metadata
             django_message.assistant_id = message_pydantic.assistant_id
             django_message.run_id = message_pydantic.run_id
-            django_message.incomplete_details = message_pydantic.incomplete_details
-            django_message.completed_at = message_pydantic.completed_at
-            django_message.incomplete_at = message_pydantic.incomplete_at
             django_message.save()
             
             logger.info(f"Message updated in Django DB: {django_message.id}")

@@ -1,5 +1,6 @@
 from django.db import models
 from .base import BaseModel
+import os
 
 class File(BaseModel):
     """
@@ -34,6 +35,30 @@ class File(BaseModel):
         help_text="The intended purpose of the file, with choices including 'assistants', 'fine-tune', and 'vision'."
     )
 
+    # Only when purpose=vision
+    image_file = models.ImageField(
+        upload_to='file_images/',
+        verbose_name="Image File",
+        help_text="The image associated with the file.",
+        null=True,
+        blank=True
+    )
+    image_url = models.URLField(
+        max_length=500,
+        verbose_name="Image URL",
+        help_text="The URL of the image associated with the file.",
+        null=True,
+        blank=True
+    )
+    
+    def delete(self, *args, **kwargs):
+        # If the image file exists, delete it
+        if self.image_file and os.path.isfile(self.image_file.path):
+            os.remove(self.image_file.path)
+        
+        # Call the superclass delete method
+        super().delete(*args, **kwargs)
+        
     def __str__(self):
         return f"{self.filename} ({self.id})"
 

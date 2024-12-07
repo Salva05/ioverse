@@ -365,7 +365,18 @@ class FileCreateSerializer(serializers.Serializer):
         required=True,
         help_text="The intended purpose of the uploaded file."
     )
-
+    image_file = serializers.ImageField(
+        required=False,
+        allow_null=True,
+        help_text="The image associated with the file."
+    )
+    image_url = serializers.URLField(
+        required=False,
+        max_length=500,
+        allow_null=True,
+        help_text="The URL of the image associated with the file."
+    )
+    
     def validate_purpose(self, value):
         return validate_purpose(value)
     
@@ -461,3 +472,13 @@ class FileSerializer(serializers.ModelSerializer):
 
 class GenericJSONSerializer(serializers.Serializer):
     data = serializers.JSONField()
+    
+# ====================
+# Image Serializer (file-related)
+# ====================
+class ImageSerializer(serializers.ModelSerializer):
+    image_file = serializers.ImageField(use_url=True)
+
+    class Meta:
+        model = File
+        fields = ['image_file']

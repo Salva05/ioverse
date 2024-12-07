@@ -33,9 +33,12 @@ class ResponseFormat(BaseModel):
     """
     name: str
     description: Optional[str]
-    schema: Schema = Field(default_factory=lambda: Schema(type="object"))
+    schema_: Schema = Field(default_factory=lambda: Schema(type="object"), alias="schema")
     strict: Optional[bool]
 
+    class Config:
+        populate_by_name = True
+        
 #########################################
 # Pydantic models for Function generation
 #########################################
@@ -287,7 +290,7 @@ class TaskGeneratorService:
                 response_format=ResponseFormat
             )
             if schema_definition:
-                return schema_definition.model_dump(exclude_none=True)
+                return schema_definition.model_dump(exclude_none=True, by_alias=True)
             else:
                 logger.error("Failed to generate response format schema..")
                 return None
