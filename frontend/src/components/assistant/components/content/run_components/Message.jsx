@@ -3,10 +3,14 @@ import React, { useContext } from "react";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import aiIcon from "../../../../../assets/ai.png";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { AuthContext } from "../../../../../contexts/AuthContext";
+import ImageRenderer from "./ImageRenderer";
+import { fileImage } from "../../../../../api/assistant";
 
 const Message = ({ who, content }) => {
   const { isSmallScreen } = useContext(DrawerContext);
   const { assistant } = useAssistantContext();
+  const { user } = useContext(AuthContext);
 
   const isUser = who !== "assistant";
 
@@ -68,28 +72,30 @@ const Message = ({ who, content }) => {
             );
           case "image_file":
             return (
-              <img
+              <ImageRenderer
                 key={index}
-                src={`path_to_your_images/${part.image_file.file_id}`} // Adjust the path as needed
-                alt="Image File"
-                style={{ maxWidth: "100%", borderRadius: "8px" }}
+                type="image_file"
+                id={part.image_file.file_id}
+                isUser={isUser}
+                isSmallScreen={isSmallScreen}
               />
             );
           case "image_url":
             return (
-              <img
+              <ImageRenderer
                 key={index}
-                src={part.image_url.url}
-                alt="Image URL"
-                style={{ maxWidth: "100%", borderRadius: "8px" }}
+                type="image_url"
+                url={part.image_url.url}
+                isUser={isUser}
+                isSmallScreen={isSmallScreen}
               />
             );
           default:
-            return null; // Handle unsupported types gracefully
+            return null;
         }
       });
     } else {
-      return null; // Handle unexpected content types gracefully
+      return null;
     }
   };
 
@@ -121,7 +127,7 @@ const Message = ({ who, content }) => {
             fontSize: isSmallScreen ? "1rem" : "1.1rem",
           }}
         >
-          {isUser ? "User" : assistant?.name || "Unnamed Assistant"}
+          {isUser ? user.username : assistant?.name || "Unnamed Assistant"}
         </Typography>
       </Box>
       <Box

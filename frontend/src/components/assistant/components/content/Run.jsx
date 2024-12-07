@@ -1,19 +1,40 @@
 import { Box } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Options from "./run_sections/Options";
 import Body from "./run_sections/Body";
 import Input from "./run_sections/Input";
 import { useAssistantContext } from "../../../../contexts/AssistantContext";
 import { useMessagesData } from "../../../../hooks/assistant/useMessagesData";
-
+import selectMostRecent from "../../../../utils/selectMostRecent";
+import { useCreateThread } from "../../../../hooks/assistant/useCreateThread";
+import { useCreateMessage } from "../../../../hooks/assistant/useCreateMessage";
 const Run = () => {
-  const { thread } = useAssistantContext();
-  const { data: rawMessages, isPending } = useMessagesData(thread?.id);
+  const { thread, threads, setThread } = useAssistantContext();
+  const { mutateAsync: createThread, isPending: isThreadPending } =
+    useCreateThread();
+  const { mutate: createMessage } = useCreateMessage();
 
-  // Default to an empty array if no messages and sort by creation time
-  const sortedMessages = (rawMessages || []).sort(
-    (a, b) => a.created_at - b.created_at
-  );
+  const { data: rawMessages } = useMessagesData(thread?.id);
+  const [sortedMessages, setSortedMessages] = useState([]);
+
+  useEffect(() => {
+    if (!threads || threads.length === 0) return;
+    const recentThread = selectMostRecent(threads);
+    setThread(recentThread);
+  }, [threads]);
+
+  // Update sorted messages whenever rawMessages changes
+  useEffect(() => {
+    if (rawMessages && rawMessages.length) {
+      // Sort messages by creation time and store them in state
+      const updatedSortedMessages = [...rawMessages].sort(
+        (a, b) => a.created_at - b.created_at
+      );
+      setSortedMessages(updatedSortedMessages);
+    } else {
+      setSortedMessages([]);
+    }
+  }, [rawMessages]);
 
   return (
     <Box
@@ -25,11 +46,12 @@ const Run = () => {
       }}
     >
       {/* Thread Options */}
-      <Options isPending={isPending} />
+      <Options isThreadPending={isThreadPending} />
       {/* Main Body */}
-      <Body messages={sortedMessages} />
+      <Body
+        messages={sortedMessages}/>
       {/* Input */}
-      <Input />
+      <Input createThread={createThread} createMessage={createMessage} />
     </Box>
   );
 };

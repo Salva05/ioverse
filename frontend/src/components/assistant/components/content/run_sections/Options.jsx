@@ -3,7 +3,7 @@ import React from "react";
 import Clear from "../run_components/Clear";
 import ThreadText from "../run_components/ThreadText";
 
-const Options = ({ isPending }) => {
+const Options = ({ isThreadPending }) => {
   return (
     <Box
       sx={{
@@ -13,7 +13,7 @@ const Options = ({ isPending }) => {
         width: "90%",
       }}
     >
-      <ThreadText isPending={isPending}/>
+      <ThreadText isThreadPending={isThreadPending}/>
       <Clear />
     </Box>
   );

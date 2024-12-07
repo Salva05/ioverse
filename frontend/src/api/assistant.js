@@ -41,6 +41,21 @@ export const thread = {
     const response = await axiosInstance.get("/assistant/thread/list/");
     return response.data;
   },
+
+  // POST
+  create: async () => {
+    const response = await axiosInstance.post("/assistant/thread/create/");
+    return response.data;
+  },
+
+  // PUT
+  update: async (threadId, threadData) => {
+    const response = await axiosInstance.put(
+      `/assistant/thread/${threadId}/update/`,
+      threadData
+    );
+    return response.data;
+  },
 };
 
 // Service for Vector Stores-related API calls
@@ -176,4 +191,24 @@ export const messages = {
     );
     return response.data;
   },
+
+  // POST
+  create: async (threadId, message) => {
+    const response = await axiosInstance.post(
+      `/assistant/message/${threadId}/create/`,
+      message
+    );
+    return response.data;
+  },
 };
+
+// Service for File images-related API calls
+export const fileImage = {
+  // GET
+  get: async (id) => {
+    const response = await axiosInstance.get(
+      `/assistant/file_image/${id}/retrieve/`
+    );
+    return response.data;
+  }
+} 

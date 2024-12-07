@@ -484,7 +484,6 @@ const TextToImage = () => {
                 align="center"
                 sx={{
                   fontWeight: "700",
-                  fontFamily: "Arial, sans-serif",
                   letterSpacing: "0.05em",
                   fontFamily: "'Montserrat', serif",
                 }}

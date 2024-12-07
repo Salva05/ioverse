@@ -1,27 +1,57 @@
-import { Box, IconButton, TextField, Button, useTheme } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  TextField,
+  Button,
+  useTheme,
+  CircularProgress,
+} from "@mui/material";
 import React, { useRef, useState } from "react";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import AddIcon from "@mui/icons-material/Add";
 import { IoIosImages } from "react-icons/io";
+import useInputLogic from "../../../../../hooks/assistant/run_section/useInputLogic";
+import Popover from "@mui/material/Popover";
+import ImageInputMenu from "../run_components/ImageInputMenu";
+import CloseIcon from "@mui/icons-material/Close";
 
-const Input = () => {
+const Input = ({ createThread, createMessage }) => {
   const theme = useTheme();
-  const textFieldRef = useRef(null);
-  const [isFocused, setIsFocused] = useState(false);
 
-  const handleBoxClick = (event) => {
-    const target = event.target;
-    if (target.closest(".MuiIconButton-root") || target.closest("button")) {
-      return;
-    }
-    if (textFieldRef.current) {
-      textFieldRef.current.focus();
-      setIsFocused(true);
+  // Menu for the type of image to attach
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleImageMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleImageMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const isImageMenuOpen = Boolean(anchorEl);
+
+  // Image attachment
+  const fileInputRef = useRef(null);
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
-  const handleFocusOut = () => {
-    setIsFocused(false);
-  };
+
+  const {
+    textFieldRef,
+    isFocused,
+    message,
+    handleKeyPress,
+    handleChange,
+    handleBoxClick,
+    handleFocusOut,
+    handleAddMessage,
+    handleFileSelect,
+    previewImages,
+    handleDeleteImage,
+  } = useInputLogic(createThread, createMessage, handleImageMenuClose);
+
   return (
     <Box
       sx={{
@@ -38,6 +68,7 @@ const Input = () => {
       <Box
         onClick={handleBoxClick}
         sx={{
+          cursor: "text",
           width: "100%",
           maxWidth: "700px",
           backgroundColor:
@@ -59,9 +90,94 @@ const Input = () => {
         }}
         onBlur={handleFocusOut}
       >
+        {/* Display multiple preview images if available */}
+        {previewImages.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "8px",
+              marginBottom: "8px",
+            }}
+          >
+            {previewImages.map((image, index) => (
+              <Box
+                key={image.id}
+                sx={{
+                  position: "relative",
+                  width: "100px",
+                  height: "100px",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: `1px solid ${theme.palette.divider}`,
+                }}
+              >
+                {image.status === "loading" ? (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "rgba(255, 255, 255, 0.5)",
+                    }}
+                  >
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : image.status === "error" ? (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "rgba(255, 0, 0, 0.2)",
+                    }}
+                  >
+                    <CloseIcon color="error" />
+                  </Box>
+                ) : (
+                  <Box
+                    component="img"
+                    src={image.url}
+                    alt={`preview-${index}`}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+                {/* Icon on each preview for manual deletion */}
+                <IconButton
+                  size="small"
+                  onClick={() => handleDeleteImage(index, image.data.id)}
+                  sx={{
+                    position: "absolute",
+                    top: 2,
+                    right: 2,
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    color: "#fff",
+                    padding: "2px",
+                    "&:hover": {
+                      backgroundColor: "rgba(0,0,0,0.5)",
+                    },
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ))}
+          </Box>
+        )}
         {/* Input Field */}
         <Box>
           <TextField
+            value={message}
+            onChange={handleChange}
+            onKeyDown={handleKeyPress}
             inputRef={textFieldRef}
             variant="standard"
             placeholder="Enter your message..."
@@ -122,6 +238,7 @@ const Input = () => {
             </IconButton>
 
             <IconButton
+              onClick={handleImageMenuOpen}
               sx={{
                 backgroundColor: theme.palette.action.hover,
                 borderRadius: "8px",
@@ -129,6 +246,14 @@ const Input = () => {
                 width: "30px",
               }}
             >
+              <input
+                type="file"
+                accept=".jpeg,.jpg,.gif,.png"
+                style={{ display: "none" }}
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                multiple
+              />
               <Box
                 sx={{
                   width: "19px",
@@ -154,6 +279,7 @@ const Input = () => {
             }}
           >
             <IconButton
+              onClick={handleAddMessage}
               sx={{
                 backgroundColor: theme.palette.action.hover,
                 borderRadius: "8px",
@@ -180,6 +306,22 @@ const Input = () => {
           </Box>
         </Box>
       </Box>
+      {/* Menu for Image attachment types */}
+      <Popover
+        open={isImageMenuOpen}
+        anchorEl={anchorEl}
+        onClose={handleImageMenuClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+      >
+        <ImageInputMenu triggerFileInput={triggerFileInput} />
+      </Popover>
     </Box>
   );
 };
