@@ -2,6 +2,8 @@ import { IconButton, Tooltip } from "@mui/material";
 import React from "react";
 import { AiOutlineClear } from "react-icons/ai";
 import { styled } from "@mui/material/styles";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { useDeleteThread } from "../../../../../hooks/assistant/useDeleteThread";
 
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
   backgroundColor:
@@ -15,10 +17,18 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const Clear = () => {
+  const { thread, setThread } = useAssistantContext();
+  const { mutate } = useDeleteThread();
+
+  const handleDelete = () => {
+    mutate(thread.id);
+    setThread(null);
+  };
+
   return (
     <>
       <Tooltip title="Clear" placement="top">
-        <StyledIconButton>
+        <StyledIconButton onClick={handleDelete}>
           <AiOutlineClear style={{ color: "inherit" }} />
         </StyledIconButton>
       </Tooltip>

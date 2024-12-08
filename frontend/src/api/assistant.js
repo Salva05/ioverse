@@ -56,6 +56,14 @@ export const thread = {
     );
     return response.data;
   },
+
+  // DELETE
+  delete: async (threadId) => {
+    const response = await axiosInstance.delete(
+      `/assistant/thread/${threadId}/delete/`
+    );
+    return response.data;
+  },
 };
 
 // Service for Vector Stores-related API calls
@@ -210,5 +218,5 @@ export const fileImage = {
       `/assistant/file_image/${id}/retrieve/`
     );
     return response.data;
-  }
-} 
+  },
+};
