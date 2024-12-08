@@ -330,13 +330,6 @@ def validate_image_url(item, index):
             f"'url' in 'image_url' must be a non-empty string in content item at index {index}."
         )
     
-    # Validate URL format and supported image types
-    supported_types = ['jpeg', 'jpg', 'png', 'gif', 'webp']
-    if not any(url.lower().endswith(f".{ext}") for ext in supported_types):
-        raise ValidationError(
-            f"Image URL must end with one of the supported types: {supported_types} in content item at index {index}."
-        )
-    
     detail = item.get('detail', 'auto')
     if detail not in ['low', 'high', 'auto']:
         raise ValidationError(
