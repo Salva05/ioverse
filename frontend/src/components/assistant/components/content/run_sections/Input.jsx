@@ -5,6 +5,7 @@ import {
   Button,
   useTheme,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import React, { useRef, useState } from "react";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -14,29 +15,59 @@ import useInputLogic from "../../../../../hooks/assistant/run_section/useInputLo
 import Popover from "@mui/material/Popover";
 import ImageInputMenu from "../run_components/ImageInputMenu";
 import CloseIcon from "@mui/icons-material/Close";
+import FileInputMenu from "../run_components/FileInputMenu";
+import { InsertDriveFileOutlined } from "@mui/icons-material";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import UploadedFileMenu from "../run_components/UploadedFileMenu";
 
 const Input = ({ createThread, createMessage }) => {
   const theme = useTheme();
 
+  // Menu for file attached
+  const [uploadedFileMenu, setUploadedFileMenu] = useState({
+    anchorEl: null,
+    fileId: null,
+  });
+  const handleUploadedFileMenuOpen = (event, id) => {
+    setUploadedFileMenu({
+      anchorEl: event.currentTarget,
+      fileId: id,
+    });
+  };
+  
+  const handleUploadedFileMenuClose = () => {
+    setUploadedFileMenu({
+      anchorEl: null,
+      fileId: null,
+    });
+  };
+
   // Menu for the type of image to attach
   const [anchorEl, setAnchorEl] = useState(null);
-
   const handleImageMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleImageMenuClose = () => {
     setAnchorEl(null);
   };
-
   const isImageMenuOpen = Boolean(anchorEl);
-
   // Image attachment
-  const fileInputRef = useRef(null);
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+  const imageFileInputRef = useRef(null);
+  const triggerImageFileInput = () => {
+    if (imageFileInputRef.current) {
+      imageFileInputRef.current.click();
     }
   };
+
+  // Menu for file attach
+  const [fileMenuAnchorEl, setFileMenuAnchorEl] = useState(null);
+  const handleFileMenuOpen = (event) => {
+    setFileMenuAnchorEl(event.currentTarget);
+  };
+  const handleFileMenuClose = () => {
+    setFileMenuAnchorEl(null);
+  };
+  const isFileMenuOpen = Boolean(fileMenuAnchorEl);
 
   const {
     textFieldRef,
@@ -49,8 +80,14 @@ const Input = ({ createThread, createMessage }) => {
     handleAddMessage,
     handleFileSelect,
     previewImages,
+    previewFiles,
     handleDeleteImage,
     handleInsertImageFromUrl,
+    handleAttach,
+    uploadedFiles,
+    setUploadedFiles,
+    handleDeleteFile,
+    handleChangeFileType
   } = useInputLogic(createThread, createMessage, handleImageMenuClose);
 
   return (
@@ -91,7 +128,7 @@ const Input = ({ createThread, createMessage }) => {
         }}
         onBlur={handleFocusOut}
       >
-        {/* Display multiple preview images if available */}
+        {/* Preview of Images */}
         {previewImages.length > 0 && (
           <Box
             sx={{
@@ -137,7 +174,7 @@ const Input = ({ createThread, createMessage }) => {
                       backgroundColor: "rgba(255, 0, 0, 0.2)",
                     }}
                   >
-                    <CloseIcon color="error"/>
+                    <CloseIcon color="error" />
                   </Box>
                 ) : (
                   <Box
@@ -221,8 +258,95 @@ const Input = ({ createThread, createMessage }) => {
             }}
           />
         </Box>
-
-        {/* Buttons below the input field */}
+        {/* Preview of Files */}
+        {previewFiles.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              marginBottom: "8px",
+              marginLeft: "6px",
+            }}
+          >
+            {previewFiles.map((file) => (
+              <Box
+                key={file.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <Box
+                  onClick={(event) => handleUploadedFileMenuOpen(event, file.id)}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: "8px",
+                    cursor: "pointer",
+                    borderRadius: 2,
+                    paddingX: "4px",
+                    transition: "background-color 0.3s, border 0.3s",
+                    "&:hover .hover-text": {
+                      backgroundColor: (theme) => theme.palette.action.hover,
+                      border: `1px solid ${(theme) => theme.palette.divider}`,
+                    },
+                  }}
+                >
+                  <InsertDriveFileOutlined
+                    sx={{
+                      padding: "4px",
+                      border: "1px solid",
+                      borderColor: (theme) => theme.palette.divider,
+                      backgroundColor: (theme) => theme.palette.action.hover,
+                      borderRadius: 2,
+                      minWidth: "24px",
+                      minHeight: "24px",
+                    }}
+                  />
+                  <Typography
+                    className="hover-text"
+                    sx={{
+                      fontFamily: "'Montserrat', serif",
+                      fontSize: "0.85rem",
+                      color: "text.secondary",
+                      padding: "2px 8px",
+                      borderRadius: 2,
+                      transition: "background-color 0.3s, border 0.3s",
+                    }}
+                  >
+                    {file?.filename || file.id}
+                  </Typography>
+                </Box>
+                {/* Menu for individual file */}
+                <Popover
+                  open={uploadedFileMenu.fileId === file.id && Boolean(uploadedFileMenu.anchorEl)}
+                  anchorEl={uploadedFileMenu.anchorEl}
+                  onClose={handleUploadedFileMenuClose}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "center",
+                  }}
+                  transformOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center",
+                  }}
+                >
+                  <UploadedFileMenu
+                    handleDeleteFile={handleDeleteFile}
+                    id={file.id}
+                    handleClose={handleUploadedFileMenuClose}
+                    handleChangeFileType={handleChangeFileType}
+                    currentType={file.type}
+                  />
+                </Popover>
+              </Box>
+            ))}
+          </Box>
+        )}
+        {/* Buttons at the bottom */}
         <Box
           sx={{
             display: "flex",
@@ -234,6 +358,7 @@ const Input = ({ createThread, createMessage }) => {
           {/* Left icons */}
           <Box sx={{ display: "flex", gap: 1, paddingX: 1, paddingBottom: 1 }}>
             <IconButton
+              onClick={handleFileMenuOpen}
               sx={{
                 backgroundColor: theme.palette.action.hover,
                 borderRadius: "8px",
@@ -257,7 +382,7 @@ const Input = ({ createThread, createMessage }) => {
                 type="file"
                 accept=".jpeg,.jpg,.gif,.png"
                 style={{ display: "none" }}
-                ref={fileInputRef}
+                ref={imageFileInputRef}
                 onChange={handleFileSelect}
                 multiple
               />
@@ -313,24 +438,46 @@ const Input = ({ createThread, createMessage }) => {
           </Box>
         </Box>
       </Box>
-      {/* Menu for Image attachment types */}
+      {/* Menu for Image attachment */}
       <Popover
         open={isImageMenuOpen}
         anchorEl={anchorEl}
         onClose={handleImageMenuClose}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
+          vertical: "top",
+          horizontal: "center",
         }}
         transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
+          vertical: "bottom",
+          horizontal: "center",
         }}
       >
         <ImageInputMenu
-          triggerFileInput={triggerFileInput}
+          triggerFileInput={triggerImageFileInput}
           closeImageMenu={handleImageMenuClose}
           handleInsertImageFromUrl={handleInsertImageFromUrl}
+        />
+      </Popover>
+
+      {/* Menu for File attachment */}
+      <Popover
+        open={isFileMenuOpen}
+        anchorEl={fileMenuAnchorEl}
+        onClose={handleFileMenuClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+      >
+        <FileInputMenu
+          closeMenu={handleFileMenuClose}
+          handleAttach={handleAttach}
+          uploadedFiles={uploadedFiles}
+          setUploadedFiles={setUploadedFiles}
         />
       </Popover>
     </Box>

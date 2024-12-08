@@ -6,7 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import LinkIcon from "@mui/icons-material/Link";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import ImageInputUrlDialog from "./ImageInputUrlDialog";
 
 const ImageInputMenu = ({
@@ -14,6 +14,12 @@ const ImageInputMenu = ({
   closeImageMenu,
   handleInsertImageFromUrl,
 }) => {
+  const theme = useTheme();
+  const borderColor =
+    theme.palette.mode === "light"
+      ? theme.palette.grey[500]
+      : theme.palette.divider;
+
   // State and logic for Image Url insertion dialog
   const [open, setOpen] = useState(false);
 
@@ -26,7 +32,14 @@ const ImageInputMenu = ({
   };
 
   return (
-    <Paper sx={{ paddingX: 1, pb: 0.6 }}>
+    <Paper
+      sx={{
+        paddingX: 1,
+        pb: 0.6,
+        border: "1px solid",
+        borderColor: borderColor,
+      }}
+    >
       <MenuList>
         <MenuItem
           onClick={triggerFileInput}

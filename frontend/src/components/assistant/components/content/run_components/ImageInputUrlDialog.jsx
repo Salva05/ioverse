@@ -36,7 +36,6 @@ export default function ImageInputUrlDialog({
     setFound(false);
 
     if (!isSupportedImageUrl(url)) {
-      console.log("Not a valid format.");
       setTimeout(() => {
         setIsLoading(false);
         setIsError(true);

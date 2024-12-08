@@ -3,6 +3,7 @@ import { useAssistantContext } from "../../../contexts/AssistantContext";
 import { useCreateFile } from "../useCreateFile";
 import { v4 as uuidv4 } from "uuid";
 import { useDeleteFile } from "../useDeleteFile";
+import { toast } from "react-toastify";
 
 const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
   const { thread, setThread } = useAssistantContext();
@@ -13,13 +14,13 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
   const [isFocused, setIsFocused] = useState(false);
   const [message, setMessage] = useState("");
 
+  // For File Search
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [previewFiles, setPreviewFiles] = useState([]);
+
   // For image attachment
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
-
-  const validate = () => {
-    if (!message.trim()) return;
-  };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -55,7 +56,6 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
   };
 
   const handleRun = () => {
-    validate();
     console.log("You wrote: " + message);
   };
 
@@ -97,6 +97,11 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
   };
 
   const handleAddMessage = async () => {
+    if (!message.trim()) {
+      toast.error("The message must have a non-empty content.");
+      return;
+    }
+
     let tempThread = thread;
 
     // Handle thread creation and activation
@@ -135,21 +140,42 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
         }
       }
 
+      // Case of uploaded files
+      let attachments = [];
+      if (previewFiles && previewFiles.length > 0) {
+        attachments = previewFiles.map((file) => {
+          return {
+            file_id: file.id,
+            tools: [
+              {
+                type: file.type,
+              },
+            ],
+          };
+        });
+      }
+
       // The message object as per defined in the API documentation
       const ApiMessage = {
         thread_id: tempThread.id,
         role: "user",
-        content: content, // Either text or an array of image objects
+        content: content,
+        attachments: attachments,
       };
 
       createMessage({ threadId: tempThread.id, message: ApiMessage });
 
-      // Clean up resources
+      // Clean up for Images
       previewImages.forEach((image) => {
         URL.revokeObjectURL(image.url);
       });
       setPreviewImages([]);
       setSelectedFiles([]);
+
+      // Clean up for files
+      setPreviewFiles([]);
+      setUploadedFiles([]);
+
       setMessage("");
     } catch (error) {
       console.log(error);
@@ -198,6 +224,23 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     if (shouldDelete) deleteFile(fileId);
   };
 
+  const handleDeleteFile = (fileId) => {
+    setPreviewFiles((prevFiles) =>
+      prevFiles.filter((file) => file.id !== fileId)
+    );
+    setUploadedFiles((prevUploads) =>
+      prevUploads.filter((file) => file?.data?.id !== fileId)
+    );
+    deleteFile(fileId);
+  };
+
+  const handleChangeFileType = (type, id) => {
+    const newPreviewFiles = previewFiles.map((file) =>
+      file.id === id ? { ...file, type: type } : file
+    );
+    setPreviewFiles(newPreviewFiles);
+  };
+
   const handleCreateFile = async (id, file) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -226,6 +269,21 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     }
   };
 
+  // Load the files to attach to file search to internal state
+  const handleAttach = (event, type) => {
+    event.preventDefault();
+
+    const files = uploadedFiles
+      .filter((file) => file.status === "success") // Filter out unsuccessful uploads
+      .map((file) => ({
+        id: file.data.id,
+        type: type, // 'file_search' or 'code_interpreter'
+        filename: file.data.filename,
+      }));
+
+    setPreviewFiles(files);
+  };
+
   return {
     textFieldRef,
     isFocused,
@@ -233,8 +291,8 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     message,
     setMessage,
     previewImages,
+    previewFiles,
     handleRun,
-    validate,
     handleKeyPress,
     handleChange,
     handleBoxClick,
@@ -244,6 +302,11 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     selectedFiles,
     handleDeleteImage,
     handleInsertImageFromUrl,
+    handleAttach,
+    uploadedFiles,
+    setUploadedFiles,
+    handleDeleteFile,
+    handleChangeFileType,
   };
 };
 
