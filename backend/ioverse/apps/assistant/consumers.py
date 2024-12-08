@@ -1,9 +1,14 @@
 import json
-import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
+from assistant_modules.run.run import Run
+from assistant_modules.run.stream_handler import EventHandler
+from django.contrib.auth import get_user_model
+from asgiref.sync import sync_to_async
+import asyncio
 
+User = get_user_model()
 
-class AssistantConsumer(AsyncWebsocketConsumer):
+class OpenAIStreamingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
 
@@ -11,17 +16,56 @@ class AssistantConsumer(AsyncWebsocketConsumer):
         pass
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        prompt = data.get("prompt")
+        try:
+            data = json.loads(text_data)
+            thread_id = data.get("thread_id")
+            assistant_id = data.get("assistant_id")
+            instructions = data.get("instructions")
+        except json.JSONDecodeError:
+            await self.send(text_data=json.dumps({"error": "Invalid JSON"}))
+            return
 
-        # Simulate streaming chunks from OpenAI Assistant
-        for chunk in self.generate_ai_chunks(prompt):
-            await self.send(text_data=json.dumps({"chunk": chunk}))
-            
-    def generate_ai_chunks(self, prompt):
-        # Example generator for streaming AI response, word by word
-        response = "This is the first chunk of the AI response. Here's the second chunk. And finally, the third chunk."
+        if not thread_id or not assistant_id:
+            await self.send(text_data=json.dumps({"error": "Missing required parameters"}))
+            return
+
+        # Stream OpenAI Assistant responses
+        await self.stream_openai_response(thread_id, assistant_id, instructions)
+
+    async def stream_openai_response(self, thread_id, assistant_id, instructions):  # instruction for future usage
+        # Access the API key from the authenticated user
+        user = self.scope.get('user')
+        if not user.is_authenticated:
+            await self.send(text_data=json.dumps({"error": "Authentication required"}))
+            return
+
+        api_key = await self.get_user_api_key(user)
+        if not api_key:
+            await self.send(text_data=json.dumps({"error": "API key not found"}))
+            return
+
+        # Run class for API calls and API key
+        run = Run(api_key=api_key)
         
-        # Split the response into words and yield them one by one
-        for word in response.split():
-            yield word
+        # The current event loop
+        loop = asyncio.get_running_loop()
+
+        # EventHandler to manage the stream
+        event_handler = EventHandler(self.send, loop)
+
+        kwargs = {
+            'thread_id': thread_id,
+            'assistant_id': assistant_id,
+        }
+
+        try:
+            await sync_to_async(run.stream)(event_handler=event_handler, **kwargs)
+        except Exception as e:
+            await self.send(text_data=json.dumps({"error": str(e)}))
+
+    @sync_to_async
+    def get_user_api_key(self, user):
+        """
+        Retrieve the API key from the authenticated user.
+        """
+        return getattr(user, 'api_key', None)

@@ -174,3 +174,24 @@ class Run:
             assistant_id=assistant_id,
             **kwargs
         ).model_dump()
+        
+    @handle_errors
+    def stream(self, event_handler, **kwargs):
+        """
+        Run a thread and stream the result.
+        """
+        thread_id = kwargs.pop('thread_id', None)
+        assistant_id = kwargs.pop('assistant_id', None)
+        
+        if not thread_id:
+            raise ValueError("Missing required argument: 'thread_id'")
+        if not assistant_id:
+            raise ValueError("Missing required argument: 'assistant_id'")
+        
+        with self.client.beta.threads.runs.stream(
+            thread_id=thread_id,
+            assistant_id=assistant_id,
+            event_handler=event_handler,
+            **kwargs,
+        ) as stream:
+            stream.until_done()
