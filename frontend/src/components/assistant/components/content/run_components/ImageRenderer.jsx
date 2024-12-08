@@ -16,8 +16,21 @@ const ImageRenderer = ({ type, id, url, isUser, isSmallScreen }) => {
     const fetchImage = async () => {
       try {
         if (type === "image_url") {
-          setImageUrl(url);
-          setLoading(false);
+          // Check if the url is still a valid image (eg. OpenAI's generated images via URL option have a default of 60 min expiring time)
+          const img = new Image();
+          img.onload = () => {
+            if (isMounted) {
+              setImageUrl(url);
+              setLoading(false);
+            }
+          };
+          img.onerror = () => {
+            if (isMounted) {
+              setError(true);
+              setLoading(false);
+            }
+          };
+          img.src = url;
         } else if (type === "image_file") {
           const fetchedUrl = await fileImage.get(id);
           if (isMounted) {
@@ -49,9 +62,9 @@ const ImageRenderer = ({ type, id, url, isUser, isSmallScreen }) => {
       <Box
         sx={{
           position: "relative",
-          width: isSmallScreen ? "80%" : "200px",
+          width: isSmallScreen ? "150px" : "200px",
           maxWidth: "100%",
-          height: isSmallScreen ? "auto" : "15 0px",
+          height: isSmallScreen ? "100px" : "150px",
           marginTop: 1,
           borderRadius: "8px",
           overflow: "hidden",
@@ -59,7 +72,8 @@ const ImageRenderer = ({ type, id, url, isUser, isSmallScreen }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#f0f0f0",
+          backgroundColor:
+            theme.palette.mode === "dark" ? "#f0f0f0" : "#424242",
         }}
       >
         <CircularProgress size={24} />
@@ -85,7 +99,7 @@ const ImageRenderer = ({ type, id, url, isUser, isSmallScreen }) => {
           backgroundColor: "rgba(255, 0, 0, 0.2)",
         }}
       >
-        <CloseIcon color="error" />
+        <CloseIcon color="error" sx={{ fontSize: 30 }} />
       </Box>
     );
   }
@@ -99,9 +113,10 @@ const ImageRenderer = ({ type, id, url, isUser, isSmallScreen }) => {
         width: isSmallScreen ? "150px" : "200px",
         height: isSmallScreen ? "100px" : "150px",
         objectFit: "contain",
-        ml: 1,
         borderRadius: "8px",
-        backgroundColor: theme.palette.mode === "dark" ? "#f0f0f0" : "#424242"
+        marginLeft: isUser ? 0 : "auto",
+        marginRight: isUser ? "auto" : 0,
+        backgroundColor: theme.palette.mode === "dark" ? "#f0f0f0" : "#424242",
       }}
     />
   );

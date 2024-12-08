@@ -78,6 +78,24 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     setIsFocused(false);
   };
 
+  // For image insertion by URL
+  const handleInsertImageFromUrl = (url) => {
+    const id = uuidv4();
+    const newPreview = {
+      id,
+      url,
+      status: "success",
+      data: null,
+      isFromUrl: true,
+    };
+
+    // Update preview images state
+    setPreviewImages((prev) => [...prev, newPreview]);
+
+    // Close the image menu (if necessary)
+    handleImageMenuClose();
+  };
+
   const handleAddMessage = async () => {
     let tempThread = thread;
 
@@ -97,10 +115,19 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
 
       // Case of uploaded images
       if (previewImages && previewImages.length > 0) {
-        content = previewImages.map((image) => ({
-          type: "image_file",
-          image_file: { file_id: image.data.id, detail: "auto" },
-        }));
+        content = previewImages.map((image) => {
+          if (image.isFromUrl) {
+            return {
+              type: "image_url",
+              image_url: { url: image.url, detail: "auto" },
+            };
+          } else {
+            return {
+              type: "image_file",
+              image_file: { file_id: image.data.id, detail: "auto" },
+            };
+          }
+        });
 
         // insert text content
         if (message) {
@@ -145,8 +172,9 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
           url: URL.createObjectURL(file),
           status: "loading",
           data: null,
+          isFromUrl: false,
         };
-        handleCreateFile(id, file, file, null); // Initiate upload
+        handleCreateFile(id, file); // Initiate upload
         return previewEntry;
       });
 
@@ -158,7 +186,7 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     }
   };
 
-  const handleDeleteImage = (index, fileId) => {
+  const handleDeleteImage = (index, fileId, shouldDelete = false) => {
     const imageToDelete = previewImages[index];
     if (imageToDelete) {
       // Revoke the object URL to free memory
@@ -167,33 +195,22 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     setPreviewImages((prevUrls) => prevUrls.filter((_, i) => i !== index));
 
-    deleteFile(fileId);
+    if (shouldDelete) deleteFile(fileId);
   };
 
-  const handleCreateFile = async (
-    id,
-    file,
-    imageFile = null,
-    imageUrl = null
-  ) => {
+  const handleCreateFile = async (id, file) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("purpose", "vision");
 
-    // Conditionally append image_file if provided
-    if (imageFile) {
-      formData.append("image_file", imageFile);
-    }
-
-    // Conditionally append image_url if provided
-    if (imageUrl) {
-      formData.append("image_url", imageUrl);
+    if (file) {
+      formData.append("image_file", file);
     }
 
     try {
       const data = await createFile(formData);
 
-      // Update the file's status to 'success' and store any returned data
+      // Update the file's status to 'success'
       setPreviewImages((prevFiles) =>
         prevFiles.map((entry) =>
           entry.id === id ? { ...entry, status: "success", data: data } : entry
@@ -226,6 +243,7 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     handleFileSelect,
     selectedFiles,
     handleDeleteImage,
+    handleInsertImageFromUrl,
   };
 };
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import Paper from "@mui/material/Paper";
 import MenuList from "@mui/material/MenuList";
 import MenuItem from "@mui/material/MenuItem";
@@ -9,7 +9,11 @@ import LinkIcon from "@mui/icons-material/Link";
 import { Box, Typography } from "@mui/material";
 import ImageInputUrlDialog from "./ImageInputUrlDialog";
 
-const ImageInputMenu = ({ triggerFileInput }) => {
+const ImageInputMenu = ({
+  triggerFileInput,
+  closeImageMenu,
+  handleInsertImageFromUrl,
+}) => {
   // State and logic for Image Url insertion dialog
   const [open, setOpen] = useState(false);
 
@@ -79,7 +83,12 @@ const ImageInputMenu = ({ triggerFileInput }) => {
           </Box>
         </Box>
       </MenuList>
-      <ImageInputUrlDialog open={open} onClose={handleClose} />
+      <ImageInputUrlDialog
+        open={open}
+        onClose={handleClose}
+        closeImageMenu={closeImageMenu}
+        handleInsertImageFromUrl={handleInsertImageFromUrl}
+      />
     </Paper>
   );
 };

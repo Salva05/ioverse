@@ -50,6 +50,7 @@ const Input = ({ createThread, createMessage }) => {
     handleFileSelect,
     previewImages,
     handleDeleteImage,
+    handleInsertImageFromUrl,
   } = useInputLogic(createThread, createMessage, handleImageMenuClose);
 
   return (
@@ -136,7 +137,7 @@ const Input = ({ createThread, createMessage }) => {
                       backgroundColor: "rgba(255, 0, 0, 0.2)",
                     }}
                   >
-                    <CloseIcon color="error" />
+                    <CloseIcon color="error"/>
                   </Box>
                 ) : (
                   <Box
@@ -153,7 +154,13 @@ const Input = ({ createThread, createMessage }) => {
                 {/* Icon on each preview for manual deletion */}
                 <IconButton
                   size="small"
-                  onClick={() => handleDeleteImage(index, image.data.id)}
+                  onClick={() => {
+                    if (image?.data?.id) {
+                      handleDeleteImage(index, image?.data?.id, true);
+                    } else {
+                      handleDeleteImage(index, image?.id, false);
+                    }
+                  }}
                   sx={{
                     position: "absolute",
                     top: 2,
@@ -320,7 +327,11 @@ const Input = ({ createThread, createMessage }) => {
           horizontal: "left",
         }}
       >
-        <ImageInputMenu triggerFileInput={triggerFileInput} />
+        <ImageInputMenu
+          triggerFileInput={triggerFileInput}
+          closeImageMenu={handleImageMenuClose}
+          handleInsertImageFromUrl={handleInsertImageFromUrl}
+        />
       </Popover>
     </Box>
   );
