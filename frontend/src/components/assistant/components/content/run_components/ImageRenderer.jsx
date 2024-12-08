@@ -87,7 +87,6 @@ const ImageRenderer = ({ type, id, url, isUser, isSmallScreen }) => {
         sx={{
           position: "relative",
           width: isSmallScreen ? "150px" : "200px",
-          maxWidth: "100%",
           height: isSmallScreen ? "100px" : "150px",
           borderRadius: "8px",
           overflow: "hidden",
@@ -114,8 +113,9 @@ const ImageRenderer = ({ type, id, url, isUser, isSmallScreen }) => {
         height: isSmallScreen ? "100px" : "150px",
         objectFit: "contain",
         borderRadius: "8px",
-        marginLeft: isUser ? 0 : "auto",
-        marginRight: isUser ? "auto" : 0,
+        display: "flex",
+        alignItems: "center",
+        marginBottom: 1,
         backgroundColor: theme.palette.mode === "dark" ? "#f0f0f0" : "#424242",
       }}
     />

@@ -360,6 +360,7 @@ const FileSearchAddDialog = ({
             handleFiles={handleFiles}
             handleDragOver={handleDragOver}
             handleDrop={handleDrop}
+            isAssistant={true}
           />
         ) : (
           // Uploaded Files

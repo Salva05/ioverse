@@ -17,6 +17,7 @@ const UploadedFileMenu = ({
   handleClose,
   handleChangeFileType,
   currentType,
+  isSent = false,
 }) => {
   const theme = useTheme();
 
@@ -81,7 +82,7 @@ const UploadedFileMenu = ({
       </Typography>
       <MenuList>
         {/* File Search Checkbox */}
-        <MenuItem onClick={() => handleChange("file_search")}>
+        <MenuItem disabled={isSent} onClick={() => handleChange("file_search")}>
           <Checkbox
             checked={fileSearchChecked}
             size="small"
@@ -103,7 +104,10 @@ const UploadedFileMenu = ({
         </MenuItem>
 
         {/* Code Interpreter Checkbox */}
-        <MenuItem onClick={() => handleChange("code_interpreter")}>
+        <MenuItem
+          disabled={isSent}
+          onClick={() => handleChange("code_interpreter")}
+        >
           <Checkbox
             checked={codeInterpreterChecked}
             size="small"
@@ -133,6 +137,7 @@ const UploadedFileMenu = ({
 
         {/* Delete */}
         <MenuItem
+          disabled={isSent}
           onClick={() => {
             handleClose();
             handleDeleteFile(id);

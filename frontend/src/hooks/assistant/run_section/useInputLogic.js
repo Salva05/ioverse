@@ -281,7 +281,10 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
         filename: file.data.filename,
       }));
 
-    setPreviewFiles(files);
+    // Preserve previously attached elements
+    setPreviewFiles((prevFiles) => [...prevFiles, ...files]);
+    // Clean files from the dialog
+    setUploadedFiles([]);
   };
 
   return {

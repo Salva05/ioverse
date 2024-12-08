@@ -5,7 +5,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemText from "@mui/material/ListItemText";
 import AddIcon from "@mui/icons-material/Add";
 import { Divider, useTheme } from "@mui/material";
-import FileSearchAddDialog from "./FileSearchAddDialog";
+import FileAddDialog from "./FileAddDialog";
 
 const FileInputMenu = ({
   closeMenu,
@@ -15,11 +15,21 @@ const FileInputMenu = ({
 }) => {
   // File Search Dialog state
   const [addFilesOpen, setAddFilesOpen] = useState(false);
-  const addFilesDialogOpen = () => {
+  const [isFileSearch, setIsFileSearch] = useState(true);
+
+  const openDialog = (fileSearch) => {
+    setIsFileSearch(fileSearch);
     setAddFilesOpen(true);
   };
-  const addFilesDialogClose = () => {
+  const closeDialog = () => {
     setAddFilesOpen(false);
+  };
+
+  // boolean for disabling one of the buttons
+  // forcing to upload only one type per time
+  const hasAndIsFileSearch = {
+    has: uploadedFiles && uploadedFiles.length > 0,
+    isFileSearch: uploadedFiles[0]?.type === "file_search",
   };
 
   const theme = useTheme();
@@ -44,12 +54,21 @@ const FileInputMenu = ({
     >
       <MenuList>
         <MenuItem
-          onClick={addFilesDialogOpen}
+          onClick={() => openDialog(true)}
+          disabled={hasAndIsFileSearch.has && !hasAndIsFileSearch.isFileSearch}
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             paddingY: 0.5,
+            opacity:
+              hasAndIsFileSearch.has && !hasAndIsFileSearch.isFileSearch
+                ? 0.5
+                : 1,
+            pointerEvents:
+              hasAndIsFileSearch.has && !hasAndIsFileSearch.isFileSearch
+                ? "none"
+                : "auto",
           }}
         >
           <ListItemText
@@ -73,12 +92,21 @@ const FileInputMenu = ({
         </MenuItem>
         <Divider sx={{ marginX: 2 }} />
         <MenuItem
-          onClick={() => {}}
+          onClick={() => openDialog(false)}
+          disabled={hasAndIsFileSearch.has && hasAndIsFileSearch.isFileSearch}
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             paddingY: 0.5,
+            opacity:
+              hasAndIsFileSearch.has && hasAndIsFileSearch.isFileSearch
+                ? 0.5
+                : 1,
+            pointerEvents:
+              hasAndIsFileSearch.has && hasAndIsFileSearch.isFileSearch
+                ? "none"
+                : "auto",
           }}
         >
           <ListItemText
@@ -102,13 +130,14 @@ const FileInputMenu = ({
         </MenuItem>
       </MenuList>
       {/* File Add Dialog */}
-      <FileSearchAddDialog
+      <FileAddDialog
         openDialog={addFilesOpen}
-        handleClose={addFilesDialogClose}
+        handleClose={closeDialog}
         closeMenu={closeMenu}
         handleAttach={handleAttach}
         uploadedFiles={uploadedFiles}
         setUploadedFiles={setUploadedFiles}
+        isFileSearch={isFileSearch}
       />
     </Paper>
   );

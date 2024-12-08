@@ -17,7 +17,6 @@ import ImageInputMenu from "../run_components/ImageInputMenu";
 import CloseIcon from "@mui/icons-material/Close";
 import FileInputMenu from "../run_components/FileInputMenu";
 import { InsertDriveFileOutlined } from "@mui/icons-material";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import UploadedFileMenu from "../run_components/UploadedFileMenu";
 
 const Input = ({ createThread, createMessage }) => {

@@ -217,6 +217,7 @@ const CodeInterpreterAddDialog = ({ openDialog, handleClose, assistant }) => {
             handleFiles={handleFiles}
             handleDragOver={handleDragOver}
             handleDrop={handleDrop}
+            isAssistant={true}
           />
         ) : (
           // Uploaded Files

@@ -24,13 +24,14 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const FileSearchAddDialog = ({
+const FileAddDialog = ({
   openDialog,
   handleClose,
   closeMenu,
   handleAttach,
   uploadedFiles,
   setUploadedFiles,
+  isFileSearch,
 }) => {
   const theme = useTheme();
 
@@ -62,7 +63,12 @@ const FileSearchAddDialog = ({
       // Initially in 'loading' status
       setUploadedFiles((prevFiles) => [
         ...prevFiles,
-        { id, file, status: "loading" },
+        {
+          id,
+          file,
+          status: "loading",
+          type: isFileSearch ? "file_search" : "code_interpreter",
+        },
       ]);
 
       // Prepare form data
@@ -122,7 +128,7 @@ const FileSearchAddDialog = ({
           uploadedFiles.length
         ) {
           toast.info(
-            "Files not yet enabled for retrieval.\n Make sure to attach them to a vector store."
+            "Files not yet enabled for retrieval.\n Make sure to attach them to the thread."
           );
         }
         handleClose();
@@ -148,7 +154,9 @@ const FileSearchAddDialog = ({
             fontSize: "1.1rem",
           }}
         >
-          Attach files to file search
+          {isFileSearch
+            ? "Attach files to file search"
+            : "Attach files to code interpreter"}
         </Typography>
       </DialogTitle>
       <DialogContent
@@ -167,6 +175,7 @@ const FileSearchAddDialog = ({
             handleFiles={handleFiles}
             handleDragOver={handleDragOver}
             handleDrop={handleDrop}
+            isAssistant={false}
           />
         ) : (
           // Uploaded Files
@@ -239,7 +248,10 @@ const FileSearchAddDialog = ({
           </Button>
           <Button
             onClick={(e) => {
-              handleAttach(e, "file_search");
+              handleAttach(
+                e,
+                isFileSearch ? "file_search" : "code_interpreter"
+              );
               handleClose();
               closeMenu();
             }}
@@ -265,4 +277,4 @@ const FileSearchAddDialog = ({
   );
 };
 
-export default FileSearchAddDialog;
+export default FileAddDialog;

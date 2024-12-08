@@ -8,6 +8,7 @@ const DragFilesContent = ({
   handleDrop,
   isMobile,
   isTablet,
+  isAssistant
 }) => {
   const theme = useTheme();
   const fileInputRef = useRef(null);
@@ -81,7 +82,7 @@ const DragFilesContent = ({
           fontSize: "0.8rem",
         }}
       >
-        Information in attached files will be available to this assistant.
+        Information in attached files will be available to this {isAssistant ? "assistant" : "thread"}.
       </Typography>
       <Link
         href="https://platform.openai.com/docs/assistants/tools/file-search"

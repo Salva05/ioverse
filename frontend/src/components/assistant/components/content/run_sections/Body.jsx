@@ -45,6 +45,7 @@ const Body = ({ messages }) => {
             key={message.id}
             who={message.role}
             content={message.content}
+            attachments={message?.attachments || []}
           />
         ))
       )}

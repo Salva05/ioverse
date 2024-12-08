@@ -5,12 +5,14 @@ import aiIcon from "../../../../../assets/ai.png";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 import { AuthContext } from "../../../../../contexts/AuthContext";
 import ImageRenderer from "./ImageRenderer";
-import { fileImage } from "../../../../../api/assistant";
+import FileRenderer from "./FileRenderer";
 
-const Message = ({ who, content }) => {
+const Message = ({ who, content, attachments }) => {
   const { isSmallScreen } = useContext(DrawerContext);
   const { assistant } = useAssistantContext();
   const { user } = useContext(AuthContext);
+
+  const { files } = useAssistantContext();
 
   const isUser = who !== "assistant";
 
@@ -55,21 +57,32 @@ const Message = ({ who, content }) => {
     } else if (Array.isArray(content)) {
       // If content is an array, iterate and render each part
       return content.map((part, index) => {
+        if (part.type === "text") {
+          return (
+            <Typography
+              key={index}
+              sx={{
+                fontFamily: "Montserrat, serif",
+                fontSize: isSmallScreen ? "0.9rem" : "1rem",
+                textAlign: isUser ? "right" : "left",
+              }}
+            >
+              {part.text.value}
+            </Typography>
+          );
+        }
+        return null;
+      });
+    } else {
+      return null;
+    }
+  };
+
+  // Function to render media content (images)
+  const renderMediaContent = (content) => {
+    if (Array.isArray(content)) {
+      return content.map((part, index) => {
         switch (part.type) {
-          case "text":
-            // Extract the 'value' from the 'text' object
-            return (
-              <Typography
-                key={index}
-                sx={{
-                  fontFamily: "Montserrat, serif",
-                  fontSize: isSmallScreen ? "0.9rem" : "1rem",
-                  textAlign: isUser ? "right" : "left",
-                }}
-              >
-                {part.text.value}
-              </Typography>
-            );
           case "image_file":
             return (
               <ImageRenderer
@@ -94,9 +107,27 @@ const Message = ({ who, content }) => {
             return null;
         }
       });
-    } else {
-      return null;
     }
+    return null;
+  };
+
+  // Function to render attachments
+  const renderAttachments = () => {
+    return attachments.map((attachment, index) => {
+      const matchedFile = files.find((file) => file.id === attachment.file_id);
+      const fileName = matchedFile?.filename || attachment.file_id;
+
+      return (
+        <FileRenderer
+          key={index}
+          fileId={attachment.file_id}
+          fileName={fileName}
+          isUser={isUser}
+          isDeleted={!matchedFile}
+          toolType={attachment.tools[0].type}
+        />
+      );
+    });
   };
 
   return (
@@ -140,6 +171,17 @@ const Message = ({ who, content }) => {
           borderColor: isUser ? "primary.main" : "secondary.main",
         }}
       >
+        {renderAttachments()}
+        {/* Needed to align images vertically at the start */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: isUser ? "flex-end" : "flex-start",
+          }}
+        >
+          {renderMediaContent(content)}
+        </Box>
         {renderContent(content)}
       </Box>
     </Box>
