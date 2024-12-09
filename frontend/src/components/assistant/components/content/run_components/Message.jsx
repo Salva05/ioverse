@@ -1,11 +1,12 @@
-import { Avatar, Box, Typography, Paper } from "@mui/material";
-import React, { useContext } from "react";
+import { Avatar, Box, Typography } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import aiIcon from "../../../../../assets/ai.png";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 import { AuthContext } from "../../../../../contexts/AuthContext";
 import ImageRenderer from "./ImageRenderer";
 import FileRenderer from "./FileRenderer";
+import { useWebSocket } from "../../../../../contexts/WebSocketContext";
 
 const Message = ({ who, content, attachments }) => {
   const { isSmallScreen } = useContext(DrawerContext);
@@ -15,6 +16,27 @@ const Message = ({ who, content, attachments }) => {
   const { files } = useAssistantContext();
 
   const isUser = who !== "assistant";
+
+  // WebSocket Streaming Callback function Registerers
+  const { addMessageListener, removeMessageListener } = useWebSocket();
+
+  // State to hold incoming messages
+  const [streamedMessages, setStreamedMessages] = useState([]);
+
+  // Handler for incoming WebSocket messages
+  const handleIncomingMessage = (message) => {
+    setStreamedMessages((prevMessages) => [...prevMessages, message]);
+  };
+
+  useEffect(() => {
+    // Register the message handler when the component mounts
+    addMessageListener(handleIncomingMessage);
+
+    // Cleanup
+    return () => {
+      removeMessageListener(handleIncomingMessage);
+    };
+  }, []);
 
   const getAvatar = () => {
     if (isUser) {

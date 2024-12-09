@@ -4,6 +4,7 @@ import Message from "../run_components/Message";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
+import { useWebSocket } from "../../../../../contexts/WebSocketContext";
 
 const Body = ({ messages }) => {
   const { isSmallScreen } = useContext(DrawerContext);
@@ -13,6 +14,7 @@ const Body = ({ messages }) => {
   const cachedMessages = queryClient.getQueryData(["messages", thread?.id]);
   const isFetching = useIsFetching(["messages", thread?.id]);
 
+  const { connectionStatus } = useWebSocket();
   return (
     <Box
       sx={{

@@ -4,9 +4,12 @@ import { useCreateFile } from "../useCreateFile";
 import { v4 as uuidv4 } from "uuid";
 import { useDeleteFile } from "../useDeleteFile";
 import { toast } from "react-toastify";
+import { useWebSocket } from "../../../contexts/WebSocketContext";
 
 const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
-  const { thread, setThread } = useAssistantContext();
+  const { sendMessage } = useWebSocket();
+  
+  const { thread, setThread, assistant } = useAssistantContext();
   const { mutateAsync: createFile } = useCreateFile();
   const { mutate: deleteFile } = useDeleteFile();
 
@@ -56,7 +59,11 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
   };
 
   const handleRun = () => {
-    console.log("You wrote: " + message);
+    const data = {
+      thread_id: thread.id,
+      assistant_id: assistant.id,
+    };
+    sendMessage(data);
   };
 
   const handleChange = (e) => {

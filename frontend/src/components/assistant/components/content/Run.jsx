@@ -8,6 +8,7 @@ import { useMessagesData } from "../../../../hooks/assistant/useMessagesData";
 import selectMostRecent from "../../../../utils/selectMostRecent";
 import { useCreateThread } from "../../../../hooks/assistant/useCreateThread";
 import { useCreateMessage } from "../../../../hooks/assistant/useCreateMessage";
+import { WebSocketProvider } from "../../../../contexts/WebSocketContext";
 const Run = () => {
   const { thread, threads, setThread } = useAssistantContext();
   const { mutateAsync: createThread, isPending: isThreadPending } =
@@ -37,22 +38,23 @@ const Run = () => {
   }, [rawMessages]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-      }}
-    >
-      {/* Thread Options */}
-      <Options isThreadPending={isThreadPending} />
-      {/* Main Body */}
-      <Body
-        messages={sortedMessages}/>
-      {/* Input */}
-      <Input createThread={createThread} createMessage={createMessage} />
-    </Box>
+    <WebSocketProvider>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        {/* Thread Options */}
+        <Options isThreadPending={isThreadPending} />
+        {/* Main Body */}
+        <Body messages={sortedMessages} />
+        {/* Input */}
+        <Input createThread={createThread} createMessage={createMessage} />
+      </Box>
+    </WebSocketProvider>
   );
 };
 

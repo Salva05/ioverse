@@ -33,7 +33,7 @@ const Input = ({ createThread, createMessage }) => {
       fileId: id,
     });
   };
-  
+
   const handleUploadedFileMenuClose = () => {
     setUploadedFileMenu({
       anchorEl: null,
@@ -86,7 +86,8 @@ const Input = ({ createThread, createMessage }) => {
     uploadedFiles,
     setUploadedFiles,
     handleDeleteFile,
-    handleChangeFileType
+    handleChangeFileType,
+    handleRun,
   } = useInputLogic(createThread, createMessage, handleImageMenuClose);
 
   return (
@@ -278,7 +279,9 @@ const Input = ({ createThread, createMessage }) => {
                 }}
               >
                 <Box
-                  onClick={(event) => handleUploadedFileMenuOpen(event, file.id)}
+                  onClick={(event) =>
+                    handleUploadedFileMenuOpen(event, file.id)
+                  }
                   sx={{
                     display: "flex",
                     flexDirection: "row",
@@ -321,7 +324,10 @@ const Input = ({ createThread, createMessage }) => {
                 </Box>
                 {/* Menu for individual file */}
                 <Popover
-                  open={uploadedFileMenu.fileId === file.id && Boolean(uploadedFileMenu.anchorEl)}
+                  open={
+                    uploadedFileMenu.fileId === file.id &&
+                    Boolean(uploadedFileMenu.anchorEl)
+                  }
                   anchorEl={uploadedFileMenu.anchorEl}
                   onClose={handleUploadedFileMenuClose}
                   anchorOrigin={{
@@ -422,6 +428,7 @@ const Input = ({ createThread, createMessage }) => {
             </IconButton>
 
             <Button
+              onClick={handleRun}
               variant="contained"
               color="success"
               sx={{
