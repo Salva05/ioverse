@@ -7,8 +7,13 @@ import { AuthContext } from "../../../../../contexts/AuthContext";
 import ImageRenderer from "./ImageRenderer";
 import FileRenderer from "./FileRenderer";
 import { useWebSocket } from "../../../../../contexts/WebSocketContext";
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "prismjs/themes/prism-tomorrow.css";
 
-const Message = ({ who, content, attachments }) => {
+const Message = ({ who, id, content, attachments }) => {
   const { isSmallScreen } = useContext(DrawerContext);
   const { assistant } = useAssistantContext();
   const { user } = useContext(AuthContext);
@@ -17,15 +22,22 @@ const Message = ({ who, content, attachments }) => {
 
   const isUser = who !== "assistant";
 
-  // WebSocket Streaming Callback function Registerers
-  const { addMessageListener, removeMessageListener } = useWebSocket();
+  // WebSocket Streaming callback registerer
+  const {
+    addMessageListener,
+    removeMessageListener,
+    hasFinished,
+    streamMessageId,
+  } = useWebSocket();
 
   // State to hold incoming messages
-  const [streamedMessages, setStreamedMessages] = useState([]);
+  const [streamedChunks, setStreamedChunks] = useState("");
 
   // Handler for incoming WebSocket messages
   const handleIncomingMessage = (message) => {
-    setStreamedMessages((prevMessages) => [...prevMessages, message]);
+    if (message.type === "chunk") {
+      setStreamedChunks((prevMessages) => prevMessages + message.message);
+    }
   };
 
   useEffect(() => {
@@ -37,6 +49,13 @@ const Message = ({ who, content, attachments }) => {
       removeMessageListener(handleIncomingMessage);
     };
   }, []);
+
+  // Listen for hasFinished, empty the streamed messages then.
+  // This operation is safe since the message will be substituted with the updated
+  // cached query data at the stream completion
+  useEffect(() => {
+    if (hasFinished) setStreamedChunks("");
+  }, [hasFinished]);
 
   const getAvatar = () => {
     if (isUser) {
@@ -61,36 +80,75 @@ const Message = ({ who, content, attachments }) => {
     }
   };
 
+  // Function to render streams of text
+  const renderStream = () => {
+    return (
+      <ReactMarkdown
+        children={streamedChunks}
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+        components={{
+          p: ({ node, ...props }) => (
+            <Typography
+              sx={{
+                fontFamily: "Montserrat, serif",
+                fontSize: isSmallScreen ? "0.9rem" : "1rem",
+                textAlign: isUser ? "right" : "left",
+              }}
+              {...props}
+            />
+          ),
+        }}
+      />
+    );
+  };
+
   // Function to render content based on its type
   const renderContent = (content) => {
     if (typeof content === "string") {
       // If content is a simple string, render it directly
       return (
-        <Typography
-          sx={{
-            fontFamily: "Montserrat, serif",
-            fontSize: isSmallScreen ? "0.9rem" : "1rem",
-            textAlign: isUser ? "right" : "left",
+        <ReactMarkdown
+          children={content}
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+          components={{
+            p: ({ node, ...props }) => (
+              <Typography
+                sx={{
+                  fontFamily: "Montserrat, serif",
+                  fontSize: isSmallScreen ? "0.9rem" : "1rem",
+                  textAlign: isUser ? "right" : "left",
+                }}
+                {...props}
+              />
+            ),
           }}
-        >
-          {content}
-        </Typography>
+        />
       );
     } else if (Array.isArray(content)) {
       // If content is an array, iterate and render each part
       return content.map((part, index) => {
         if (part.type === "text") {
           return (
-            <Typography
+            <ReactMarkdown
               key={index}
-              sx={{
-                fontFamily: "Montserrat, serif",
-                fontSize: isSmallScreen ? "0.9rem" : "1rem",
-                textAlign: isUser ? "right" : "left",
+              children={part.text.value}
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+              components={{
+                p: ({ node, ...props }) => (
+                  <Typography
+                    sx={{
+                      fontFamily: "Montserrat, serif",
+                      fontSize: isSmallScreen ? "0.9rem" : "1rem",
+                      textAlign: isUser ? "right" : "left",
+                    }}
+                    {...props}
+                  />
+                ),
               }}
-            >
-              {part.text.value}
-            </Typography>
+            />
           );
         }
         return null;
@@ -204,7 +262,9 @@ const Message = ({ who, content, attachments }) => {
         >
           {renderMediaContent(content)}
         </Box>
-        {renderContent(content)}
+        {id === streamMessageId && !hasFinished
+          ? renderStream()
+          : renderContent(content)}
       </Box>
     </Box>
   );

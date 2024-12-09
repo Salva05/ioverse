@@ -1,10 +1,9 @@
 import { Box, CircularProgress } from "@mui/material";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import Message from "../run_components/Message";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
-import { useWebSocket } from "../../../../../contexts/WebSocketContext";
 
 const Body = ({ messages }) => {
   const { isSmallScreen } = useContext(DrawerContext);
@@ -14,7 +13,14 @@ const Body = ({ messages }) => {
   const cachedMessages = queryClient.getQueryData(["messages", thread?.id]);
   const isFetching = useIsFetching(["messages", thread?.id]);
 
-  const { connectionStatus } = useWebSocket();
+  // For scroll
+  const messageEndRef = useRef(null);
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   return (
     <Box
       sx={{
@@ -45,12 +51,14 @@ const Body = ({ messages }) => {
         (messages || []).map((message) => (
           <Message
             key={message.id}
+            id={message.id} // key prop is reserved prop thus not accessible
             who={message.role}
             content={message.content}
             attachments={message?.attachments || []}
           />
         ))
       )}
+      <div ref={messageEndRef} />
     </Box>
   );
 };

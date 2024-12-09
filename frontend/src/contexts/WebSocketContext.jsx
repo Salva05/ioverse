@@ -9,10 +9,15 @@ import { AuthContext } from "./AuthContext";
 import { getAccessToken } from "../utils/getAccessToken";
 import { toast } from "react-toastify";
 import config from "../config";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
+  const queryClient = useQueryClient();
+  const [hasFinished, setHasFinished] = useState(false); // to signal the component the end of the stream
+  const [streamMessageId, setStreamMessageId] = useState(""); // only the corresponding message in Message.jsx will apply the conditional streaming renders
+
   const { isAuthenticated } = useContext(AuthContext);
   const ws = useRef(null);
   const [connectionStatus, setConnectionStatus] = useState("DISCONNECTED");
@@ -23,7 +28,7 @@ export const WebSocketProvider = ({ children }) => {
 
   // Ref to hold message listeners
   const messageListeners = useRef([]);
-  
+
   const connect = async () => {
     if (!isAuthenticated) return;
 
@@ -89,10 +94,19 @@ export const WebSocketProvider = ({ children }) => {
     // Message routing based on type
     switch (message.type) {
       case "start":
-        console.log("Assistant started generating text.");
+        console.log("STREAM STARTED >>>", message.data);
+        setStreamMessageId(message.data.id);
+        setHasFinished(false);
+
+        // Insert the incomplete message to the cached data to have an immediate UI update
+        queryClient.setQueryData(
+          ["messages", message.data.thread_id],
+          (oldData) => [...(oldData || []), message.data]
+        );
+
         break;
       case "chunk":
-        console.log("In chunk switch case: " + message.message);
+        // For future processing
         break;
       case "tool_call":
         console.log(`Tool call: ${message.message}`);
@@ -102,6 +116,20 @@ export const WebSocketProvider = ({ children }) => {
         break;
       case "code_output":
         console.log(`Code Output: ${message.message}`);
+        break;
+      case "end":
+        // Update the cached query data with completed message
+        console.log("STREAM ENDED >>>", message.data);
+        setHasFinished(true);
+        setStreamMessageId("");
+        queryClient.setQueryData(
+          ["messages", message.data[0].thread_id],
+          (oldData) =>
+            (oldData || []).map((entity) =>
+              entity.id === message.data[0].id ? message.data[0] : entity
+            )
+        );
+
         break;
       case "error":
         console.error(`Error from server: ${message.message}`);
@@ -155,6 +183,8 @@ export const WebSocketProvider = ({ children }) => {
     sendMessage,
     addMessageListener,
     removeMessageListener,
+    hasFinished,
+    streamMessageId,
   };
 
   return (
