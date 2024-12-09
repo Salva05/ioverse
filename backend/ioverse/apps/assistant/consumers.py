@@ -1,10 +1,9 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from assistant_modules.run.run import Run
-from assistant_modules.run.stream_handler import EventHandler
+from assistant_modules.run.stream_handler import AsyncEventHandler
 from django.contrib.auth import get_user_model
 from asgiref.sync import sync_to_async
-import asyncio
 
 User = get_user_model()
 
@@ -46,12 +45,9 @@ class OpenAIStreamingConsumer(AsyncWebsocketConsumer):
 
         # Run class for API calls and API key
         run = Run(api_key=api_key)
-        
-        # The current event loop
-        loop = asyncio.get_running_loop()
 
         # EventHandler to manage the stream
-        event_handler = EventHandler(self.send, loop)
+        event_handler = AsyncEventHandler(self.send)
 
         kwargs = {
             'thread_id': thread_id,
@@ -59,9 +55,21 @@ class OpenAIStreamingConsumer(AsyncWebsocketConsumer):
         }
 
         try:
-            await sync_to_async(run.stream)(event_handler=event_handler, **kwargs)
+            await run.stream(event_handler=event_handler, **kwargs)
+            
+            # Retrieve the final messages after the stream ends
+            messages = await event_handler.get_final_messages()
+
+            # Serialize and send messages
+            serialized_messages = [message.model_dump() for message in messages]
+            
+            # Send the final generated messages and signal end of generation
+            await self.send(text_data=json.dumps({
+                "type": "end",
+                "data": serialized_messages
+            }))
         except Exception as e:
-            await self.send(text_data=json.dumps({"error": str(e)}))
+            await self.send(text_data=json.dumps({"type": "error", "message": str(e)}))
 
     @sync_to_async
     def get_user_api_key(self, user):
