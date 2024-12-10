@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from file_modules.services import FileService
 from file_modules.parameters import FileUploadParams
 from apps.assistant.models import File as DjangoFile
@@ -25,8 +25,11 @@ class FileIntegrationService:
             image_url = data.pop('image_url', None)
             
             # Pass the file as a (filename, file_object) tuple
-            if isinstance(data['file'], InMemoryUploadedFile):
-                data['file'] = (data['file'].name, data['file'])
+            uploaded_file = data['file']
+            if isinstance(uploaded_file, InMemoryUploadedFile) or isinstance(uploaded_file, TemporaryUploadedFile):
+                # Convert TemporaryUploadedFile or InMemoryUploadedFile to a tuple
+                uploaded_file.seek(0)  # Ensure the file pointer is at the start
+                data['file'] = (uploaded_file.name, uploaded_file.read())  # Read into memory as bytes
                             
             # Validate and transform data using Pydantic
             params = FileUploadParams(**data)
@@ -44,7 +47,7 @@ class FileIntegrationService:
             )
             
             try:
-                if image_file and isinstance(image_file, InMemoryUploadedFile):
+                if image_file and isinstance(image_file, (InMemoryUploadedFile, TemporaryUploadedFile)):
                     django_file.image_file = image_file
                 if image_url:
                     django_file.image_url = image_url
