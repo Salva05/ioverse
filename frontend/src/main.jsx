@@ -49,7 +49,11 @@ const router = createBrowserRouter(
         },
         {
           path: "assistant",
-          element: <Assistant />,
+          element: (
+            <ProtectedRoute>
+              <Assistant />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "login",

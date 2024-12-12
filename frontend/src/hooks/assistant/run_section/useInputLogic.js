@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAssistantContext } from "../../../contexts/AssistantContext";
 import { useCreateFile } from "../useCreateFile";
 import { v4 as uuidv4 } from "uuid";
@@ -7,8 +7,9 @@ import { toast } from "react-toastify";
 import { useWebSocket } from "../../../contexts/WebSocketContext";
 
 const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
-  const { sendMessage } = useWebSocket();
-  
+  const { sendMessage, streamMessageId, toolCall, hasFinished } =
+    useWebSocket();
+
   const { thread, setThread, assistant } = useAssistantContext();
   const { mutateAsync: createFile } = useCreateFile();
   const { mutate: deleteFile } = useDeleteFile();
@@ -24,6 +25,9 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
   // For image attachment
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+
+  const [isRunning, setIsRunning] = useState(false);
+  const [isReasoning, setIsReasoning] = useState(false);
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -59,12 +63,32 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
   };
 
   const handleRun = () => {
+    setIsRunning(true);
+    setIsReasoning(true);
     const data = {
       thread_id: thread.id,
       assistant_id: assistant.id,
     };
     sendMessage(data);
   };
+
+  useEffect(() => {
+    if (hasFinished) {
+      setIsReasoning(false);
+    } else if (streamMessageId && streamMessageId.length > 0) {
+      // First chunk arrived
+      setIsReasoning(false);
+    } else {
+      setIsReasoning(true);
+    }
+  }, [hasFinished, streamMessageId]);
+
+  // When the stream finishes
+  useEffect(() => {
+    if (hasFinished) {
+      setIsRunning(false);
+    }
+  }, [hasFinished]);
 
   const handleChange = (e) => {
     setMessage(e.target.value);
@@ -317,6 +341,9 @@ const useInputLogic = (createThread, createMessage, handleImageMenuClose) => {
     setUploadedFiles,
     handleDeleteFile,
     handleChangeFileType,
+    isRunning,
+    isReasoning,
+    toolCall,
   };
 };
 

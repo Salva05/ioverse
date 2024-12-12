@@ -18,9 +18,27 @@ import CloseIcon from "@mui/icons-material/Close";
 import FileInputMenu from "../run_components/FileInputMenu";
 import { InsertDriveFileOutlined } from "@mui/icons-material";
 import UploadedFileMenu from "../run_components/UploadedFileMenu";
+import { keyframes } from "@mui/system";
+import { alpha } from "@mui/material/styles";
+
+const waveAnimation = keyframes`
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
 
 const Input = ({ createThread, createMessage }) => {
   const theme = useTheme();
+
+  const gradient = `linear-gradient(
+    to right,
+    ${alpha(theme.palette.text.primary, 0)} 0%,
+    ${alpha(theme.palette.text.primary, 0.5)} 50%,
+    ${alpha(theme.palette.text.primary, 0)} 100%
+  )`;
 
   // Menu for file attached
   const [uploadedFileMenu, setUploadedFileMenu] = useState({
@@ -88,6 +106,9 @@ const Input = ({ createThread, createMessage }) => {
     handleDeleteFile,
     handleChangeFileType,
     handleRun,
+    isRunning,
+    isReasoning,
+    toolCall,
   } = useInputLogic(createThread, createMessage, handleImageMenuClose);
 
   return (
@@ -106,6 +127,7 @@ const Input = ({ createThread, createMessage }) => {
       <Box
         onClick={handleBoxClick}
         sx={{
+          position: "relative",
           cursor: "text",
           width: "100%",
           maxWidth: "700px",
@@ -128,6 +150,27 @@ const Input = ({ createThread, createMessage }) => {
         }}
         onBlur={handleFocusOut}
       >
+        {/* UI Feedback while waiting first stream chunk */}
+        {(isReasoning || (toolCall && toolCall.length > 0)) && (
+          <Typography
+            sx={{
+              position: "absolute",
+              top: -23,
+              left: 5,
+              fontFamily: "'Montserrat', serif",
+              fontSize: "0.95rem",
+              color: "transparent",
+              background: gradient,
+              backgroundSize: "200% 100%",
+              backgroundClip: "text",
+              animation: `${waveAnimation} 3s linear infinite`,
+            }}
+          >
+            {toolCall && toolCall.length > 0
+              ? "Processing tool call..."
+              : "Reasoning..."}
+          </Typography>
+        )}
         {/* Preview of Images */}
         {previewImages.length > 0 && (
           <Box
@@ -429,6 +472,7 @@ const Input = ({ createThread, createMessage }) => {
 
             <Button
               onClick={handleRun}
+              disabled={isRunning}
               variant="contained"
               color="success"
               sx={{

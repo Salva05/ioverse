@@ -134,6 +134,14 @@ export const files = {
     );
     return response.data;
   },
+
+  // GET - (Retrieve)
+  retrieve: async (id) => {
+    const response = await axiosInstance.get(
+      `/assistant/file/${id}/retrieve/`
+    );
+    return response.data;
+  },
 };
 
 // Service for Vector Store File-related API calls
@@ -210,13 +218,20 @@ export const messages = {
   },
 };
 
-// Service for File images-related API calls
-export const fileImage = {
+// Service for File content-related API calls
+export const fileContent = {
   // GET
-  get: async (id) => {
+  getImage: async (id) => {
     const response = await axiosInstance.get(
       `/assistant/file_image/${id}/retrieve/`
     );
     return response.data;
   },
+  // GET 
+  getContent: async (id) => {
+    const response = await axiosInstance.get(
+      `/assistant/file_content/${id}/retrieve/`
+    );
+    return response.data;
+  }
 };

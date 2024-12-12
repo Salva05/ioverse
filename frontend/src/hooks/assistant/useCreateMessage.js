@@ -21,7 +21,7 @@ export const useCreateMessage = () => {
         role: message.role,
         content: message.content,
         created_at: Math.floor(Date.now() / 1000),
-        attachments: [],
+        attachments: message.attachments || [],
       };
 
       // Optimistically update the cache

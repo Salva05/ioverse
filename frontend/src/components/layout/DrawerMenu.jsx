@@ -61,7 +61,7 @@ const pages = [
     display: "Assistant",
     path: "/assistant",
     icon: <AssistantOutlinedIcon />,
-    protected: false,
+    protected: true,
   },
 ];
 
@@ -171,6 +171,7 @@ export default function DrawerMenu({ handleDrawerClose }) {
 
   // Handle Navigation Item Click
   const handlePageClick = (page) => {
+    handleDrawerClose();
     if (page.path === "/chat") {
       if (isAuthenticated) {
         refetch();
@@ -238,8 +239,16 @@ export default function DrawerMenu({ handleDrawerClose }) {
                 />
                 {!isAuthenticated && page.protected && (
                   <Tooltip title="Login required">
-                    <IconButton>
-                      <VpnKeyIcon fontSize="small" />
+                    <IconButton
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: "transparent",
+                        },
+                      }}
+                    >
+                      <VpnKeyIcon
+                        sx={{ fontSize: 18, color: "text.secondary" }}
+                      />
                     </IconButton>
                   </Tooltip>
                 )}

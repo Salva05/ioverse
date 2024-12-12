@@ -6,56 +6,98 @@ import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 import { AuthContext } from "../../../../../contexts/AuthContext";
 import ImageRenderer from "./ImageRenderer";
 import FileRenderer from "./FileRenderer";
-import { useWebSocket } from "../../../../../contexts/WebSocketContext";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "prismjs/themes/prism-tomorrow.css";
+import rehypeRaw from "rehype-raw";
+import { fileContent } from "../../../../../api/assistant";
 
-const Message = ({ who, id, content, attachments }) => {
+const Message = ({
+  who,
+  id,
+  content,
+  attachments,
+  hasFinished,
+  streamMessageId,
+  streamedChunks,
+}) => {
   const { isSmallScreen } = useContext(DrawerContext);
   const { assistant } = useAssistantContext();
   const { user } = useContext(AuthContext);
 
   const { files } = useAssistantContext();
-
+  
   const isUser = who !== "assistant";
 
-  // WebSocket Streaming callback registerer
-  const {
-    addMessageListener,
-    removeMessageListener,
-    hasFinished,
-    streamMessageId,
-  } = useWebSocket();
+  const [annotationUrls, setAnnotationUrls] = useState({});
 
-  // State to hold incoming messages
-  const [streamedChunks, setStreamedChunks] = useState("");
-
-  // Handler for incoming WebSocket messages
-  const handleIncomingMessage = (message) => {
-    if (message.type === "chunk") {
-      setStreamedChunks((prevMessages) => prevMessages + message.message);
+  // Fetch URLs for annotations of type "file_path"
+  const fetchAnnotationUrls = async (annotations) => {
+    const urlMapping = {};
+    for (const annotation of annotations) {
+      if (annotation.type === "file_path" && annotation.file_path?.file_id) {
+        try {
+          const response = await fileContent.getContent(
+            annotation.file_path.file_id
+          );
+          urlMapping[annotation.file_path.file_id] = {
+            url: response?.file_content_url || "#",
+            filename: response?.filename || "download",
+          };
+        } catch (error) {
+          console.error(
+            `Failed to fetch file content for file_id ${annotation.file_path.file_id}`,
+            error
+          );
+          urlMapping[annotation.file_path.file_id] = {
+            url: "#",
+            filename: "unavailable",
+          };
+        }
+      }
     }
+    setAnnotationUrls((prev) => ({ ...prev, ...urlMapping }));
+  };
+
+  // Helper function to convert text with annotations to links
+  const convertToLink = (text, annotations) => {
+    if (!annotations) return text;
+
+    // Process only annotations with type "file_path"
+    const fileAnnotations = annotations.filter(
+      (annotation) => annotation.type === "file_path"
+    );
+
+    return text.replace(
+      /\[([^\]]+)\]\(sandbox:[^\)]+\)/g,
+      (match, linkText) => {
+        // Find the corresponding annotation based on the text content
+        const annotation = fileAnnotations.find((a) => match.includes(a.text));
+        if (annotation && annotation.file_path?.file_id) {
+          const fileData = annotationUrls[annotation.file_path.file_id];
+          if (fileData) {
+            const { url, filename } = fileData;
+            return `<a href="${url}" download="${filename}">${linkText}</a>`;
+          }
+        }
+        return linkText; // Return plain text if no matching URL is found
+      }
+    );
   };
 
   useEffect(() => {
-    // Register the message handler when the component mounts
-    addMessageListener(handleIncomingMessage);
+    if (Array.isArray(content)) {
+      const annotations = content
+        .filter((part) => part.type === "text" && part.text?.annotations)
+        .flatMap((part) => part.text.annotations);
 
-    // Cleanup
-    return () => {
-      removeMessageListener(handleIncomingMessage);
-    };
-  }, []);
-
-  // Listen for hasFinished, empty the streamed messages then.
-  // This operation is safe since the message will be substituted with the updated
-  // cached query data at the stream completion
-  useEffect(() => {
-    if (hasFinished) setStreamedChunks("");
-  }, [hasFinished]);
+      if (annotations.length > 0) {
+        fetchAnnotationUrls(annotations);
+      }
+    }
+  }, [content]);
 
   const getAvatar = () => {
     if (isUser) {
@@ -105,6 +147,12 @@ const Message = ({ who, id, content, attachments }) => {
 
   // Function to render content based on its type
   const renderContent = (content) => {
+    // Tags to be allowed for the render
+    const customSanitize = {
+      tagNames: ["a", "p", "strong", "em", "code", "ul", "ol", "li"],
+      attributeNames: ["href", "download", "src"],
+    };
+
     if (typeof content === "string") {
       // If content is a simple string, render it directly
       return (
@@ -130,12 +178,22 @@ const Message = ({ who, id, content, attachments }) => {
       // If content is an array, iterate and render each part
       return content.map((part, index) => {
         if (part.type === "text") {
+          const initialText = part.text.value;
+          const processedText = convertToLink(
+            initialText,
+            part.text?.annotations
+          );
+
           return (
             <ReactMarkdown
               key={index}
-              children={part.text.value}
+              children={processedText}
               remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+              rehypePlugins={[
+                rehypeSanitize(customSanitize),
+                rehypeHighlight,
+                rehypeRaw,
+              ]}
               components={{
                 p: ({ node, ...props }) => (
                   <Typography
@@ -143,6 +201,22 @@ const Message = ({ who, id, content, attachments }) => {
                       fontFamily: "Montserrat, serif",
                       fontSize: isSmallScreen ? "0.9rem" : "1rem",
                       textAlign: isUser ? "right" : "left",
+                    }}
+                    {...props}
+                  />
+                ),
+                a: ({ node, ...props }) => (
+                  <Typography
+                    component="a"
+                    sx={{
+                      color: "primary.main",
+                      textDecoration: "none",
+                      fontWeight: "medium",
+                      fontFamily: "'Montserrat', serif",
+                      "&:hover": {
+                        color: "secondary.main",
+                        textDecoration: "none",
+                      },
                     }}
                     {...props}
                   />

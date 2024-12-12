@@ -35,21 +35,23 @@ const FileRenderer = ({ fileId, fileName, isUser, toolType, isDeleted }) => {
         marginBottom: 1,
       }}
     >
-      <Typography
-        onClick={isDeleted ? undefined : handleOpen}
-        className="hover-text"
-        sx={{
-          cursor: isDeleted ? "default" : "pointer",
-          fontFamily: "'Montserrat', serif",
-          fontSize: "0.85rem",
-          color: isDeleted ? theme.palette.error.light : "text.secondary",
-          padding: "2px 8px",
-          borderRadius: 2,
-          transition: "background-color 0.3s, border 0.3s",
-        }}
-      >
-        {isDeleted ? "file deleted" : fileName}
-      </Typography>
+      {isUser && (
+        <Typography
+          onClick={isDeleted ? undefined : handleOpen}
+          className="hover-text"
+          sx={{
+            cursor: isDeleted ? "default" : "pointer",
+            fontFamily: "'Montserrat', serif",
+            fontSize: "0.85rem",
+            color: isDeleted ? theme.palette.error.light : "text.secondary",
+            padding: "2px 8px",
+            borderRadius: 2,
+            transition: "background-color 0.3s, border 0.3s",
+          }}
+        >
+          {isDeleted ? "file deleted" : fileName}
+        </Typography>
+      )}
       {isDeleted ? (
         <GoXCircle
           size={20}
@@ -70,6 +72,23 @@ const FileRenderer = ({ fileId, fileName, isUser, toolType, isDeleted }) => {
             minHeight: "24px",
           }}
         />
+      )}
+      {!isUser && (
+        <Typography
+          onClick={isDeleted ? undefined : handleOpen}
+          className="hover-text"
+          sx={{
+            cursor: isDeleted ? "default" : "pointer",
+            fontFamily: "'Montserrat', serif",
+            fontSize: "0.85rem",
+            color: isDeleted ? theme.palette.error.light : "text.secondary",
+            padding: "2px 8px",
+            borderRadius: 2,
+            transition: "background-color 0.3s, border 0.3s",
+          }}
+        >
+          {isDeleted ? "file deleted" : fileName}
+        </Typography>
       )}
 
       {/* File details menu */}

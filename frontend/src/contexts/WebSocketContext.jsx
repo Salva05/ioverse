@@ -10,13 +10,17 @@ import { getAccessToken } from "../utils/getAccessToken";
 import { toast } from "react-toastify";
 import config from "../config";
 import { useQueryClient } from "@tanstack/react-query";
-
+import { updateCache } from "../utils/fileGenerationUtils";
+import { useAssistantContext } from "./AssistantContext";
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
   const queryClient = useQueryClient();
-  const [hasFinished, setHasFinished] = useState(false); // to signal the component the end of the stream
+  const { files } = useAssistantContext();
+
+  const [hasFinished, setHasFinished] = useState(true); // Signals the component the end of the stream
   const [streamMessageId, setStreamMessageId] = useState(""); // only the corresponding message in Message.jsx will apply the conditional streaming renders
+  const [toolCall, setToolCall] = useState("");
 
   const { isAuthenticated } = useContext(AuthContext);
   const ws = useRef(null);
@@ -94,34 +98,75 @@ export const WebSocketProvider = ({ children }) => {
     // Message routing based on type
     switch (message.type) {
       case "start":
-        console.log("STREAM STARTED >>>", message.data);
-        setStreamMessageId(message.data.id);
+        console.log("STREAM STARTED >>>", message.message);
         setHasFinished(false);
-
-        // Insert the incomplete message to the cached data to have an immediate UI update
-        queryClient.setQueryData(
-          ["messages", message.data.thread_id],
-          (oldData) => [...(oldData || []), message.data]
-        );
-
+        setToolCall("");
         break;
       case "chunk":
         // For future processing
         break;
+      case "message_creation":
+        console.log("MESSAGE CREATED >>>", message.data);
+
+        setStreamMessageId(message.data.id);
+        setHasFinished(false);
+
+        // Add message snapshot
+        queryClient.setQueryData(
+          ["messages", message.data.thread_id],
+          (oldData) => [...(oldData || []), message.data]
+        );
+        // If any file is generated, save a temp file and it's filename inferred from annotation file_path
+        // to give instant UI feedback and then trigger a retrieval from backend to update the cache with real data
+        updateCache(message.data, files, queryClient);
+        break;
+      case "message_done":
+        console.log("MESSAGE COMPLETED >>>", message.data);
+        setStreamMessageId("");
+        setToolCall("");
+
+        // Substitute snapshot message with completed one
+        queryClient.setQueryData(
+          ["messages", message.data.thread_id],
+          (oldData) =>
+            (oldData || []).map((entity) =>
+              entity.id === message.data.id ? message.data : entity
+            )
+        );
+
+        updateCache(message.data, files, queryClient);
+        break;
       case "tool_call":
+        // For future features
         console.log(`Tool call: ${message.message}`);
+        switch (message.message) {
+          case "code_interpreter":
+            console.log("inside code_intp.");
+            setToolCall("code_interpreter");
+            break;
+        }
         break;
       case "code_input":
-        console.log(`Code Input: ${message.message}`);
+        // For future features
         break;
       case "code_output":
-        console.log(`Code Output: ${message.message}`);
+        setToolCall("");
+        console.log("Tool call completed", message);
+        break;
+      case "image_file_done":
+        console.log("IMAGE_FILE COMPLETED >>>", message.data);
+        // Update the local data with the image
+        queryClient.setQueryData(
+          ["messages", message.data.thread_id],
+          (oldData) =>
+            (oldData || []).map((entity) =>
+              entity.id === message.data.id ? message.data : entity
+            )
+        );
         break;
       case "end":
         // Update the cached query data with completed message
         console.log("STREAM ENDED >>>", message.data);
-        setHasFinished(true);
-        setStreamMessageId("");
         queryClient.setQueryData(
           ["messages", message.data[0].thread_id],
           (oldData) =>
@@ -129,10 +174,15 @@ export const WebSocketProvider = ({ children }) => {
               entity.id === message.data[0].id ? message.data[0] : entity
             )
         );
-
+        setHasFinished(true);
+        setStreamMessageId("");
+        setToolCall("");
         break;
       case "error":
         console.error(`Error from server: ${message.message}`);
+        setHasFinished(true);
+        setStreamMessageId("");
+        setToolCall("");
         break;
       default:
         console.warn(`Unhandled message type: ${message.type}`);
@@ -185,6 +235,7 @@ export const WebSocketProvider = ({ children }) => {
     removeMessageListener,
     hasFinished,
     streamMessageId,
+    toolCall,
   };
 
   return (
