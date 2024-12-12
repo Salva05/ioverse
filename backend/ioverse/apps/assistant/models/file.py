@@ -35,7 +35,7 @@ class File(BaseModel):
         help_text="The intended purpose of the file, with choices including 'assistants', 'fine-tune', and 'vision'."
     )
 
-    # Only when purpose=vision
+    # Only when purpose=vision or 'assistants_output'
     image_file = models.ImageField(
         upload_to='file_images/',
         verbose_name="Image File",
@@ -50,7 +50,15 @@ class File(BaseModel):
         null=True,
         blank=True
     )
-    
+    # image_file and this could be merged, but will keep distinct to keep the handling clear
+    # this is used in cases the file arrives as an assistant_output generated file whose type is not 'image_file'
+    file_content = models.FileField(
+        upload_to='uploaded_files/',
+        verbose_name="File",
+        help_text="Upload images or other files.",
+        null=True,
+        blank=True,
+    )
     def delete(self, *args, **kwargs):
         # If the image file exists, delete it
         if self.image_file and os.path.isfile(self.image_file.path):

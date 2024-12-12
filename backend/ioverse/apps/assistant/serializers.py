@@ -481,4 +481,23 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = File
-        fields = ['image_file']
+        fields = ['image_file', 'filename']
+        
+# ====================
+# File Content Serializer (file-related)
+# ====================
+class FileContentSerializer(serializers.ModelSerializer):
+    file_content_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = File
+        fields = ['file_content_url', 'filename']
+
+    def get_file_content_url(self, obj):
+        """
+        Return a fully qualified URL for the file_content field if it exists.
+        """
+        request = self.context.get('request')
+        if obj.file_content and hasattr(obj.file_content, 'url'):
+            return request.build_absolute_uri(obj.file_content.url)
+        return None

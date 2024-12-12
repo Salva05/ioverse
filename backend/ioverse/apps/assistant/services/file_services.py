@@ -77,7 +77,6 @@ class FileIntegrationService:
             # Update Django model fields
             django_file.bytes = file_pydantic.bytes
             django_file.created_at = file_pydantic.created_at
-            django_file.filename = file_pydantic.filename
             django_file.object = file_pydantic.object
             django_file.purpose = file_pydantic.purpose
             django_file.save()
@@ -134,7 +133,6 @@ class FileIntegrationService:
                             'id': file_pydantic.id,
                             'bytes': file_pydantic.bytes,
                             'created_at': file_pydantic.created_at,
-                            'filename': file_pydantic.filename,
                             'object': file_pydantic.object,
                             'purpose': file_pydantic.purpose,
                         }
@@ -159,3 +157,53 @@ class FileIntegrationService:
         except Exception as e:
             logger.error(f"Error listing files: {e}")
             raise
+    
+    def get_content(self, file_id, file_name, user):
+        """
+        Returns the content associated with a given file uploaded to OpenAI or other file services.
+        Supports image, CSV, Excel, and other file types.
+        """
+        import mimetypes
+        from django.core.files.base import ContentFile
+        from pathlib import Path
+
+        try:
+            response = self.file_service.get_content(file_id=file_id)
+
+            if hasattr(response, 'content'):
+                file_content = response.content
+            else:
+                raise ValueError("Unable to retrieve file content from the response.")
+
+            # Sanitize the file_name to prevent path traversal
+            file_name = Path(file_name).name  # Extracts only the base name
+        
+            # Guess the file type using mimetypes
+            mime_type, encoding = mimetypes.guess_type(file_name)
+            if not mime_type:
+                logger.warning(f"Could not determine MIME type for file_id={file_id}. Assuming binary.")
+                mime_type = 'application/octet-stream'
+
+            # If the file is an image, ensure the extension matches the content
+            if mime_type.startswith('image/'):
+                import imghdr
+                image_type = imghdr.what(None, h=file_content)
+                if not image_type:
+                    logger.warning(f"File content for file_id={file_id} is not a recognized image format.")
+                else:
+                    # Ensure the filename has the correct extension for the image
+                    file_extension = f".{image_type}"
+                    if not file_name.endswith(file_extension):
+                        file_name = f"{Path(file_name).stem}{file_extension}"
+            else:
+                # If not an image, ensure the file has an appropriate extension
+                if not Path(file_name).suffix:
+                    # Add a generic extension based on MIME type
+                    file_extension = mimetypes.guess_extension(mime_type) or '.bin'
+                    file_name = f"{file_name}{file_extension}"
+
+            return ContentFile(file_content, name=file_name)
+
+        except Exception as e:
+            logger.error(f"Error while retrieving file content: {str(e)}")
+            return None

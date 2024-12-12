@@ -40,7 +40,7 @@ class FileAdmin(admin.ModelAdmin):
             'fields': ('bytes', 'object')
         }),
         ('Image Details', {
-            'fields': ('image_file', 'image_url')
+            'fields': ('image_file', 'image_url', 'file_content')
         }),
     ]
     
@@ -55,6 +55,7 @@ class FileAdmin(admin.ModelAdmin):
             'purpose': "The intended purpose of the file (e.g., 'assistants', 'fine-tune').",
             'image_file': "An optional image associated with the file.",
             'image_url': "An optional URL pointing to an image associated with the file.",
+            'file_content': "The content of the actual file."
         }
 
     def get_readonly_fields(self, request, obj=None):

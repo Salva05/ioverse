@@ -4,13 +4,15 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import Http404
 
 from ..models.file import File
-from ..serializers import ImageSerializer
+from ..serializers import FileContentSerializer
 from ioverse.exceptions import MissingApiKeyException
 from apps.assistant.services.file_services import FileIntegrationService
 
-class ImageRetrieveView(generics.RetrieveAPIView):
+# image_file and this could be merged, but will keep distinct to keep the handling clear
+# this is used in cases the file arrives as an assistant_output generated file whose type is not 'image_file'
+class FileContentRetrieveView(generics.RetrieveAPIView):
     queryset = File.objects.all()
-    serializer_class = ImageSerializer
+    serializer_class = FileContentSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'
     lookup_url_kwarg = 'id' 
@@ -18,9 +20,8 @@ class ImageRetrieveView(generics.RetrieveAPIView):
     def get_object(self):
         file_instance = super().get_object()
         
-        if not file_instance.image_file:
-            # Attempt to download the image directly from OpenAI API
-            # in case the image creation was done external to this application
+        if not file_instance.file_content:
+            # Attempt to download the content directly from OpenAI API
             user = self.request.user
             file_id = self.kwargs.get(self.lookup_url_kwarg)
             
@@ -34,11 +35,10 @@ class ImageRetrieveView(generics.RetrieveAPIView):
             if not django_file:
                 raise Http404(f"File with ID {file_id} not found.")
             
-            # Download the image associated to this file
+            # Download the content associated to this file
             # and set it to the local model instance
-            image_file = service.get_content(file_id, django_file.filename, user)
-            django_file.image_file = image_file
+            file_content = service.get_content(file_id, django_file.filename, user)
+            django_file.file_content = file_content
             django_file.save()
         
         return file_instance
-    

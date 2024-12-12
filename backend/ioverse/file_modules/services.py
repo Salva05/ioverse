@@ -72,3 +72,16 @@ class FileService:
         except Exception as e:
             logger.error(f"Error deleting file: {str(e)}")
             raise
+        
+    def get_content(self, file_id):
+        """
+        Download the content associated with a file ID.
+        The content can be an image, CSV, Excel, or other file types.
+        """
+        try:
+            response = self.client.get_file_content(file_id=file_id)
+            logger.info(f"Content retrieve for file ID: {file_id}")
+            return response
+        except Exception as e:
+            logger.error(f"Error retrieving content: {str(e)}")
+        

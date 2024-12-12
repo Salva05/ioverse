@@ -36,3 +36,9 @@ class FileClient:
         Delete a file from OpenAI.
         """
         return self.client.files.delete(file_id)
+    def get_file_content(self, file_id):
+        """
+        Returns the content of an file
+        """
+        return self.client.files.content(file_id=file_id)
+        
