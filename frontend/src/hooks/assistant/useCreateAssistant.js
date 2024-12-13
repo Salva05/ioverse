@@ -21,6 +21,7 @@ export const useCreateAssistant = () => {
       if (selectedTab === "Create") setSelectedTab("Settings");
     },
     onError: (error) => {
+      console.log(error);
       const errorMessage =
         error.response?.data?.message ||
         "Failed to create assistant. Please try again later.";

@@ -22,13 +22,14 @@ const Message = ({
   hasFinished,
   streamMessageId,
   streamedChunks,
+  assistant_id,
 }) => {
   const { isSmallScreen } = useContext(DrawerContext);
-  const { assistant } = useAssistantContext();
+  const { assistant, assistants } = useAssistantContext();
   const { user } = useContext(AuthContext);
 
   const { files } = useAssistantContext();
-  
+
   const isUser = who !== "assistant";
 
   const [annotationUrls, setAnnotationUrls] = useState({});
@@ -312,7 +313,10 @@ const Message = ({
             fontSize: isSmallScreen ? "1rem" : "1.1rem",
           }}
         >
-          {isUser ? user.username : assistant?.name || "Unnamed Assistant"}
+          {isUser
+            ? user.username
+            : assistants.find((a) => a.id === assistant_id)?.name ||
+              "Unnamed Assistant"}
         </Typography>
       </Box>
       <Box

@@ -90,7 +90,11 @@ const SwitchEntityButton = () => {
             key={entity.label}
             selected={selectedEntity === entity.label}
             onClick={() => {
-              setSelectedEntity(entity.label);
+              if (entity.label === "Thread") {
+                alert("Yet to be developed. Hold on...");
+              } else {
+                setSelectedEntity(entity.label);
+              }
               handleClose();
             }}
             sx={{

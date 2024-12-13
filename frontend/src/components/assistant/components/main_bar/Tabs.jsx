@@ -11,7 +11,7 @@ import { IoMdAdd } from "react-icons/io";
 import { GrStorage } from "react-icons/gr";
 
 const Tabs = () => {
-  const { selectedEntity, setSelectedTab, selectedTab, hasItems } =
+  const { selectedEntity, setSelectedTab, selectedTab, hasItems, assistant } =
     useAssistantContext();
 
   const theme = useTheme();
@@ -38,12 +38,9 @@ const Tabs = () => {
         label: "Run",
       },
       {
-        icon:(
-            <GrStorage
-              size="1.4em"
-              style={{ marginRight: 7, marginBottom: 3 }}
-            />
-          ),
+        icon: (
+          <GrStorage size="1.4em" style={{ marginRight: 7, marginBottom: 3 }} />
+        ),
         label: "Storage",
       },
       {
@@ -64,6 +61,7 @@ const Tabs = () => {
       <motion.div layout transition={{ duration: 0.4, ease: "easeInOut" }}>
         {tabs.map((item, index) => (
           <Button
+            disabled={item.label === "Run" && !assistant}
             color="inherit"
             key={item.label}
             onClick={() => {

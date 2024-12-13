@@ -125,6 +125,7 @@ const Body = ({ messages }) => {
             hasFinished={hasFinished}
             streamMessageId={streamMessageId}
             streamedChunks={streamedChunks}
+            assistant_id={message?.assistant_id}
           />
         ))
       )}
