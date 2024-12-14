@@ -39,7 +39,7 @@ export const updateCache = async (message, files, queryClient) => {
           object: "file",
           purpose: "assistant_output",
           created_at: Math.floor(Date.now() / 1000),
-          filename: fileName || "unknown_file",
+          filename: fileName || "loading...",
         };
 
         // Update the local cache for immediate UI feedback

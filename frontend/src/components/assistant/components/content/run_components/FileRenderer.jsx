@@ -3,9 +3,26 @@ import { Box, Typography, useTheme, Popover } from "@mui/material";
 import InsertDriveFileOutlined from "@mui/icons-material/InsertDriveFileOutlined";
 import UploadedFileMenu from "./UploadedFileMenu";
 import { GoXCircle } from "react-icons/go";
+import { keyframes } from "@mui/system";
+import { alpha } from "@mui/material/styles";
+
+const waveAnimation = keyframes`
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
 
 const FileRenderer = ({ fileId, fileName, isUser, toolType, isDeleted }) => {
   const theme = useTheme();
+  const gradient = `linear-gradient(
+      to right,
+      ${alpha(theme.palette.text.primary, 0)} 0%,
+      ${alpha(theme.palette.text.primary, 0.5)} 50%,
+      ${alpha(theme.palette.text.primary, 0)} 100%
+    )`;
 
   // Menu for file attached
   const [fileMenu, setFileMenu] = useState(null);
@@ -81,10 +98,21 @@ const FileRenderer = ({ fileId, fileName, isUser, toolType, isDeleted }) => {
             cursor: isDeleted ? "default" : "pointer",
             fontFamily: "'Montserrat', serif",
             fontSize: "0.85rem",
-            color: isDeleted ? theme.palette.error.light : "text.secondary",
             padding: "2px 8px",
             borderRadius: 2,
-            transition: "background-color 0.3s, border 0.3s",
+            color:
+              fileName === "loading..."
+                ? "transparent"
+                : isDeleted
+                ? theme.palette.error.light
+                : theme.palette.text.secondary,
+            background: fileName === "loading..." ? gradient : "none",
+            backgroundSize: fileName === "loading..." ? "200% 100%" : "auto",
+            backgroundClip: fileName === "loading..." ? "text" : "border-box",
+            animation:
+              fileName === "loading..."
+                ? `${waveAnimation} 3s linear infinite`
+                : "none",
           }}
         >
           {isDeleted ? "file deleted" : fileName}

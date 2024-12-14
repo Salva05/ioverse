@@ -1,4 +1,4 @@
-import { Avatar, Box, Typography } from "@mui/material";
+import { Avatar, Box, Typography, useTheme } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import aiIcon from "../../../../../assets/ai.png";
@@ -13,6 +13,19 @@ import rehypeHighlight from "rehype-highlight";
 import "prismjs/themes/prism-tomorrow.css";
 import rehypeRaw from "rehype-raw";
 import { fileContent } from "../../../../../api/assistant";
+import config from "../../../../../config";
+import { keyframes } from "@mui/system";
+import { alpha } from "@mui/material/styles";
+
+const baseUrl = `${config.API_BASE_URL}/assistant`;
+const waveAnimation = keyframes`
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
 
 const Message = ({
   who,
@@ -24,6 +37,14 @@ const Message = ({
   streamedChunks,
   assistant_id,
 }) => {
+  const theme = useTheme();
+  const gradient = `linear-gradient(
+        to right,
+        ${alpha(theme.palette.text.primary, 0)} 0%,
+        ${alpha(theme.palette.text.primary, 0.5)} 50%,
+        ${alpha(theme.palette.text.primary, 0)} 100%
+      )`;
+
   const { isSmallScreen } = useContext(DrawerContext);
   const { assistant, assistants } = useAssistantContext();
   const { user } = useContext(AuthContext);
@@ -66,26 +87,81 @@ const Message = ({
   const convertToLink = (text, annotations) => {
     if (!annotations) return text;
 
-    // Process only annotations with type "file_path"
-    const fileAnnotations = annotations.filter(
+    const filePathAnnotations = annotations.filter(
       (annotation) => annotation.type === "file_path"
     );
 
-    return text.replace(
+    const fileCitationAnnotations = annotations.filter(
+      (annotation) => annotation.type === "file_citation"
+    );
+
+    // Handles file_path annotations (downloadable links)
+    text = text.replace(
       /\[([^\]]+)\]\(sandbox:[^\)]+\)/g,
       (match, linkText) => {
-        // Find the corresponding annotation based on the text content
-        const annotation = fileAnnotations.find((a) => match.includes(a.text));
+        const annotation = filePathAnnotations.find((a) =>
+          match.includes(a.text)
+        );
         if (annotation && annotation.file_path?.file_id) {
           const fileData = annotationUrls[annotation.file_path.file_id];
-          if (fileData) {
-            const { url, filename } = fileData;
-            return `<a href="${url}" download="${filename}">${linkText}</a>`;
+
+          // If fileData not yet available, show a loading placeholder
+          if (!fileData) {
+            return `<span class="loading-link">Loading link...</span>`;
           }
+
+          const { url, filename } = fileData;
+          return `<a href="${url}" rel="noopener noreferrer" download="${filename}">${linkText}</a>`;
         }
-        return linkText; // Return plain text if no matching URL is found
+
+        return linkText;
       }
     );
+
+    // Handles file_citation annotations (change formatting)
+    for (const annotation of fileCitationAnnotations) {
+      const citationText = annotation.text;
+      if (citationText) {
+        const match = citationText.match(/†([^】]+)/);
+        let displayText = citationText; // fallback if no match
+
+        if (match && match[1]) {
+          const filename = match[1].trim();
+          displayText = ` (${filename})`;
+        }
+        text = text.replace(
+          citationText,
+          `<span class="citation" title="Citation">${displayText}</span>`
+        );
+      }
+    }
+
+    return text;
+  };
+
+  // Function to find strings in the fashion [Some File](sandbox:/path/to/file)
+  // and replace them with a placeholder. This applies only when renderStream() is used thus a streaming response is open
+  const processStreamedContent = (text) => {
+    // For processing "file_path" annotations
+    const sandboxLinkRegex = /\[([^\]]+)\]\(sandbox:[^\)]+\)/g;
+    let processedText = text.replace(
+      sandboxLinkRegex,
+      `<span class="loading-link">Loading link...</span>`
+    );
+
+    // For processing "" annotations
+    const citationRegex = /【[^】]*†[^】]*】/g;
+    processedText = processedText.replace(citationRegex, (citationText) => {
+      const match = citationText.match(/†([^】]+)/);
+      let displayText = citationText; // fallback if no match
+      if (match && match[1]) {
+        const filename = match[1].trim();
+        displayText = ` (${filename})`;
+      }
+      return `<span class="citation" title="Citation">${displayText}</span>`;
+    });
+
+    return processedText;
   };
 
   useEffect(() => {
@@ -125,11 +201,29 @@ const Message = ({
 
   // Function to render streams of text
   const renderStream = () => {
+    // Process streamedChunks to replace sandbox links with the loading placeholder
+    const processedStream = processStreamedContent(streamedChunks);
+
+    const customSanitize = {
+      allowedTags: ["span", "p", "strong", "em", "code", "ul", "ol", "li"],
+      allowedAttributes: {
+        span: ["class"],
+        a: ["href", "download", "rel"],
+      },
+      allowedClasses: {
+        span: ["loading-link", "citation"],
+      },
+    };
+
     return (
       <ReactMarkdown
-        children={streamedChunks}
+        children={processedStream}
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+        rehypePlugins={[
+          [rehypeSanitize(customSanitize)],
+          rehypeHighlight,
+          rehypeRaw,
+        ]}
         components={{
           p: ({ node, ...props }) => (
             <Typography
@@ -141,6 +235,44 @@ const Message = ({
               {...props}
             />
           ),
+          span: ({ node, ...props }) => {
+            const className = props.className || "";
+            if (className.includes("loading-link")) {
+              return (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: "'Montserrat', serif",
+                    fontSize: "0.85rem",
+                    padding: "2px 8px",
+                    borderRadius: 2,
+                    color: "transparent",
+                    background: gradient,
+                    backgroundSize: "200% 100%",
+                    backgroundClip: "text",
+                    animation: `${waveAnimation} 3s linear infinite`,
+                  }}
+                >
+                  Loading link...
+                </Typography>
+              );
+            } else if (className.includes("citation")) {
+              return (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: "'Montserrat', serif",
+                    fontSize: "0.9rem",
+                    fontStyle: "italic",
+                    color: theme.palette.text.secondary,
+                    cursor: "help",
+                  }}
+                  {...props}
+                />
+              );
+            }
+            return <span {...props} />;
+          },
         }}
       />
     );
@@ -150,8 +282,14 @@ const Message = ({
   const renderContent = (content) => {
     // Tags to be allowed for the render
     const customSanitize = {
-      tagNames: ["a", "p", "strong", "em", "code", "ul", "ol", "li"],
-      attributeNames: ["href", "download", "src"],
+      allowedTags: ["span", "a", "p", "strong", "em", "code", "ul", "ol", "li"],
+      allowedAttributes: {
+        span: ["class"],
+        a: ["href", "download", "rel"],
+      },
+      allowedClasses: {
+        span: ["loading-link"],
+      },
     };
 
     if (typeof content === "string") {
@@ -191,7 +329,7 @@ const Message = ({
               children={processedText}
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[
-                rehypeSanitize(customSanitize),
+                [rehypeSanitize(customSanitize)],
                 rehypeHighlight,
                 rehypeRaw,
               ]}
@@ -219,9 +357,71 @@ const Message = ({
                         textDecoration: "none",
                       },
                     }}
+                    onClick={async (e) => {
+                      if (props.download) {
+                        e.preventDefault();
+                        try {
+                          const res = await fetch(props.href);
+                          const blob = await res.blob();
+                          const blobUrl = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = blobUrl;
+                          a.download = props.download;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(blobUrl);
+                        } catch (err) {
+                          console.error("Download failed:", err);
+                        }
+                      }
+                    }}
                     {...props}
                   />
                 ),
+                span: ({ node, ...props }) => {
+                  const className = props.className || "";
+                  if (className.includes("loading-link")) {
+                    return (
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontFamily: "'Montserrat', serif",
+                          fontSize: "0.85rem",
+                          color: "transparent",
+                          padding: "2px 8px",
+                          borderRadius: 2,
+                          backgroundSize: "200% 100%",
+                          background: gradient,
+                          backgroundClip: "text",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          animation: `${waveAnimation} 3s linear infinite`,
+                          transition: "background-color 0.3s, border 0.3s",
+                          cursor: "default",
+                        }}
+                      >
+                        Loading link...
+                      </Typography>
+                    );
+                  } else if (className.includes("citation")) {
+                    return (
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontFamily: "'Montserrat', serif",
+                          fontSize: "0.86rem",
+                          fontStyle: "italic",
+                          color: theme.palette.text.secondary,
+                          cursor: "help",
+                        }}
+                        {...props}
+                      />
+                    );
+                  }
+                  // Default rendering for spans without loading-link or citation classes
+                  return <span {...props} />;
+                },
               }}
             />
           );

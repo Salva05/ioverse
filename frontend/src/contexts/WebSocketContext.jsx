@@ -122,7 +122,6 @@ export const WebSocketProvider = ({ children }) => {
         break;
       case "message_done":
         console.log("MESSAGE COMPLETED >>>", message.data);
-        setStreamMessageId("");
         setToolCall("");
 
         // Substitute snapshot message with completed one
@@ -134,6 +133,7 @@ export const WebSocketProvider = ({ children }) => {
             )
         );
 
+        setStreamMessageId("");
         updateCache(message.data, files, queryClient);
         break;
       case "tool_call":
@@ -141,9 +141,10 @@ export const WebSocketProvider = ({ children }) => {
         console.log(`Tool call: ${message.message}`);
         switch (message.message) {
           case "code_interpreter":
-            console.log("inside code_intp.");
             setToolCall("code_interpreter");
             break;
+          case "file_search":
+            setToolCall("file_search");
         }
         break;
       case "code_input":
@@ -179,7 +180,8 @@ export const WebSocketProvider = ({ children }) => {
         setToolCall("");
         break;
       case "error":
-        console.error(`Error from server: ${message.message}`);
+        console.error(message.message);
+        toast.error(message.message);
         setHasFinished(true);
         setStreamMessageId("");
         setToolCall("");

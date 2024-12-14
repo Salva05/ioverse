@@ -20,6 +20,7 @@ import { InsertDriveFileOutlined } from "@mui/icons-material";
 import UploadedFileMenu from "../run_components/UploadedFileMenu";
 import { keyframes } from "@mui/system";
 import { alpha } from "@mui/material/styles";
+import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 
 const waveAnimation = keyframes`
   0% {
@@ -32,6 +33,7 @@ const waveAnimation = keyframes`
 
 const Input = ({ createThread, createMessage }) => {
   const theme = useTheme();
+  const { thread } = useAssistantContext();
 
   const gradient = `linear-gradient(
     to right,
@@ -167,7 +169,7 @@ const Input = ({ createThread, createMessage }) => {
             }}
           >
             {toolCall && toolCall.length > 0
-              ? "Processing tool call..."
+              ? toolCall === "file_search" ? "Retrieving file data" : "Processing tool call..."
               : "Reasoning..."}
           </Typography>
         )}
@@ -472,7 +474,7 @@ const Input = ({ createThread, createMessage }) => {
 
             <Button
               onClick={handleRun}
-              disabled={isRunning}
+              disabled={isRunning || !thread}
               variant="contained"
               color="success"
               sx={{
