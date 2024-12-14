@@ -45,6 +45,7 @@ from .views.vectorstorebatch import VectorStoreBacthCreateView, VectorStoreBatch
 from .views.generate import GenerateSystemInstruction, GenerateFunction, GenerateSchema
 from .views.image_retrieve import ImageRetrieveView
 from .views.content_retrieve import FileContentRetrieveView
+from .views.download_file import download_file
 
 urlpatterns = [
     # Assistant
@@ -95,6 +96,7 @@ urlpatterns = [
     path('generate/schema/', GenerateSchema.as_view(), name='gen-schema'),
     # File-related images
     path('file_image/<str:id>/retrieve/', ImageRetrieveView.as_view(), name='file_image-retrieve'),
-    # File-related images
+    # File-related content
     path('file_content/<str:id>/retrieve/', FileContentRetrieveView.as_view(), name='file_content-retrieve'),
+    path('download/<str:filename>/', download_file, name='download_file'),
 ]

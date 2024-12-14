@@ -2,7 +2,7 @@ from typing_extensions import override
 from openai import AsyncAssistantEventHandler
 from openai.types.beta.threads import Text, TextDelta
 from openai.types.beta.threads.runs import ToolCall, ToolCallDelta
-from openai.types.beta.assistant_stream_event import ThreadRunCreated
+from openai.types.beta.assistant_stream_event import ThreadRunCreated, ThreadRunFailed
 from openai.types.beta.threads.message import Message
 from openai.types.beta.threads.text_content_block import TextContentBlock
 from openai.types.beta.threads.file_path_annotation import FilePathAnnotation
@@ -39,6 +39,13 @@ class AsyncEventHandler(AsyncAssistantEventHandler):
         Called when a Run object is created and generation starts.
         Signals asynchronously via WebSocket.
         """
+        if isinstance(event, ThreadRunFailed):
+            await self.websocket_send(
+            text_data=json.dumps({
+                "type": "error",
+                "message": event.data.last_error.message
+            })
+        )
         if isinstance(event, ThreadRunCreated):
             await self.websocket_send(
             text_data=json.dumps({
