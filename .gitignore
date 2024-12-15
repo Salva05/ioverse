@@ -133,6 +133,7 @@ celerybeat.pid
 
 # Environments
 .env
+!.env.template  # Exclude all .env files but explicitly include .env.template
 .venv
 env/
 venv/
