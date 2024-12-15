@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.text_to_image',
     'apps.assistant',
     'rest_framework',
+    'django_celery_beat',
     'django_json_widget',
     'corsheaders',
 ]
@@ -96,6 +97,15 @@ SIMPLE_JWT = {
     'VERIFYING_KEY': PUBLIC_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# Celery Configuration
+CELERY_BROKER_URL = 'memory://'  # In-memory broker
+CELERY_RESULT_BACKEND = 'cache+memory://'  # In-memory result backend
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_EXTENDED = True 
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 CELERY_BEAT_SCHEDULE = {
     # Task to unshare expired images every 5 minutes
