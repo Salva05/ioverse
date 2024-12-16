@@ -1,6 +1,6 @@
 # IOverse
 
-### A **Django-powered** web application that utilizes **OpenAI APIs** to deliver latest AI-driven features. Features include conversational AI through Chat Completions, Text-to-Image generation using OpenAI's models, and a fully customizable AI assistant through Assistant API designed for dynamic, intelligent interactions.
+A **Django-powered** web application that utilizes **OpenAI APIs** to deliver latest AI-driven features as a conversational AI through Chat Completions, Text-to-Image generation using OpenAI's models, and a fully customizable AI assistant through Assistant API designed for dynamic, intelligent interactions.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@
    - [Text to Image](#text-to-image)
    - [Assistant Domain](#assistant-domain)
 8. [Known Issues](#known-issues)
-
+9. [Project Structure](#project-structure)
 
 ## About the Project
 
@@ -24,7 +24,6 @@ This project is a comprehensive AI platform that utilizes OpenAI APIs to offer a
 - **Chat Completion**: A chatbot capable of generating text-based responses using Chat Completions OpenAI APIs.
 - **Text-to-Image**: Generate images using **DALL-E** with customizable parameters.
 - **Assistant**: A powerful assistant API supporting tool integrations, RAG capabilities, code generation, vector storage, and real-time interactive threads.
-
 
 ## Features
 
@@ -48,7 +47,7 @@ Ensure the following are installed on your system:
 
 ## OpenAI API Key Requirement
 
-To use this application, you must have a valid **OpenAI API key**. This key is essential for interacting with OpenAI’s APIs, as it validates requests made by the application on your behalf. 
+To use this application, you must have a valid **OpenAI API key**. This key is essential for interacting with OpenAI’s APIs, as it validates requests made by the application on your behalf.
 
 - **Where to Get an API Key:** You can obtain an API key by creating an account on the [OpenAI website](https://platform.openai.com/signup/). Once logged in, navigate to the API settings section to generate your key.
 - **How to Use It in the Application:** During registration, you will be prompted to input your API key. This key will be securely stored in the backend and used for processing your requests.
@@ -113,7 +112,7 @@ Set the .env file in the project's backend root and add the required configurati
    | `EMAIL_HOST_USER`     | SMTP username or address of the email account used to send emails.            | `EMAIL_HOST_USER=your-email@example.com`              |
    | `EMAIL_HOST_PASSWORD` | SMTP app-specific password for the above email.                               | `EMAIL_HOST_PASSWORD=your_password`                   |
 
-   > **Notes:**
+   > [!NOTE]
    >
    > - To generate a `SECRET_KEY`, run the following command in your terminal:
    >   ```bash
@@ -222,31 +221,34 @@ To run the project, you will require:
 
 1. **An Instance of the Backend Server**:  
    Start the Django server by running the following command in the backend directory (same level of manage.py):
+
    ```bash
    python manage.py runserver
    ```
-   > **Notes:**
+
+   > [!NOTE]
    >
    > - Make sure to configure the frontend environment variable for the server URL accordingly.
    > - If a virtual environment was set up during the dependency installation, ensure it is activated before running this command.
 
-2. **An Instance of the Frontend Server** 
+2. **An Instance of the Frontend Server**
    Navigate to the frontend directory and start the Vite development server by running:
    ```bash
    npm run dev
    ```
 
 #### Django Celery Up and Running (Optional but recommended)
-Lastly, since this project uses Django Celery to perform periodic background operations, such as the check and cleanup of expired shared conversations or images, you should start the Celery worker and scheduler by running the following commands in the backend directory:
-   
 
-   ```bash
-   celery -A ioverse worker --pool=solo --loglevel=info
-   celery -A ioverse beat --loglevel=info
-   ```
-   > **Note:**
-   >
-   > Notice the flag `--pool=solo`, is used because Celery is configured as an in-memory worker with a single dedicated thread.
+Lastly, since this project uses Django Celery to perform periodic background operations, such as the check and cleanup of expired shared conversations or images, you should start the Celery worker and scheduler by running the following commands in the backend directory:
+
+```bash
+celery -A ioverse worker --pool=solo --loglevel=info
+celery -A ioverse beat --loglevel=info
+```
+
+> [!NOTE]
+>
+> Notice the flag `--pool=solo`, is used because Celery is configured as an in-memory worker with a single dedicated thread.
 
 ## Usage Guide
 
@@ -258,27 +260,31 @@ This feature allows users to engage in conversations with the AI, leveraging Ope
 The default model used is `gpt-4`, which is customizable by manually changing the defualt for the parameter `model` in `backend.ioverse.chatbot_modules.core.chatbot.Chatbot`'s `__init__` method.
 
 #### How to Use:
+
 1. Navigate to the **Chat** page in the application.
 2. Type your message in the input field at the bottom of the screen.
 3. Press **Enter** or click the **Send** button to submit your query.
 4. The AI will respond in real-time, and the conversation will appear in the chat section of the menu.
 
-> **Tip:** You can export your conversations as a PDF or share them directly using the share button. Conversations can also be searched both via the search bar in the menu or in the *Account* page, and can be managed in the django's admin panel.
+> [!TIP] 
+> You can export your conversations as a PDF or share them directly using the share button. Conversations can also be searched both via the search bar in the menu or in the _Account_ page, and can be managed in the django's admin panel.
 
 ---
 
 ### Text to Image
 
-This feature uses OpenAI's DALL-E API to generate images from text prompts with customizable options.
+This feature uses OpenAI's **DALL-E API** to generate images from text prompts with customizable options.
 
 #### How to Use:
+
 1. Go to the **Text to Image** section of the application.
 2. Enter a descriptive text prompt in the input field.
 3. Customize parameters such as model, image size, and style.
 4. Click **Generate** to create your image.
 5. The generated image(s) will appear below the button to generate them, where you can download or share them.
 
-> **Note:** You can adjust the number of images and quality for more tailored results. Saved images can be seen and managed in the *Account* page of the application, and also in the folder `backend/ioverse/media/generated_images` and in the django's admin panel. 
+> [!NOTE]
+>  You can adjust the number of images and quality for more tailored results. Saved images can be seen and managed in the _Account_ page of the application, and also in the folder `backend/ioverse/media/generated_images` and in the django's admin panel.
 
 ---
 
@@ -287,25 +293,93 @@ This feature uses OpenAI's DALL-E API to generate images from text prompts with 
 The Assistant API offers a customizable AI experience for advanced interactions, such as tool integrations, code generation, and real-time threads.
 
 #### How to Use:
+
 1. Open the **Assistant** page in the application.
-2. Create an assistant in the *Create* tab.
-2. Configure the assistant in the *Settings* tab by setting parameters like:
+2. Create an assistant in the _Create_ tab.
+3. Configure the assistant in the _Settings_ tab by setting parameters like:
    - Model (e.g., gpt-4o)
    - Temperature (for creativity)
    - Tools (e.g., response format, file upload)
-3. Upload files (if needed) to enable vector storage and data retrieval, or other tools.
-4. Select the desired assistant from the selection menu in the upper left.
-5. Interact with the assistant in the tab *Run* by sending queries. `Runs` are done on a per-thread basis, where you can initialize the thread with the necessary information before running it. Each thread can be 'cleared' (deleted) and new threads can be created.
-6. View responses in real-time, streamed through the WebSocket connection.
+4. Upload files (if needed) to enable vector storage and data retrieval, or other tools.
+5. Select the desired assistant from the selection menu in the upper left.
+6. Interact with the assistant in the tab _Run_ by sending queries. `Runs` are done on a per-thread basis, where you can initialize the thread with the necessary information before running it. Each thread can be 'cleared' (deleted) and new threads can be created.
+7. View responses in real-time, streamed through the WebSocket connection.
 
-> **Tip:** If enabled on the assistant's settings, `file search` and `code interpreter` tools can be triggered explicitly via queries like "Create an image of.." or "Parse this PDF and generate a graph..".
+> [!TIP]
+>  If enabled on the assistant's settings, `file search` and `code interpreter` tools can be triggered explicitly via queries like "Create an image of.." or "Parse this PDF and generate a graph..".
 
 ## Known Issues
+
 Below are the currently known issues with the application:
 
 ### Assistant Domain
+
 1. **Function Calling Tool:**  
-   When the `function call` tool is enabled, and functions are created for an assistant, triggering them via a query results in the application responding with an empty message. This occurs because the OpenAI API generates a response with the status `requires_action`, indicating that the function tool called by the AI needs to be executed with the provided parameters and the result submitted back to the AI. The returned value would then serve as the next AI response.  
+   When the `function call` tool is enabled, and functions are created for an assistant, triggering them via a query results in the application responding with an empty message. This occurs because the OpenAI API generates a response with the status `requires_action`, indicating that the function tool called by the AI needs to be executed with the provided parameters and the result submitted back to the AI. The returned value would then serve as the next AI response.
    - **Current Status:** This functionality is not yet fully implemented and is a work-in-progress feature.
 
-> **Note:** We are actively working to resolve these issues in upcoming updates. If you encounter other problems, please report them via the [GitHub Issues page](https://github.com/Salva05/ioverse/issues).
+> [!NOTE] 
+> We are actively working to resolve these issues in upcoming updates. If you encounter other problems, please report them via the [GitHub Issues page](https://github.com/Salva05/ioverse/issues).
+
+## Project Structure
+The project is built atop the following libraries and frameworks:
+
+### Backend
+The backend is implemented using **Django**, following the **Django Rest Framework (DRF)** for building a fully RESTful API. Key backend components include:
+- **Django**: The core web framework providing the foundation for the application.
+- **Django Rest Framework (DRF)**: For creating and managing RESTful APIs.
+- **SimpleJWT**: Token-based authentication system for managing secure API access.
+- **Celery**: Task queue used for handling asynchronous operations.
+- **Pydantic**: Used for data validation and parsing in external modules.
+- **django-environ**: For managing environment variables securely and conveniently.
+- **Daphne**: ASGI server for handling asynchronous HTTP and WebSocket protocols in Django applications.
+- **Channels**: For enabling real-time capabilities, Consumer interface and WebSocket support in the backend.
+- **Tenacity**: A library for retrying operations with customizable backoff and retry strategies, used for error handling in external modules.
+- **Bleach**: A library for sanitizing HTML and preventing XSS attacks, ensuring secure handling of user-generated content.
+- **OpenAI API (v2 beta) and OpenAI Python SDK**: Integrated with the project to power the assistant, vision and chat features.
+
+### Frontend
+The frontend is implemented using **React**, managed with **Vite** for fast development and optimized builds. Key frontend libraries and tools include:
+- **React**: The main library for building user interfaces.
+- **Material-UI (MUI)**: For pre-designed components and styling, ensuring a consistent and responsive design.
+- **React Router**: For client-side navigation and route management.
+- **TanStack Query (React Query)**: For server-state management, caching, and data synchronization.
+- **Axios**: For making HTTP requests to the backend API.
+- **Motion**: A library for creating smooth animations and gestures in React applications.
+- **React Toastify**: For displaying non-blocking notifications.
+- **Prism.js**: For syntax highlighting in code-related components.
+- **date-fns**: A lightweight library for manipulating, formatting, and parsing dates in JavaScript.
+- **he**: A library for encoding and decoding HTML entities to ensure proper handling of special characters in text.
+- **jwt-decode**: A library for decoding JSON Web Tokens (JWT) to extract payload data without verifying the signature.
+- **rehype-sanitize**: A plugin for sanitizing HTML in Markdown, ensuring safe rendering of user-generated content.
+- **rehype-raw**: A plugin for parsing and processing raw HTML embedded in Markdown content.
+- **react-simple-code-editor**: A lightweight code editor component for React, with syntax highlighting support.
+- **Emotion**: For CSS-in-JS styling.
+
+### Backend Structure
+The backend is divided into two main domains:
+
+1. **Application-Specific Domains**:  
+   - **Chatbot**, **Text-To-Image**, **Assistant**, and **Account**: These represent the core application features. The **Account** domain extends Django's User model to include the user's API key.
+
+2. **External Modules**:  
+   - **`chatbot_modules`**, **`text_to_image_modules`**, **`assistant_modules`**, and **`file_modules`**: These modules provide the underlying services used by the application-specific domains. They serve as a bridge between the application and OpenAI APIs.
+
+### Frontend Structure
+The frontend structure follows a classic "React-style" approach:
+
+- **api folder**: Contains backend API calls, wrapped with a customized Axios configuration to handle token submission and retry mechanisms (used for JWT authentication).
+
+- **components folder**: Holds all reusable and application-specific React components.
+
+- **contexts folder**: Includes context providers for application-wide functionalities such as theming, authentication, WebSocket management, and domain-specific contexts.
+
+- **hooks folder**: Contains TanStack Query hooks for data fetching and mutations. These serve as the connection point between components and API calls.
+
+- **pages folder**: Houses React Router page components for defining navigable views in the application.
+
+- **services folder**: Contains domain-specific service functions, such as login and token management.
+
+- **styles folder**: Stores application-wide CSS styles.
+
+- **utils folder**: Holds utility functions, such as text formatting and other reusable helpers.
