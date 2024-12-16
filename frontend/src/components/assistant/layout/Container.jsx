@@ -20,7 +20,7 @@ const Container = () => {
         {isMobile ? <MobileMainBar /> : <MainBar />}
       </Box>
       <Toolbar />
-      <MUIContainer>
+      <MUIContainer style={{ height: "100%" }}>
         <Content />
       </MUIContainer>
     </>

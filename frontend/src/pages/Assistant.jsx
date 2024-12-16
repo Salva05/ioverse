@@ -16,7 +16,7 @@ const Assistant = () => {
               display: "flex",
               flexDirection: "column",
               flexGrow: 1,
-              minHeight: 0,
+              height: "100%",
             }}
           >
             <Container />

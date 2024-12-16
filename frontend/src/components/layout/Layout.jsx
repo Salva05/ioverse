@@ -60,11 +60,11 @@ export default function Layout() {
       <DrawerContext.Provider value={{ open, isSmallScreen }}>
         <ThemeProvider theme={theme}>
           <ConversationProvider>
-            <Box sx={{ display: "flex", width: "100%" }}>
+            <Box sx={{ display: "flex", width: "100%", height: "100%" }}>
               <CssBaseline />
               <AppBar handleDrawerOpen={handleDrawerOpen} />
               <DrawerMenu handleDrawerClose={handleDrawerClose} />
-              <MainContent>
+              <MainContent style={{ height: "100%" }}>
                 <Outlet />
               </MainContent>
               <ToastContainer

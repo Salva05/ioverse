@@ -6,6 +6,7 @@ import { useAssistantContext } from "../../../contexts/AssistantContext";
 import Create from "./content/Create";
 import Help from "./content/Help";
 import Run from "./content/Run";
+import Storage from "./content/Storage";
 
 const Content = () => {
   const isMobile = useMediaQuery("(max-width:815px)");
@@ -19,6 +20,8 @@ const Content = () => {
         return <Create />;
       case "Run":
         return <Run />;
+      case "Storage":
+        return <Storage />;
       default:
         return <Help />;
     }
@@ -41,6 +44,7 @@ const Content = () => {
           flexDirection: "column",
           alignItems: "center",
           mt: 5,
+          height: "calc(100% - 100px)",
         }}
       >
         {renderTabContent()}
