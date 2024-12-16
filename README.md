@@ -195,6 +195,13 @@ Run the following commands to set up the database and create a superuser:
 
    Enter the required details when prompted (email can remain empty). This user will have administrative access to manage the application.
 
+   > [!IMPORTANT]
+   >
+   > To grant this user access to the application's functionalities, you must manually register the **OpenAI API key** in the admin panel. Navigate to the "Users" tab, select the admin user you just created, and locate the **API Key** field at the bottom of the user details page. Enter the API key in this field to ensure it is correctly associated with the user for service usage.  
+   >
+   > Alternatively, you can create a new user from scratch by following the in-app sign-up instructions.
+
+
 ### 3. Set Up the Frontend
 
 From the base project directory, navigate into the frontend folder:
