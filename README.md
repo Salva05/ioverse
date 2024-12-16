@@ -4,18 +4,39 @@ A **Django-powered** web application that utilizes **OpenAI APIs** to deliver la
 
 ## Table of Contents
 
-1. [About the Project](#about-the-project)
-2. [Features](#features)
-3. [Pre-requisites](#pre-requisites)
-4. [OpenAI API Key Requirement](#openai-api-key-requirement)
-5. [Installation](#installation)
-6. [Running the Project](#running-the-project)
-7. [Usage Guide](#usage-guide)
-   - [Chat Completion](#chat-completion)
-   - [Text to Image](#text-to-image)
-   - [Assistant Domain](#assistant-domain)
-8. [Known Issues](#known-issues)
-9. [Project Structure](#project-structure)
+- [IOverse](#ioverse)
+  - [Table of Contents](#table-of-contents)
+  - [About the Project](#about-the-project)
+  - [Features](#features)
+  - [Pre-requisites](#pre-requisites)
+  - [OpenAI API Key Requirement](#openai-api-key-requirement)
+  - [Installation](#installation)
+    - [1. Clone the Repository](#1-clone-the-repository)
+    - [2. Set Up the Backend](#2-set-up-the-backend)
+      - [Create a Virtual Environment (Optional but Recommended) and activate it](#create-a-virtual-environment-optional-but-recommended-and-activate-it)
+      - [Install dependencies](#install-dependencies)
+      - [Configure Environment Variables](#configure-environment-variables)
+      - [Generate RSA Key Pair](#generate-rsa-key-pair)
+      - [Set Up Database and create the Super User](#set-up-database-and-create-the-super-user)
+    - [3. Set Up the Frontend](#3-set-up-the-frontend)
+      - [Install dependencies](#install-dependencies-1)
+      - [Configure Environment Variables](#configure-environment-variables-1)
+  - [Running The Project](#running-the-project)
+      - [Django Celery Up and Running (Optional but recommended)](#django-celery-up-and-running-optional-but-recommended)
+  - [Usage Guide](#usage-guide)
+    - [Chat Completion](#chat-completion)
+      - [How to Use:](#how-to-use)
+    - [Text to Image](#text-to-image)
+      - [How to Use:](#how-to-use-1)
+    - [Assistant Domain](#assistant-domain)
+      - [How to Use:](#how-to-use-2)
+  - [Known Issues](#known-issues)
+    - [Assistant Domain](#assistant-domain-1)
+  - [Project Architecture](#project-architecture)
+    - [Backend Tech Stack](#backend-tech-stack)
+    - [Frontend Tech Stack](#frontend-tech-stack)
+    - [Backend Structure](#backend-structure)
+    - [Frontend Structure](#frontend-structure)
 
 ## About the Project
 
@@ -321,24 +342,24 @@ Below are the currently known issues with the application:
 > [!NOTE] 
 > We are actively working to resolve these issues in upcoming updates. If you encounter other problems, please report them via the [GitHub Issues page](https://github.com/Salva05/ioverse/issues).
 
-## Project Structure
+## Project Architecture
 The project is built atop the following libraries and frameworks:
 
-### Backend
+### Backend Tech Stack
 The backend is implemented using **Django**, following the **Django Rest Framework (DRF)** for building a fully RESTful API. Key backend components include:
 - **Django**: The core web framework providing the foundation for the application.
 - **Django Rest Framework (DRF)**: For creating and managing RESTful APIs.
-- **SimpleJWT**: Token-based authentication system for managing secure API access.
-- **Celery**: Task queue used for handling asynchronous operations.
+- **SimpleJWT**: Token-based authentication for API access.
+- **Celery**: Task queue for handling asynchronous operations.
 - **Pydantic**: Used for data validation and parsing in external modules.
-- **django-environ**: For managing environment variables securely and conveniently.
+- **django-environ**: For secure and convenient management of environment variables.
 - **Daphne**: ASGI server for handling asynchronous HTTP and WebSocket protocols in Django applications.
-- **Channels**: For enabling real-time capabilities, Consumer interface and WebSocket support in the backend.
+- **Channels**: For enabling real-time capabilities, consumer interfaces and WebSocket support in the backend.
 - **Tenacity**: A library for retrying operations with customizable backoff and retry strategies, used for error handling in external modules.
 - **Bleach**: A library for sanitizing HTML and preventing XSS attacks, ensuring secure handling of user-generated content.
 - **OpenAI API (v2 beta) and OpenAI Python SDK**: Integrated with the project to power the assistant, vision and chat features.
 
-### Frontend
+### Frontend Tech Stack
 The frontend is implemented using **React**, managed with **Vite** for fast development and optimized builds. Key frontend libraries and tools include:
 - **React**: The main library for building user interfaces.
 - **Material-UI (MUI)**: For pre-designed components and styling, ensuring a consistent and responsive design.
