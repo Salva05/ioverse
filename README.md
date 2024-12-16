@@ -32,6 +32,7 @@ A **Django-powered** web application that utilizes **OpenAI APIs** to deliver la
       - [How to Use:](#how-to-use-2)
   - [Known Issues](#known-issues)
     - [Assistant Domain](#assistant-domain-1)
+  - [Work In Progress](#work-in-progress)
   - [Project Architecture](#project-architecture)
     - [Backend Tech Stack](#backend-tech-stack)
     - [Frontend Tech Stack](#frontend-tech-stack)
@@ -349,6 +350,12 @@ Below are the currently known issues with the application:
 
 > [!NOTE] 
 > We are actively working to resolve these issues in upcoming updates. If you encounter other problems, please report them via the [GitHub Issues page](https://github.com/Salva05/ioverse/issues).
+
+## Work In Progress
+The following sections of the application are currently under development:
+- **Storage** area in **Assistant** page
+- **Help** area in **Assistant** page
+We're actively working on these features and will share updates as soon as they're ready.
 
 ## Project Architecture
 The project is built atop the following libraries and frameworks:
