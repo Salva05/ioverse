@@ -133,15 +133,15 @@ Set the .env file in the project's backend root and add the required configurati
    | `EMAIL_HOST_USER`     | SMTP username or address of the email account used to send emails.            | `EMAIL_HOST_USER=your-email@example.com`              |
    | `EMAIL_HOST_PASSWORD` | SMTP app-specific password for the above email.                               | `EMAIL_HOST_PASSWORD=your_password`                   |
 
-   > [!NOTE]
-   >
-   > - To generate a `SECRET_KEY`, run the following command in your terminal:
-   >   ```bash
-   >   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-   >   ```
-   > - `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` are used by Django to send emails, such as password reset links.
-   > - The application uses Gmail as the default email provider. If using a different provider, update the `EMAIL_HOST` variable in the `settings.py` file accordingly.
-   > - If you’re using _Gmail_ and have _Two-Factor_ Authentication enabled, you must use an App Password. For other providers (e.g., SendGrid, Mailgun), use the SMTP credentials they supply.
+> [!NOTE]
+>
+> - To generate a `SECRET_KEY`, run the following command in your terminal:
+>   ```bash
+>   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+>   ```
+> - `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` are used by Django to send emails, such as password reset links.
+> - The application uses Gmail as the default email provider. If using a different provider, update the `EMAIL_HOST` variable in the `settings.py` file accordingly.
+> - If you’re using _Gmail_ and have _Two-Factor_ Authentication enabled, you must use an App Password. For other providers (e.g., SendGrid, Mailgun), use the SMTP credentials they supply.
 
 #### Generate RSA Key Pair
 
@@ -195,11 +195,11 @@ Run the following commands to set up the database and create a superuser:
 
    Enter the required details when prompted (email can remain empty). This user will have administrative access to manage the application.
 
-   > [!IMPORTANT]
-   >
-   > To grant this user access to the application's functionalities, you must manually register the **OpenAI API key** in the admin panel. Navigate to the "Users" tab, select the admin user you just created, and locate the **API Key** field at the bottom of the user details page. Enter the API key in this field to ensure it is correctly associated with the user for service usage.  
-   >
-   > Alternatively, you can create a new user from scratch by following the in-app sign-up instructions.
+> [!IMPORTANT]
+>
+> To grant this user access to the application's functionalities, you must manually register the **OpenAI API key** in the admin panel. Navigate to the "Users" tab, select the admin user you just created, and locate the **API Key** field at the bottom of the user details page. Enter the API key in this field to ensure it is correctly associated with the user for service usage.  
+>
+> Alternatively, you can create a new user from scratch by following the in-app sign-up instructions.
 
 
 ### 3. Set Up the Frontend
@@ -254,10 +254,10 @@ To run the project, you will require:
    python manage.py runserver
    ```
 
-   > [!NOTE]
-   >
-   > - Make sure to configure the frontend environment variable for the server URL accordingly.
-   > - If a virtual environment was set up during the dependency installation, ensure it is activated before running this command.
+> [!NOTE]
+>
+> - Make sure to configure the frontend environment variable for the server URL accordingly.
+> - If a virtual environment was set up during the dependency installation, ensure it is activated before running this command.
 
 2. **An Instance of the Frontend Server**
    Navigate to the frontend directory and start the Vite development server by running:
@@ -267,7 +267,7 @@ To run the project, you will require:
 
 #### Django Celery Up and Running (Optional but recommended)
 
-Lastly, since this project uses Django Celery to perform periodic background operations, such as the check and cleanup of expired shared conversations or images, you should start the Celery worker and scheduler by running the following commands in the backend directory:
+Lastly, since this project uses Django Celery to perform periodic background operations, such as the check and cleanup of expired shared conversations or images, you should start the Celery worker and scheduler by running the following commands in the backend's root directory (at the same level of manage.py):
 
 ```bash
 celery -A ioverse worker --pool=solo --loglevel=info
@@ -275,8 +275,9 @@ celery -A ioverse beat --loglevel=info
 ```
 
 > [!NOTE]
->
-> Notice the flag `--pool=solo`, is used because Celery is configured as an in-memory worker with a single dedicated thread.
+> 
+> - If a virtual environment was used to install the dependencies, ensure it is activated before running the command.
+> - Notice the flag `--pool=solo`, is used because Celery is configured as an in-memory worker with a single dedicated thread.
 
 ## Usage Guide
 
