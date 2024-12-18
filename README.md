@@ -72,8 +72,11 @@ Ensure the following are installed on your system:
 To use this application, you must have a valid **OpenAI API key**. This key is essential for interacting with OpenAI’s APIs, as it validates requests made by the application on your behalf.
 
 - **Where to Get an API Key:** You can obtain an API key by creating an account on the [OpenAI website](https://platform.openai.com/signup/). Once logged in, navigate to the API settings section to generate your key.
-- **How to Use It in the Application:** During registration, you will be prompted to input your API key. This key will be securely stored in the backend and used for processing your requests.
+- **How to Use It in the Application:** During registration, you will be prompted to input your API key. This key will be stored in the backend and used for processing your requests.
 - **Important Note:** Ensure that your API key has sufficient credits or quota to avoid disruptions while using the application features like Chat Completions or Text-to-Image generation.
+
+> [!CAUTION]
+> Currently, the application stores the API key obtained during the registration process in plain text, which poses a security risk. An encryption layer is planned for implementation in upcoming updates to address this issue.
 
 ## Installation
 
@@ -282,7 +285,7 @@ celery -A ioverse beat --loglevel=info
 
 ## Usage Guide
 
-First, you will need to sign up and create an account to access the application's pages. During the registration process, you will be required to provide a valid **OpenAI API key**. This key will be stored securely in the local database and used to validate API calls to the OpenAI server for each user's requests.
+First, you will need to sign up and create an account to access the application's pages. During the registration process, you will be required to provide a valid **OpenAI API key**. This key will be stored in the local database and used to validate API calls to the OpenAI server for each user's requests.
 
 ### Chat Completion
 
@@ -353,8 +356,11 @@ Below are the currently known issues with the application:
 
 ## Work In Progress
 The following sections of the application are currently under development:
-- **Storage** area in **Assistant** page
-- **Help** area in **Assistant** page
+- **Storage** page within **Assistant** domain.
+- **Help** page within **Assistant** domain.
+- **Thread**-related functionalities (outside of the ones present in the "Run" page) within the assistant domain.
+- **API Key Encryption**
+
 We're actively working on these features and will share updates as soon as they're ready.
 
 ## Project Architecture
