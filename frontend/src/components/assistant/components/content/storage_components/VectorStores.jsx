@@ -7,18 +7,19 @@ import { IoIosEye } from "react-icons/io";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { truncateText } from "../../../../../utils/textUtils";
 import { formatFileSize } from "../../../../../utils/formatFileSize";
+import AddIcon from "@mui/icons-material/Add";
 
-const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
-  const { files } = useAssistantContext();
+const VectorStores = () => {
+  const { vectorStores } = useAssistantContext();
   const theme = useTheme();
   const { isSmallScreen } = useContext(DrawerContext);
 
   return (
     <>
-      {files && files.length > 0 ? (
-        files.map((currentFile) => (
+      {vectorStores && vectorStores.length > 0 ? (
+        vectorStores.map((currentStore) => (
           <Box
-            key={currentFile.id}
+            key={currentStore.id}
             className="file-item"
             sx={{
               border: `1px solid ${theme.palette.divider}`,
@@ -38,11 +39,11 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
               alignItems: "center",
               cursor: "pointer",
               transition: `
-  background-color 0.3s ease-in-out, 
-  border-color 0.3s ease-in-out, 
-  box-shadow 0.3s ease-in-out, 
-  transform 0.3s ease-in-out
-`,
+    background-color 0.3s ease-in-out, 
+    border-color 0.3s ease-in-out, 
+    box-shadow 0.3s ease-in-out, 
+    transform 0.3s ease-in-out
+  `,
               "& *": {
                 fontFamily: "'Montserrat', serif",
               },
@@ -84,7 +85,7 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
               gutterBottom
               sx={{ fontSize: isSmallScreen ? "1rem" : "1.1rem" }}
             >
-              {truncateText(currentFile?.filename || currentFile.id, 10)}
+              {truncateText(currentStore?.filename || currentStore.id, 10)}
             </Typography>
 
             {/* File Details */}
@@ -104,7 +105,7 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
                     color="text.secondary"
                     sx={{ fontSize: isSmallScreen ? "0.8rem" : "0.85rem" }}
                   >
-                    {formatFileSize(currentFile.bytes)}
+                    {formatFileSize(currentStore.bytes)}
                   </Typography>
                 </Box>
               </Tooltip>
@@ -124,7 +125,7 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
                     color="text.secondary"
                     sx={{ fontSize: isSmallScreen ? "0.8rem" : "0.85rem" }}
                   >
-                    {currentFile.purpose}
+                    {currentStore.purpose}
                   </Typography>
                 </Box>
               </Tooltip>
@@ -171,27 +172,34 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
               fontFamily: "'Montserrat', serif",
             }}
           >
-            No files found
+            Create a vector store
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ fontFamily: "'Montserrat', serif" }}
+            sx={{ fontFamily: "'Montserrat', serif", maxWidth: "500px" }}
           >
-            Files uploaded with OpenAI API will appear here.
+            Vector stores allow Assistants to search information in your
+            documents using the File Search tool.
           </Typography>
 
           {/* Button */}
-          <Box sx={{ mt: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
             <Box
               component="a"
               href="https://platform.openai.com/docs/api-reference/files"
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                backgroundColor: "primary.main",
+                backgroundColor: theme.palette.success.light,
                 color: "primary.contrastText",
-                px: 1.5,
+                px: 1.3,
                 py: 0.5,
                 borderRadius: "8px",
                 border: "none",
@@ -200,12 +208,36 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
                 textDecoration: "none",
                 fontWeight: "medium",
                 fontFamily: "'Montserrat', serif",
+                alignItems: "center", // Align text and icon vertically
+                justifyContent: "center",
+                display: "inline-flex",
                 "&:hover": {
-                  backgroundColor: "primary.dark",
+                  backgroundColor: theme.palette.success.dark,
                 },
               }}
             >
-              Learn more
+              Create
+              <AddIcon sx={{ fontSize: "1rem" }} />
+            </Box>
+            <Box
+              component="a"
+              href="https://platform.openai.com/docs/api-reference/files"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: "primary.main",
+                px: 1.5,
+                py: 0.5,
+                cursor: "pointer",
+                textTransform: "none",
+                textDecoration: "none",
+                fontWeight: "medium",
+                display: "inline-block",
+                fontFamily: "'Montserrat', serif",
+                fontSize: "0.8rem",
+              }}
+            >
+              Learn about vector stores
             </Box>
           </Box>
         </Box>
@@ -214,4 +246,4 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
   );
 };
 
-export default Files;
+export default VectorStores;

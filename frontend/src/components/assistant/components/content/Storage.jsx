@@ -74,6 +74,7 @@ const Storage = () => {
             }}
           >
             <RightColumn
+              selected={selected}
               file={lockedFile || file}
               setFile={setFile}
               lockedFile={lockedFile}
@@ -111,10 +112,11 @@ const Storage = () => {
               gap: 2,
               padding: 2,
               overflowY: "auto",
-              width: "100%"
+              width: "100%",
             }}
           >
             <RightColumn
+              selected={selected}
               file={lockedFile || file}
               setFile={setFile}
               lockedFile={lockedFile}

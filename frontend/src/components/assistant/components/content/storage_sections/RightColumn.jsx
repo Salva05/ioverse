@@ -1,8 +1,15 @@
 import React from "react";
 import { Box } from "@mui/material";
 import Files from "../storage_components/Files";
+import VectorStores from "../storage_components/VectorStores";
 
-const RightColumn = ({ file, setFile, lockedFile, setLockedFile }) => {
+const RightColumn = ({
+  selected,
+  file,
+  setFile,
+  lockedFile,
+  setLockedFile,
+}) => {
   return (
     <Box
       sx={{
@@ -13,12 +20,16 @@ const RightColumn = ({ file, setFile, lockedFile, setLockedFile }) => {
         width: "100%",
       }}
     >
-      <Files
-        file={file}
-        setFile={setFile}
-        lockedFile={lockedFile}
-        setLockedFile={setLockedFile}
-      />
+      {selected === "Files" ? (
+        <Files
+          file={file}
+          setFile={setFile}
+          lockedFile={lockedFile}
+          setLockedFile={setLockedFile}
+        />
+      ) : (
+        <VectorStores />
+      )}
     </Box>
   );
 };
