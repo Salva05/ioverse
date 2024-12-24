@@ -28,7 +28,12 @@ const RightColumn = ({
           setLockedFile={setLockedFile}
         />
       ) : (
-        <VectorStores />
+        <VectorStores
+          file={file}
+          setFile={setFile}
+          lockedFile={lockedFile}
+          setLockedFile={setLockedFile}
+        />
       )}
     </Box>
   );

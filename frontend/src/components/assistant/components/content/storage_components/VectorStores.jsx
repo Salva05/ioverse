@@ -1,15 +1,14 @@
 import React, { useContext } from "react";
-import { Box, Divider, Tooltip, Typography, useTheme } from "@mui/material";
+import { Box, Tooltip, Typography, useTheme } from "@mui/material";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";
 import { TbFileDatabase } from "react-icons/tb";
-import { IoIosEye } from "react-icons/io";
 import { DrawerContext } from "../../../../../contexts/DrawerContext";
 import { truncateText } from "../../../../../utils/textUtils";
 import { formatFileSize } from "../../../../../utils/formatFileSize";
 import AddIcon from "@mui/icons-material/Add";
 
-const VectorStores = () => {
+const VectorStores = ({ file, setFile, lockedFile, setLockedFile }) => {
   const { vectorStores } = useAssistantContext();
   const theme = useTheme();
   const { isSmallScreen } = useContext(DrawerContext);
@@ -20,7 +19,7 @@ const VectorStores = () => {
         vectorStores.map((currentStore) => (
           <Box
             key={currentStore.id}
-            className="file-item"
+            className="store-item"
             sx={{
               border: `1px solid ${theme.palette.divider}`,
               borderRadius: 2,
@@ -28,9 +27,9 @@ const VectorStores = () => {
               paddingY: 1,
               boxShadow: theme.shadows[1],
               backgroundColor:
-                lockedFile?.id === currentFile.id
+                lockedFile?.id === currentStore.id
                   ? theme.palette.action.selected
-                  : file?.id === currentFile.id
+                  : file?.id === currentStore.id
                   ? theme.palette.action.hover
                   : theme.palette.background.paper,
               display: "flex",
@@ -59,14 +58,14 @@ const VectorStores = () => {
             }}
             onMouseEnter={() => {
               if (!lockedFile) {
-                setFile(currentFile); // Update the file state only if no file is locked
+                setFile(currentStore); // Update the file state only if no file (yes, file is used btoh for vector stores and classis files) is locked
               }
             }}
             onClick={() => {
-              if (lockedFile?.id === currentFile.id) {
+              if (lockedFile?.id === currentStore.id) {
                 setLockedFile(null); // Unlock the file if it's already locked
               } else {
-                setLockedFile(currentFile); // Lock the file on click
+                setLockedFile(currentStore); // Lock the file on click
               }
             }}
           >
@@ -90,7 +89,7 @@ const VectorStores = () => {
 
             {/* File Details */}
             <Box sx={{ width: "100%", mt: isSmallScreen ? 0.7 : 1 }}>
-              <Tooltip title="File size">
+              <Tooltip title="Store size">
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <TbFileDatabase
                     style={{
@@ -105,27 +104,7 @@ const VectorStores = () => {
                     color="text.secondary"
                     sx={{ fontSize: isSmallScreen ? "0.8rem" : "0.85rem" }}
                   >
-                    {formatFileSize(currentStore.bytes)}
-                  </Typography>
-                </Box>
-              </Tooltip>
-              <Divider sx={{ mb: 0.2, mt: 0.8 }} />
-              <Tooltip title="Purpose">
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <IoIosEye
-                    style={{
-                      marginRight: 8,
-                      color: theme.palette.primary.main,
-                      fontSize: "1.3rem",
-                    }}
-                    aria-label="File Size Icon"
-                  />
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ fontSize: isSmallScreen ? "0.8rem" : "0.85rem" }}
-                  >
-                    {currentStore.purpose}
+                    {formatFileSize(currentStore.usage_bytes)}
                   </Typography>
                 </Box>
               </Tooltip>
@@ -192,10 +171,7 @@ const VectorStores = () => {
             }}
           >
             <Box
-              component="a"
-              href="https://platform.openai.com/docs/api-reference/files"
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={() => alert("Pippo")}
               sx={{
                 backgroundColor: theme.palette.success.light,
                 color: "primary.contrastText",
@@ -208,7 +184,7 @@ const VectorStores = () => {
                 textDecoration: "none",
                 fontWeight: "medium",
                 fontFamily: "'Montserrat', serif",
-                alignItems: "center", // Align text and icon vertically
+                alignItems: "center",
                 justifyContent: "center",
                 display: "inline-flex",
                 "&:hover": {
@@ -221,7 +197,7 @@ const VectorStores = () => {
             </Box>
             <Box
               component="a"
-              href="https://platform.openai.com/docs/api-reference/files"
+              href="https://platform.openai.com/docs/api-reference/vector-stores"
               target="_blank"
               rel="noopener noreferrer"
               sx={{

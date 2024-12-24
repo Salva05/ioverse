@@ -8,6 +8,7 @@ const Storage = () => {
   const { isSmallScreen } = useContext(DrawerContext);
   const theme = useTheme();
 
+  // Only one entity handling - no differentiation between files and vector stores
   const [selected, setSelected] = useState("Files");
   const [file, setFile] = useState(null);
   const [lockedFile, setLockedFile] = useState(null);
@@ -17,8 +18,12 @@ const Storage = () => {
   };
 
   const handleOutsideClick = (event) => {
-    if (!event.target.closest(".file-item")) {
-      setLockedFile(null); // Deselect the locked file when clicking outside
+    // Check if the clicked element is either a file or a store item
+    if (
+      !event.target.closest(".file-item") &&
+      !event.target.closest(".store-item")
+    ) {
+      setLockedFile(null); // Deselect the locked file or store when clicking outside
     }
   };
 
@@ -29,6 +34,9 @@ const Storage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log("Locked ", lockedFile);
+  }, [lockedFile])
   return (
     <Box
       sx={{

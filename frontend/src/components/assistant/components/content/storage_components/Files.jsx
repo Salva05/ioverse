@@ -139,7 +139,7 @@ const Files = ({ file, setFile, lockedFile, setLockedFile }) => {
             justifyContent: "center",
             alignItems: "center",
             width: "100%",
-            height: "100%", // Full height of the container
+            height: "100%",
             textAlign: "center",
             gap: 1.5,
             color: "text.secondary",

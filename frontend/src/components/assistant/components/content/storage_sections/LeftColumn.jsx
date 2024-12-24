@@ -19,7 +19,7 @@ const LeftColumn = ({ handleClick, selected, file, lockedFile }) => {
       <SelectionButtons handleClick={handleClick} selected={selected} />
 
       {/* Selected Entity Details */}
-      {activeFile && <FileDetails file={activeFile} />}
+      {activeFile && <FileDetails file={activeFile} selected={selected}/>}
     </Box>
   );
 };
