@@ -152,7 +152,7 @@ Set the .env file in the project's backend root and add the required configurati
 This application uses the **RS256 signing algorithm** to sign and verify JWT tokens that the backend generates and consumes. Follow these steps to generate the key pair:
 
 1. **Create a `keys` folder**  
-   At the root of your project directory, create a folder named `keys`:
+   At the root of your project directory (where manage.py is located), create a folder named `keys`:
 
    ```bash
    mkdir keys
