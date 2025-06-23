@@ -131,7 +131,7 @@ Set the .env file in the project's backend root and add the required configurati
 
    | Variable              | Description                                                                   | Example / Notes                                       |
    | --------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------- |
-   | `DEBUG`               | Enables or disables the Django debug mode. Should be `false` for development. | `DEBUG=true`                                          |
+   | `DEBUG`               | Enables or disables the Django debug mode. Should be `false` for production.  | `DEBUG=true`                                          |
    | `SECRET_KEY`          | A secret key used for cryptographic signing in Django.                        | Generate one using the command below. Keep it secret! |
    | `FRONTEND_URL`        | The URL where the frontend application is hosted.                             | `FRONTEND_URL=http://localhost:5173`                  |
    | `EMAIL_HOST_USER`     | SMTP username or address of the email account used to send emails.            | `EMAIL_HOST_USER=your-email@example.com`              |
