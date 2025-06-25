@@ -14,6 +14,7 @@ import TextToImage from "./pages/TextToImage";
 import Account from "./pages/Account";
 import Assistant from "./pages/Assistant";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
+import Home from "./pages/Home";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,10 @@ const router = createBrowserRouter(
       path: "/",
       element: <Layout />,
       children: [
+        {
+          path: "home",
+          element: <Home />,
+        },
         {
           path: "account",
           element: (
