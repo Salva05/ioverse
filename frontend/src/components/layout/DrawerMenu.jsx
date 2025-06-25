@@ -24,6 +24,7 @@ import { toast } from "react-toastify";
 import SearchBar from "../chat/SearchBar";
 import { AuthContext } from "../../contexts/AuthContext";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import HomeIcon from "@mui/icons-material/Home";
 import AssistantOutlinedIcon from "@mui/icons-material/AssistantOutlined";
 import { Tooltip, Typography } from "@mui/material";
 import sortedConversation from "../../utils/sortedConversation";
@@ -44,20 +45,27 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 const pages = [
   {
     id: 1,
+    display: "Home",
+    path: "/home",
+    icon: <HomeIcon />,
+    protected: false,
+  },
+  {
+    id: 2,
     display: "Chat",
     path: "/chat",
     icon: <ChatOutlinedIcon />,
     protected: true,
   },
   {
-    id: 2,
+    id: 3,
     display: "Text To Image",
     path: "/text-to-image",
     icon: <MmsOutlinedIcon />,
     protected: true,
   },
   {
-    id: 3,
+    id: 4,
     display: "Assistant",
     path: "/assistant",
     icon: <AssistantOutlinedIcon />,
