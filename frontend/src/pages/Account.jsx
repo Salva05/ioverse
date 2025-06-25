@@ -166,14 +166,6 @@ const Account = () => {
     navigate("/chat");
   };
 
-  // Handle group toggle
-  const handleGroupClick = (group) => {
-    setOpenGroups((prev) => ({
-      ...prev,
-      [group]: !prev[group],
-    }));
-  };
-
   if (loading || !user) {
     // Optionally show a spinner or loading message
     return <Typography>Loading account information...</Typography>;
@@ -298,7 +290,7 @@ const Account = () => {
                     </InputAdornment>
                   ),
                   sx: {
-                    fontFamily: 'Montserrat',
+                    fontFamily: "Montserrat",
                   },
                 },
               }}
