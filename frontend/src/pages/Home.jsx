@@ -11,9 +11,12 @@ import ChatIcon from "@mui/icons-material/Chat";
 import ImageIcon from "@mui/icons-material/Image";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import { Link as RouterLink } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 
 export default function HomePage() {
   const theme = useTheme();
+  const { isAuthenticated } = useContext(AuthContext);
 
   const features = [
     {
@@ -100,14 +103,16 @@ export default function HomePage() {
             >
               Start Chatting
             </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              component={RouterLink}
-              to="/register"
-            >
-              Register
-            </Button>
+            {!isAuthenticated && (
+              <Button
+                variant="outlined"
+                size="large"
+                component={RouterLink}
+                to="/register"
+              >
+                Register
+              </Button>
+            )}
           </Box>
         </Box>
 
