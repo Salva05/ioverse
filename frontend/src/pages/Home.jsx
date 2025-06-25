@@ -85,7 +85,7 @@ export default function HomePage() {
               fontSize: { xs: "0.9rem", sm: "1rem" },
             }}
           >
-            Chat, create and innovate with the latest OpenAI capabilities – all
+            Chat, create and innovate with the latest OpenAI capabilities, all
             in one place.
           </Typography>
 
@@ -104,9 +104,9 @@ export default function HomePage() {
               variant="outlined"
               size="large"
               component={RouterLink}
-              to="/signup"
+              to="/register"
             >
-              Sign Up
+              Register
             </Button>
           </Box>
         </Box>
@@ -184,8 +184,9 @@ export default function HomePage() {
               fontSize: { xs: "0.9rem", sm: "1rem" },
             }}
           >
-            Browse step-by-step guides, API reference and examples to start your
-            first chat, generate images, or craft a custom assistant in minutes.
+            Browse step-by-step guides, API reference and walkthroughs to start
+            your first chat, generate images, or craft a custom assistant in
+            minutes.
           </Typography>
 
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
