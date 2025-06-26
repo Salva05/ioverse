@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import { useAssistantsData } from "../hooks/assistant/useAssistantsData";
 import { useThreadsData } from "../hooks/assistant/useThreadsData";
 import { useVectorStoresData } from "../hooks/assistant/useVectorStoresData";

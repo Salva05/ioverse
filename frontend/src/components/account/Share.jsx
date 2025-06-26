@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import { SendOutlined, ScheduleSendOutlined } from "@mui/icons-material";
@@ -96,7 +96,10 @@ const Share = ({ image }) => {
 
   return (
     <>
-      <Tooltip placement="top" title={image.is_shared ? "Stop Sharing" : "Share"}>
+      <Tooltip
+        placement="top"
+        title={image.is_shared ? "Stop Sharing" : "Share"}
+      >
         <Box display="inline-flex">
           <Button onClick={handleClick}>
             {image.is_shared ? (

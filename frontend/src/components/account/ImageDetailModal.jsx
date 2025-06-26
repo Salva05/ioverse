@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -227,7 +226,7 @@ const ImageDetailModal = ({ open, handleClose, image }) => {
             paddingX: 4,
             paddingY: 1.2,
             fontSize: "1rem",
-            textTransform: "none"
+            textTransform: "none",
           }}
         >
           Close

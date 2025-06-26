@@ -1,5 +1,4 @@
 import { IconButton, Tooltip } from "@mui/material";
-import React from "react";
 import { AiOutlineClear } from "react-icons/ai";
 import { styled } from "@mui/material/styles";
 import { useAssistantContext } from "../../../../../contexts/AssistantContext";

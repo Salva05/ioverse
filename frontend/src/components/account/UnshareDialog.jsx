@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, forwardRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,7 +8,6 @@ import {
   Typography,
   Box,
   TextField,
-  IconButton,
   Tooltip,
   Fade,
 } from "@mui/material";
@@ -17,7 +16,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = forwardRef(function Transition(props, ref) {
   return <Fade {...props} ref={ref} timeout={600} />;
 });
 

@@ -1,4 +1,3 @@
-import React from "react";
 import { Typography, Box, Avatar, Paper, useMediaQuery } from "@mui/material";
 
 const UserInfo = ({ user }) => {
@@ -13,8 +12,8 @@ const UserInfo = ({ user }) => {
           alignItems: "center",
           gap: isSmallScreen ? 2 : 3,
           "& *": {
-            fontFamily: "'Montserrat', serif"
-          }
+            fontFamily: "'Montserrat', serif",
+          },
         }}
       >
         <Avatar

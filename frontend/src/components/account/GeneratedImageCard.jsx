@@ -1,5 +1,5 @@
 // src/components/account/GeneratedImageCard.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardMedia,
