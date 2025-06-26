@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { assistant } from "../../api/assistant";
 import { toast } from "react-toastify";
-import { useAssistantContext } from "../../contexts/AssistantContext";
 
 export const useUpdateAssistant = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, assistantData}) => assistant.update(id, assistantData),
+    mutationFn: ({ id, assistantData }) => assistant.update(id, assistantData),
     mutationKey: ["updateAssistant"],
     onMutate: async ({ id, assistantData }) => {
       await queryClient.cancelQueries(["assistants"]);
