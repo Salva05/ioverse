@@ -77,18 +77,20 @@ const ConsumptionsPanel = ({ data = fallbackData }) => {
 
   return (
     <>
-      <Divider sx={{ my: 4 }} />
+      <Typography variant="h6" flexGrow={1} sx={{ mt: 4, mb: 1 }}>
+        OpenAI Consumptions
+      </Typography>
+
+      <Divider />
+
       <Box>
         {/* Header & filter */}
         <Stack
           direction={isSm ? "column" : "row"}
+          sx={{ mt: 5 }}
           spacing={2}
           alignItems="center"
         >
-          <Typography variant="h6" flexGrow={1}>
-            OpenAI Consumptions
-          </Typography>
-
           <FormControl size="small" sx={{ minWidth: 160 }}>
             <InputLabel id="model-select-label">Model</InputLabel>
             <Select
