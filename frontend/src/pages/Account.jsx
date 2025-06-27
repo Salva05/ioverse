@@ -96,6 +96,9 @@ const Account = () => {
       <Box
         sx={{
           padding: isSmallScreen ? 2 : 4,
+          width: "100%",
+          maxWidth: 1400,
+          marginX: "auto",
           "& *": {
             fontFamily: "'Montserrat', serif",
           },
