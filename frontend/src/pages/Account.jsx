@@ -14,7 +14,6 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../contexts/AuthContext";
 import chat from "../api/chat";
 import TabPanel from "../components/account/TabPanel";
-import UserInfo from "../components/account/UserInfo";
 import GeneratedImagesList from "../components/account/GeneratedImagesList";
 import textToImage from "../api/textToImage";
 import GeneralInfoSection from "../components/account/GeneralInfoSection";
@@ -110,16 +109,6 @@ const Account = () => {
         >
           Account
         </Typography>
-
-        {/* User Information */}
-        <UserInfo
-          user={{
-            /* avatar: "/static/images/avatar/1.jpg", */
-            name: user.username,
-            email: user.email,
-            joinedDate: user.joined_date,
-          }}
-        />
 
         {/* Tabs */}
         <Box sx={{ borderBottom: 1 }}>
