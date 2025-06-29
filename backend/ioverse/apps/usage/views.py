@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 
 from .serializers import UsageQueryParams
 from .usage_service import fetch_usage, UsageInputError
-from .costs_service import fetch_costs
 
 class OrgUsageView(APIView):
     permission_classes = [IsAuthenticated]
