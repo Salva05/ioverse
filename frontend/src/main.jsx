@@ -19,6 +19,7 @@ import Account from "./pages/Account";
 import Assistant from "./pages/Assistant";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 import Home from "./pages/Home";
+import AdminKeyRegistration from "./pages/AdminKeyRegistration";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,14 @@ const router = createBrowserRouter(
         {
           path: "register",
           element: <SignUp />,
+        },
+        {
+          path: "register-admin-key",
+          element: (
+            <ProtectedRoute>
+              <AdminKeyRegistration />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "shared-conversation/:share_token",
