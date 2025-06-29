@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Backdrop,
   Box,
@@ -14,6 +15,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Button,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -25,7 +27,9 @@ import { Tooltip } from "@mui/material";
 import { AuthContext } from "../../contexts/AuthContext";
 
 const ConsumptionsPanel = () => {
-  const { isAuthenticated, user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const goToRegistrationPage = () => navigate("/register-admin-key");
 
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
@@ -206,9 +210,25 @@ const ConsumptionsPanel = () => {
                 })}
               >
                 <LockOutlinedIcon sx={{ fontSize: 56, mb: 1 }} />
-                <Typography variant="body2" align="center">
+
+                <Typography variant="body2" align="center" gutterBottom>
                   Link an Admin key to view usage
                 </Typography>
+
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={(t) => ({
+                    flexDirection: "column",
+                    alignItems: "center",
+                    py: 0.7,
+                    px: 1.5,
+                    mt: 1,
+                  })}
+                  onClick={goToRegistrationPage}
+                >
+                  Add Admin Key
+                </Button>
               </Backdrop>
             )}
           </Box>
