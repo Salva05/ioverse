@@ -78,8 +78,15 @@ const AdminKeyRegistration = () => {
               color="text.secondary"
               sx={{ fontFamily: "Montserrat, sans-serif", mb: 3 }}
             >
-              An&nbsp;<strong>Admin API key</strong> unlocks organization-level
-              analytics such as usage by model and project. Create one in&nbsp;
+              An&nbsp;<strong>Admin&nbsp;API&nbsp;key</strong> unlocks
+              organization-level analytics (usage by model, project,
+              etc.).&nbsp;
+              <em>
+                Make sure you create the key inside the{" "}
+                <u>same organization or project</u> that your regular
+                model-access key belongs to.
+              </em>
+              &nbsp; Generate it in&nbsp;
               <Link
                 href="https://platform.openai.com/settings/organization/api-keys"
                 target="_blank"
