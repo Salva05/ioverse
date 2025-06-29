@@ -1,9 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
+  Backdrop,
   Box,
+  CircularProgress,
   Divider,
   FormControl,
   Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
@@ -12,43 +15,46 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import StatCard from "./StatCard";
 import ConsumptionChart from "./ConsumptionChart";
+import usage from "../../api/usage";
+import { toUiRow } from "../../utils/openaiConsumptionsHelpers";
+import { Tooltip } from "@mui/material";
 
-const fallbackData = [
-  { date: "2025-06-20", model: "gpt-4o", tokens: 120000, cost: 4.8 },
-  { date: "2025-06-21", model: "gpt-4o", tokens: 80000, cost: 2 },
-  { date: "2025-06-22", model: "gpt-4o", tokens: 95000, cost: 3.8 },
-
-  { date: "2025-06-20", model: "gpt-3.5-turbo", tokens: 150000, cost: 0.5 },
-  { date: "2025-06-21", model: "gpt-3.5-turbo", tokens: 100000, cost: 0.34 },
-  { date: "2025-06-22", model: "gpt-3.5-turbo", tokens: 170000, cost: 0.59 },
-
-  { date: "2025-06-20", model: "dall-e-3", tokens: 0, cost: 2.4 },
-  { date: "2025-06-21", model: "dall-e-3", tokens: 0, cost: 1.2 },
-  { date: "2025-06-22", model: "dall-e-3", tokens: 0, cost: 1.6 },
-];
-
-const ConsumptionsPanel = ({ data = fallbackData }) => {
+const ConsumptionsPanel = () => {
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
-  const [selectedModel, setSelectedModel] = useState("all");
 
-  // Distinct list of models for the filter dropdown
+  const [selectedModel, setSelectedModel] = useState("all");
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = useCallback(() => {
+    setLoading(true);
+    setError(null);
+
+    const end = Math.floor(Date.now() / 1000);
+    const start = end - 60 * 60 * 24 * 30;
+
+    usage
+      .get({ startTime: start, endTime: end, groupBy: ["model"] })
+      .then((res) => setRows(res.map(toUiRow)))
+      .catch(() => setError("Could not load usage data."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(fetchData, [fetchData]);
+
   const models = useMemo(
-    () => [...new Set(data.map((r) => r.model))].sort(),
-    [data]
+    () => [...new Set(rows.map((r) => r.model))].sort(),
+    [rows]
   );
 
-  const handleModelChange = (event) => {
-    setSelectedModel(event.target.value);
-  };
-
-  // Aggregate daily totals, optionally filtered by model
   const chartData = useMemo(() => {
     const map = new Map();
-
-    data.forEach((r) => {
+    rows.forEach((r) => {
       if (selectedModel !== "all" && r.model !== selectedModel) return;
       const prev = map.get(r.date) || { tokens: 0, cost: 0 };
       map.set(r.date, {
@@ -56,13 +62,11 @@ const ConsumptionsPanel = ({ data = fallbackData }) => {
         cost: prev.cost + r.cost,
       });
     });
-
-    return Array.from(map.entries())
-      .map(([date, val]) => ({ date, ...val }))
+    return [...map.entries()]
+      .map(([date, v]) => ({ date, ...v }))
       .sort((a, b) => (a.date < b.date ? -1 : 1));
-  }, [data, selectedModel]);
+  }, [rows, selectedModel]);
 
-  // Totals for summary cards
   const totals = useMemo(
     () =>
       chartData.reduce(
@@ -75,73 +79,107 @@ const ConsumptionsPanel = ({ data = fallbackData }) => {
     [chartData]
   );
 
+  const sectionUnavailable = !loading && rows.length === 0;
+
   return (
     <>
-      <Typography variant="h6" flexGrow={1} sx={{ mt: 4, mb: 1 }}>
-        OpenAI Consumptions
-      </Typography>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        sx={{ mt: 7, mb: 1 }}
+      >
+        <Typography variant="h6">OpenAI Consumptions</Typography>
 
+        <Tooltip title="Refresh and sync latest usage data" arrow>
+          <IconButton onClick={fetchData} size="small">
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
       <Divider />
 
-      <Box>
-        {/* Header & filter */}
-        <Stack
-          direction={isSm ? "column" : "row"}
-          sx={{ mt: 5 }}
-          spacing={2}
-          alignItems="center"
-        >
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel id="model-select-label">Model</InputLabel>
-            <Select
-              labelId="model-select-label"
-              value={selectedModel}
-              label="Model"
-              onChange={handleModelChange}
-            >
-              <MenuItem value="all">All Models</MenuItem>
-              {models.map((m) => (
-                <MenuItem key={m} value={m}>
-                  {m}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+      {sectionUnavailable && (
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2 }}>
+          <Typography color="text.secondary">No data found.</Typography>
+          <IconButton onClick={fetchData} size="small">
+            <RefreshIcon fontSize="small" />
+          </IconButton>
         </Stack>
+      )}
 
-        {/* Summary stats */}
-        <Grid container spacing={isSm ? 2 : 4} mt={1}>
-          <Grid item xs={6} sm={3}>
-            <StatCard
-              label="Total Tokens"
-              value={totals.tokens.toLocaleString()}
-            />
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <StatCard
-              label="Est. Cost (USD)"
-              value={totals.cost.toFixed(2)}
-              prefix="$"
-            />
-          </Grid>
-        </Grid>
+      {error && !sectionUnavailable && (
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2 }}>
+          <Typography color="error">{error}</Typography>
+          <IconButton onClick={fetchData} size="small">
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      )}
 
-        <Divider sx={{ my: 3 }} />
-
-        {/* Chart section */}
-        {chartData.length ? (
-          <ConsumptionChart chartData={chartData} />
-        ) : (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            textAlign="center"
-            mt={4}
+      {!sectionUnavailable && (
+        <Box sx={{ position: "relative", opacity: loading ? 0.4 : 1 }}>
+          <Stack
+            direction={isSm ? "column" : "row"}
+            sx={{ mt: 5 }}
+            spacing={2}
+            alignItems="center"
           >
-            No consumption data available.
-          </Typography>
-        )}
-      </Box>
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <InputLabel id="model-select-label">Model</InputLabel>
+              <Select
+                labelId="model-select-label"
+                value={selectedModel}
+                label="Model"
+                disabled={loading}
+                onChange={(e) => setSelectedModel(e.target.value)}
+              >
+                <MenuItem value="all">All Models</MenuItem>
+                {models.map((m) => (
+                  <MenuItem key={m} value={m}>
+                    {m}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+
+          <Grid container spacing={isSm ? 2 : 4} mt={1}>
+            <Grid item xs={6} sm={3}>
+              <StatCard
+                label="Total Tokens"
+                value={totals.tokens.toLocaleString()}
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <StatCard
+                label="Est. Cost (USD)"
+                prefix="$"
+                value={totals.cost.toFixed(2)}
+              />
+            </Grid>
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
+          <ConsumptionChart chartData={chartData} />
+
+          <Backdrop
+            open={loading}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              zIndex: (t) => t.zIndex.drawer + 1,
+              color: "#fff",
+            }}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        </Box>
+      )}
     </>
   );
 };
