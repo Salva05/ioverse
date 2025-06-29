@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .serializers import UserSerializer, UserRegistrationSerializer
+from .serializers import UserSerializer, UserRegistrationSerializer, AdminKeySetSerializer
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
@@ -53,3 +53,13 @@ class PasswordResetRequestView(APIView):
             return Response({"message": "Password reset email sent."}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+    
+class AdminKeySetView(generics.UpdateAPIView):
+    """
+    PATCH /users/admin-key/   {"admin_key": "sk-admin-..."}
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class    = AdminKeySetSerializer
+
+    def get_object(self):
+        return self.request.user
