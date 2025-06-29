@@ -26,6 +26,7 @@ from apps.account.views import CurrentUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/", include("apps.usage.urls")),
     path('api/chatbot/', include('apps.chatbot.urls')),
     path('api/text-to-image/', include('apps.text_to_image.urls')),
     path('api/assistant/', include('apps.assistant.urls')),

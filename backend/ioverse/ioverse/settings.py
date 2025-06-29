@@ -61,6 +61,8 @@ INSTALLED_APPS = [
     'apps.chatbot',
     'apps.text_to_image',
     'apps.assistant',
+    'apps.usage',
+    
     'rest_framework',
     'django_celery_beat',
     'django_json_widget',
