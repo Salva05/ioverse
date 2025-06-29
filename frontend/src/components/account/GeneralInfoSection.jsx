@@ -79,10 +79,14 @@ const GeneralInfoSection = ({ tabValue }) => {
             </Stack>
           </Stack>
 
-          <Divider sx={{ my: 3 }} />
+          <Typography variant="h6" flexGrow={1} sx={{ mt: 4, mb: 1 }}>
+            General
+          </Typography>
+
+          <Divider />
 
           {/* Contact row */}
-          <Grid container spacing={isSm ? 2 : 4}>
+          <Grid container spacing={isSm ? 2 : 4} sx={{ mt: 0 }}>
             <Grid item xs={12} sm={6}>
               <InfoRow icon={<EmailIcon />} label="Email" value={user.email} />
             </Grid>
