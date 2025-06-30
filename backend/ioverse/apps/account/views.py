@@ -55,9 +55,6 @@ class PasswordResetRequestView(APIView):
             return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
     
 class AdminKeySetView(generics.UpdateAPIView):
-    """
-    PATCH /users/admin-key/   {"admin_key": "sk-admin-..."}
-    """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class    = AdminKeySetSerializer
 
