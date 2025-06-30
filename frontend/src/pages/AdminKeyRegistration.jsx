@@ -12,6 +12,9 @@ import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import { Toolbar } from "@mui/material";
+import adminKeyApi from "../api/adminKey";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 /* ---------- styled helpers ---------- */
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -45,10 +48,32 @@ const AdminKeyRegistration = () => {
   const [adminKey, setAdminKey] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: call backend endpoint to save key, then redirect
-    console.log("Submitted admin key:", adminKey);
+
+    try {
+      await adminKeyApi.set(adminKey);
+      toast.success("Admin key saved ✔️");
+      navigate("/"); // happy path
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          // DRF validation errors
+          const payload = err.response.data;
+          const human =
+            typeof payload === "string"
+              ? payload
+              : Object.values(payload).flat().join(" ");
+
+          toast.error(human || "Request failed");
+        } else {
+          /* 🔌 No connection / CORS / timeout */
+          toast.error("Network error - are you offline?");
+        }
+      } else {
+        toast.error("Unexpected error");
+      }
+    }
   };
 
   return (
