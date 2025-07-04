@@ -60,7 +60,6 @@ const Share = ({ image }) => {
   const unshareMutation = useMutation({
     mutationFn: async () => await unshareImage(image.id),
     onSuccess: (data) => {
-      // Update the cache
       // Update the specific imagte in the cache
       queryClient.setQueryData(["generatedImages"], (oldData) => {
         if (!oldData) return oldData;
