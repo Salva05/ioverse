@@ -124,26 +124,32 @@ const InfoRow = ({ icon, label, value }) => (
   </Stack>
 );
 
-const StatCard = ({ icon, label, value }) => (
-  <Card
-    variant="outlined"
-    sx={{
-      borderRadius: 2,
-      height: "100%",
-      transition: "transform 150ms",
-      "&:hover": { transform: "translateY(-4px)" },
-    }}
-  >
-    <CardContent>
-      <Stack direction="row" spacing={2} alignItems="center">
-        {icon}
-        <Box>
-          <Typography variant="h6">{value}</Typography>
-          <Typography variant="caption" color="text.secondary">
-            {label}
-          </Typography>
-        </Box>
-      </Stack>
-    </CardContent>
-  </Card>
-);
+const StatCard = ({ icon, label, value }) => {
+  const theme = useTheme();
+
+  return (
+    <Card
+      variant="outlined"
+      sx={{
+        borderRadius: 2,
+        height: "100%",
+        transition: "transform 150ms",
+        "&:hover": { transform: "translateY(-4px)" },
+        bgcolor:
+          theme.palette.mode === "dark" ? "grey.900" : theme.palette.grey[50],
+      }}
+    >
+      <CardContent>
+        <Stack direction="row" spacing={2} alignItems="center">
+          {icon}
+          <Box>
+            <Typography variant="h6">{value}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {label}
+            </Typography>
+          </Box>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+};
